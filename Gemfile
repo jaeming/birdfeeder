@@ -1,10 +1,11 @@
 source 'https://rubygems.org'
-
+ruby "2.1.5"
 
 gem 'pry'
 gem 'pg'
 gem 'foundation-rails'
-gem "haml-rails", "~> 0.8"
+gem 'haml-rails', '~> 0.8'
+gem 'jsonpath'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.0'
@@ -37,10 +38,20 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+group :test do
+  gem 'rspec-rails', '~> 3.0'
+  gem 'simplecov'
+  gem 'faker'
+  gem 'database_cleaner'
+  gem 'factory_girl_rails'
+  gem 'capybara'
+end
+
 group :development, :test do
+  gem "better_errors"
+  gem "binding_of_caller"
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
-
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
 
