@@ -1,0 +1,51 @@
+$font-sans: 'Merriweather Sans', sans-serif;
+$font-styled: 'Raleway', sans-serif;
+$font-serif: 'Bitter', serif;
+
+
+h1, h2, h3, h4, h5 {
+  color:  #666;
+}
+
+h1 {
+  font-family: $font-serif;
+  font-weight: 700;
+}
+
+h2, h3, h4, h5 {
+  font-family: $font-styled;
+}
+
+body {
+  font-family: $font-sans;
+  color:  #666;
+  background: linear-gradient(to bottom, #fcfcfc 0%,#fff 30%,#f7f7f7 51%,#fefefe 100%) no-repeat;
+}
+
+p {
+  line-height: 1.9;
+  font-size: 1.1rem;
+}
+
+.star {
+  color: tomato;
+}
+
+#title {
+  color: #008CBA;
+  display: inline;
+}
+
+.margin-top {
+  margin-top: 2rem;
+}
+
+button, .button {
+  background: #50B5D6;
+  box-shadow: inset -1px -1px 15px 1px rgba(0,0,0,0.1);
+  transition: all 200ms ease-in;
+  &:hover {
+    background: #F07272;
+    text-shadow: 0 0 10px rgba(255,255,255,1) , 0 0 20px rgba(255,255,255,1) , 0 0 30px rgba(255,255,255,1) , 0 0 40px #0000ff , 0 0 70px #4a86e8 , 0 0 80px rgba(0,0,255,0.7) , 0 0 100px rgba(0,255,255,1) ;
+  }
+}

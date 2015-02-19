@@ -6,12 +6,11 @@
     %meta{ :name => "viewport", :content => "width=device-width, initial-scale=1.0" }
 
     %title= content_for?(:title) ? yield(:title) : "Untitled"
-    %link{:href => "http://fonts.googleapis.com/css?family=Bitter:400,700|Raleway|Merriweather+Sans:400,700", :rel => "stylesheet", :type => "text/css"}/
-    = stylesheet_link_tag "application"
-    = javascript_include_tag "vendor/modernizr"
+
+    = stylesheet_link_tag 'frontend'
+    = include_ember_script_tags :frontend
     = csrf_meta_tag
 
   %body
-
     = yield
 
