@@ -1,0 +1,14 @@
+<div class="row">
+  <div class="margin-top">
+    <h1 id="title">BirdFeeder</h1>
+  </div>
+  <p>
+    {{#if controllers.session.currentUser}}
+      Hi, {{controllers.session.currentUser.name}}
+    {{else}}
+      Hello, Guest
+    {{/if}}
+  </p>
+</div>
+
+  {{outlet}}
