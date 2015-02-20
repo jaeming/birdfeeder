@@ -13,6 +13,7 @@ gem 'uglifier', '>= 1.3.0'
 gem "font-awesome-rails"
 gem 'normalize-rails'
 gem 'active_model_serializers'
+gem 'devise'
 
 
 group :test do
