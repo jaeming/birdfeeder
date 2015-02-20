@@ -1,21 +1,30 @@
-$font-sans: 'Merriweather Sans', sans-serif;
-$font-styled: 'Raleway', sans-serif;
+$font-styled: 'Great Vibes', serif;
+$font-sans: 'Raleway', sans-serif;
 $font-serif: 'Bitter', serif;
+
+$light: #7fc7e3;
+$dark: #3FABCF;
+$highlight: #ff8787;
 
 
 h1, h2, h3, h4, h5 {
-  color:  #666;
+  color:  rgb(132, 132, 132);
 }
 
 h1 {
-  font-family: $font-sans;
+  font-family: $font-styled;
   font-weight: 700;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
-h2, h3, h4, h5 {
+h2, h4, h5 {
+  font-family: $font-sans;
+}
+
+h3 {
   font-family: $font-serif;
+  font-weight: 700;
 }
 
 body {
@@ -25,20 +34,20 @@ body {
 }
 
 p {
-  font-family: $font-styled;
+  font-family: $font-sans;
   color: #5a5a5a;
   text-size: 1.3rem;
-  line-height: 1.7rem;
+  line-height: 2.1rem;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   }
 
 .star {
-  color: tomato;
+  color: $dark;
 }
 
 #title {
-  color: #008CBA;
+  color: $light;
   display: inline;
 }
 

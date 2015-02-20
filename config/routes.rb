@@ -5,5 +5,5 @@ scope '/api' do
 end
 
   root 'ember#loader'
-  get '/path' => 'ember#loader'
+  get '/*path' => 'ember#loader'
 end
