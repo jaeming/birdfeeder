@@ -8,12 +8,14 @@ h1, h2, h3, h4, h5 {
 }
 
 h1 {
-  font-family: $font-serif;
+  font-family: $font-sans;
   font-weight: 700;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 h2, h3, h4, h5 {
-  font-family: $font-styled;
+  font-family: $font-serif;
 }
 
 body {
@@ -23,9 +25,13 @@ body {
 }
 
 p {
-  line-height: 1.9;
-  font-size: 1.1rem;
-}
+  font-family: $font-styled;
+  color: #5a5a5a;
+  text-size: 1.3rem;
+  line-height: 1.7rem;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  }
 
 .star {
   color: tomato;

@@ -5,6 +5,7 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 
+/spec/coverage
 /coverage
 
 # Ignore application configuration
