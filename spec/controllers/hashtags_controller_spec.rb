@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe HashtagsController, :type => :controller do
+  include Devise::TestHelpers
+
   it "Gets an index of hashtags" do
   10.times { hashtags = create(:hashtag) }
     get :index
@@ -20,13 +22,23 @@ RSpec.describe HashtagsController, :type => :controller do
   end
 
   it "returns a specific hashtag in JSON" do
-    hashtag1 = create(:hashtag, title: "lolcats")
+    hashtag = create(:hashtag, title: "lolcats")
 
-    get :show, id: hashtag1.id
+    get :show, id: hashtag.id
 
     expect(response).to have_http_status(:success)
     json = JSON.parse(response.body)
     expect(JsonPath.on(json, '$..title')).to eq(["lolcats"])
+  end
+
+  it "creates a new hashtag" do
+    @user = create(:user)
+    sign_in @user
+    params = {"hashtag" => {"title" => "programming"}}
+
+    post :create, params
+
+    expect(Hashtag.last[:title]).to eq("programming")
   end
 
 end

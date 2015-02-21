@@ -8,8 +8,6 @@
 /spec/coverage
 /coverage
 /frontend/tmp
-/frontend/dist
-/frontend/tests/
 /frontend/node_modules
 /frontend/bower_components
 
