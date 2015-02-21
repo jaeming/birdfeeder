@@ -14,6 +14,7 @@ gem "font-awesome-rails"
 gem 'normalize-rails'
 gem 'active_model_serializers'
 gem 'devise'
+gem 'feedjira'
 
 
 group :test do
@@ -32,4 +33,3 @@ group :development, :test do
   gem 'web-console', '~> 2.0'
   gem 'spring'
 end
-
