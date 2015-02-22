@@ -3,8 +3,7 @@ class Feed < ActiveRecord::Base
   after_create :parse_feed
 
   def parse_feed
-    url = self.feed_url
-    feeds = Feedjira::Feed.fetch_and_parse url
+    feeds = Feedjira::Feed.fetch_and_parse self.feed_url
     feed = feeds.entries.find { |a| a["url"] == self.article_url }
     self.title = feed.title
     self.content = feed.content || feed.summary

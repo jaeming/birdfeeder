@@ -1,0 +1,9 @@
+add your keys here and rename to application.yml
+
+SENDGRID_PASSWORD: YOUR_PASSWORD
+SENDGRID_USERNAME: YOUR_USERNAME
+
+# twitter oauth
+TWITTER_KEY: your_twitter_id
+TWITTER_SECRET: your_twitter_key
+YOUR_BEARER_TOKEN: optional(received after first request, never expires, saves you from having to make 2 api calls if included)

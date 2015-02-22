@@ -15,6 +15,8 @@ gem 'normalize-rails'
 gem 'active_model_serializers'
 gem 'devise'
 gem 'feedjira'
+gem 'twitter'
+gem 'figaro'
 
 
 group :test do
