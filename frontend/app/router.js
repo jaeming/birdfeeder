@@ -9,6 +9,9 @@ Router.map(function() {
   this.resource('hashtags', function() {
     this.route('show', {path: ':hashtag_id'});
   });
+  this.resource('feeds', function() {
+    this.route('show', {path: ':feed_id'});
+  });
 });
 
 export default Router;

@@ -17,6 +17,8 @@ gem 'devise'
 gem 'feedjira'
 gem 'twitter'
 gem 'figaro'
+gem 'unshorten'
+gem 'feedisco'
 
 
 group :test do

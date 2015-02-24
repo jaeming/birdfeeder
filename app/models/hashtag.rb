@@ -1,18 +1,17 @@
 class Hashtag < ActiveRecord::Base
   require 'json'
   has_many :feeds
-  serialize :url_list, Array
-  after_create :find_urls
+  after_create :find_feeds
 
-  def find_urls
+  def find_feeds
     client = Twitter::REST::Client.new do |config|
       config.consumer_key    = ENV['TWITTER_KEY'];
       config.consumer_secret = ENV['TWITTER_SECRET'];
       config.bearer_token = ENV['YOUR_BEARER_TOKEN'];
     end
 
-    client.search("#{self.title} -rt", filter: "links").take(20).collect do |tweet|
-      tweet.urls.each { |url| self.url_list << "#{url.expanded_url}" }
+    client.search("#{self.title} -rt", filter: "links").take(10).collect do |tweet|
+      tweet.urls.each { |url| self.feeds.find_or_create_by(:article_url => Unshorten["#{url.expanded_url}"]) }
     end
   end
 

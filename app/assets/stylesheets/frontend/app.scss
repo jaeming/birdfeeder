@@ -18,11 +18,11 @@ h1 {
   -webkit-font-smoothing: antialiased !important;
 }
 
-h2, h4, h5 {
+h2, h3 {
   font-family: $font-sans;
 }
 
-h3 {
+h4, h5 {
   font-family: $font-serif;
   font-weight: 700;
 }
@@ -37,7 +37,7 @@ p {
   font-family: $font-sans;
   color: #5a5a5a;
   text-size: 1.3rem;
-  line-height: 2.1rem;
+  line-height: 1.6rem;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   }
