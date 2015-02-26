@@ -1,9 +1,8 @@
 class Hashtag < ActiveRecord::Base
   require 'json'
   has_many :feeds
-  after_create :find_feeds
 
-  def find_feeds
+  def search_twitter
     client = Twitter::REST::Client.new do |config|
       config.consumer_key    = ENV['TWITTER_KEY'];
       config.consumer_secret = ENV['TWITTER_SECRET'];

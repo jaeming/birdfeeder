@@ -5,6 +5,7 @@ scope '/api' do
   resources :feeds
   devise_for :users
   get 'sessions/current' => 'sessions#show'
+  post 'hashtags/twitter' => 'hashtags#search_twitter'
 end
 
   root 'ember#loader'

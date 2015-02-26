@@ -15,6 +15,12 @@ class HashtagsController < ApplicationController
     render json: @hashtag
   end
 
+  def search_twitter
+    @hashtag = Hashtag.find_or_create_by(hashtag_params)
+    @hashtag.search_twitter
+    render json: @hashtag
+  end
+
   private
     def hashtag_params
       params.require(:hashtag).permit(:title)
