@@ -18,6 +18,9 @@ export default {
           id: data['id']
         });
       },
+      error:function() {
+        console.log('hola guest!');
+      }
     });
   }
 };
