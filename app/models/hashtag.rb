@@ -8,10 +8,14 @@ class Hashtag < ActiveRecord::Base
       config.consumer_secret = ENV['TWITTER_SECRET'];
       config.bearer_token = ENV['YOUR_BEARER_TOKEN'];
     end
+    urls = []
+    client.search("#{self.title} -rt", filter: "links", lang: "en").take(10).collect { |tweet| tweet.urls.select { |url| urls << url} }
+    urls
+  end
 
-    client.search("#{self.title} -rt", filter: "links", lang: "en").take(10).collect do |tweet|
-      tweet.urls.each { |url| self.feeds.find_or_create_by(:article_url => Unshorten["#{url.expanded_url}"]) }
-    end
+
+  def unshortened(url)
+    Unshorten["#{url.expanded_url}"]
   end
 
 end
