@@ -9,7 +9,7 @@ class Hashtag < ActiveRecord::Base
       config.bearer_token = ENV['YOUR_BEARER_TOKEN'];
     end
 
-    client.search("#{self.title} -rt", filter: "links").take(10).collect do |tweet|
+    client.search("#{self.title} -rt", filter: "links", lang: "en").take(10).collect do |tweet|
       tweet.urls.each { |url| self.feeds.find_or_create_by(:article_url => Unshorten["#{url.expanded_url}"]) }
     end
   end
