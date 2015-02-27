@@ -1,15 +1,21 @@
-<div class="row">
-  <div class="margin-top">
-    <h1 id="title">Bluebird Feeder</h1>
-  </div>
-  <br>
-  <p>
-    {{#if controllers.session.currentUser}}
-      Hi, {{controllers.session.currentUser.name}}
-    {{else}}
-      Hello, Guest
-    {{/if}}
-  </p>
+<div class='app-bar'>
+	<div class='account-box'>
+		{{#if controllers.session.currentUser}}
+			<img src="avatar-placeholder.png" alt="" class='avatar'>
+			<p>{{controllers.session.currentUser.name}}</p>
+			<div class='account-actions'>
+				{{fa-icon "fa-sign-in"}} {{fa-icon "fa-sign-in"}} {{fa-icon "fa-sign-in"}} {{fa-icon "fa-camera"}}
+			</div>
+		{{else}}
+			<img src="./images/guest-avatar.png" alt="" class='avatar'>
+			<p>Guest </p>&nbsp;
+			<small class='login'><a href="#" class='login-text'>{{fa-icon "fa-sign-in"}} Sign-in</a></small>
+		{{/if}}
+	</div>
+	<div class='logo-bar'>
+		<h1 class='logo'>Bluebird Feeder</h1>
+	</div>
 </div>
 
-  {{outlet}}
+
+<div class='topbar-spacer'>{{outlet}}</div>
