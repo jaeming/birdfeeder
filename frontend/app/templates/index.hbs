@@ -1,5 +1,5 @@
-<main>
-	<div {{bind-attr class=":side-bar scrollVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
+<main {{action "closeSidePanel"}}>
+	<div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
 			<p>lorem</p>
 			<p>Ipsum</p>	<p>lorem</p>
@@ -25,7 +25,7 @@
 
 
 
-	<section class='main-pane'>
+	<section {{bind-attr class=":main-pane slidePanel"}}>
 			<div class="row">
 				<div class='article'>
 					<h2>Good Lorem Ipsum Story</h2>

@@ -75,7 +75,7 @@ p {
 .app-bar {
 	width: 100%;
 	position: fixed;
-	z-index: 1;
+	z-index: 2;
 }
 
 .logo-bar {
@@ -106,7 +106,7 @@ p {
 	position: absolute;
 	top: 0;
 	left: 0;
-	z-index: 1;
+	z-index: 3;
 	&>p {
 		color: #fff;
 		white-space: nowrap;
@@ -122,7 +122,7 @@ p {
 	position: absolute;
 	left: 0;
 	top: 1.4rem;
-	z-index: 0;
+	z-index: 2;
 	transition: all 260ms ease-in;
 }
 
@@ -208,6 +208,7 @@ p {
 	padding-top: 8.2rem;
 	background: #232F34;
 	position: fixed;
+	z-index: 1;
 	top: 0;
 	bottom: 0;
 	transition: all 360ms ease;
@@ -241,6 +242,8 @@ p {
 	background: rgba(102, 152, 167, 0.48); 
 }
 
+
+
 	//MAIN
 
 main {
@@ -264,7 +267,7 @@ main {
 
 
 
-
+	//UI
 
 button, .button {
   background: #50B5D6;
@@ -274,4 +277,160 @@ button, .button {
     background: #F07272;
     text-shadow: 0 0 10px rgba(255,255,255,1) , 0 0 20px rgba(255,255,255,1) , 0 0 30px rgba(255,255,255,1) , 0 0 40px #0000ff , 0 0 70px #4a86e8 , 0 0 80px rgba(0,0,255,0.7) , 0 0 100px rgba(0,255,255,1) ;
   }
+}
+
+.menu-icon {
+	display: none;
+}
+
+
+
+
+
+
+/////////MEDIA QUERIES
+
+@media (max-width: 1000px) {
+
+	//NAV-SLIDER
+	
+	.menu-icon {
+		cursor: pointer;
+		display: inline-block;
+		margin-right: 2rem;
+		vertical-align: top;
+		&>i {
+			padding: .1rem .3rem;
+			margin-top: 7px;
+			color: #b5dfeb;
+			border: dotted 2px #95c1ce;
+			border-radius: 9px;
+		}
+	}
+	
+	.logo {
+		vertical-align: middle;
+		font-size: 2.8rem;
+		transition: all 260ms ease;
+	}
+	
+	.small-logo {
+		font-size: 2rem;
+	}
+	
+	.side-bar {
+		left: -100%;
+	}
+	
+	.side-visible {
+		left: 0;
+	}
+	
+	.main-pane {
+		margin-left: 0rem;
+		transition: all 260ms ease-in;
+	}
+	
+	.account-box {
+		left: -100%;
+		transition: all 450ms ease;
+	}
+	
+	.app-bar {
+		left: -20rem;
+		width: 160%;
+		transition: all 260ms ease-in;	
+	}
+	
+	.account-visible {
+		left: 0;
+	}
+	
+	.slide-panel {
+		margin-left: 20rem;
+		overflow: hidden;
+	}
+}
+
+@media (max-width: 650px) {
+	
+	.menu-icon {
+		cursor: pointer;
+		display: inline-block;
+		margin-right: 2rem;
+		vertical-align: top;
+		&>i {
+			padding: .1rem .3rem;
+			margin-top: 7px;
+			color: #b5dfeb;
+			border: dotted 2px #95c1ce;
+			border-radius: 9px;
+		}
+	}
+	
+	.logo {
+		vertical-align: middle;
+		font-size: 2.8rem;
+		transition: all 260ms ease;
+	}
+	
+	.small-logo {
+		font-size: 0rem;
+	}
+	
+	.side-bar {
+		left: -100%;
+	}
+	
+	.side-visible {
+		left: 0;
+	}
+	
+	.main-pane {
+		margin-left: 0rem;
+		transition: all 260ms ease-in;
+	}
+	
+	.account-box {
+		left: -100%;
+		transition: all 450ms ease;
+	}
+	
+	.app-bar {
+		left: -20rem;
+		width: 220%;
+		transition: all 260ms ease-in;	
+	}
+	
+	.account-visible {
+		left: 0;
+	}
+	
+	.slide-panel {
+
+	}
+}
+
+@media (max-width: 415px) {
+	
+	.logo {
+		vertical-align: middle;
+		font-size: 2rem;
+		transition: all 260ms ease;
+	}
+	
+	.menu-icon {
+		cursor: pointer;
+		display: inline-block;
+		margin-right: 1rem;
+		vertical-align: top;
+		&>i {
+			padding: .1rem .3rem;
+			margin-top: 7px;
+			color: #b5dfeb;
+			border: dotted 2px #95c1ce;
+			border-radius: 9px;
+		}
+	}
+	
 }

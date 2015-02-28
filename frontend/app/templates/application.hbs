@@ -1,5 +1,5 @@
-<div class='app-bar'>
-	<div class='account-box' {{action "optionsShow" on="mouseEnter"}}>
+<div {{bind-attr class=":app-bar accountVisible"}}>
+	<div {{bind-attr class=":account-box accountVisible"}} {{action "optionsShow" on="mouseEnter"}}>
 		
 		{{#if controllers.session.currentUser}}
 		
@@ -47,7 +47,8 @@
 		
 	</div>
 	<div class='logo-bar'>
-		<h1 class='logo'>Bluebird Feeder</h1>
+		<div class='menu-icon' {{action "showSidePanel"}}>{{fa-icon "fa-bars" size="2"}}</div>
+		<h1 class='logo' {{bind-attr class=":logo smallLogo"}}>Bluebird Feeder</h1>
 	</div>
 </div>
 
