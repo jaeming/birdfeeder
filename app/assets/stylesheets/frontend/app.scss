@@ -68,14 +68,14 @@ p {
 
 .app-bar {
 	width: 100%;
-	background: red;
 	position: fixed;
 	z-index: 1;
 }
 
 .logo-bar {
-  background: #232f34;
-	height: 3.6rem;
+	background: #3E5B64;
+	border-bottom: solid .8rem #457d8e;
+	height: 4.4rem;
 	padding-top: .2rem;
 	padding-left: 2rem;
 	width: auto;
@@ -83,13 +83,24 @@ p {
 }
 
 .account-box {
-	background: #354c53;
 	height: 3.6rem;
 	width: 20rem;
 	padding-left: 2rem;
 	padding-top: .8rem;
 	float: left;
 	position: relative;
+}
+
+.user-account {
+	background: #3e5b64;
+	height: 3.6rem;
+	width: 20rem;
+	padding-left: 2rem;
+	padding-top: .8rem;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
 	&>p {
 		color: #fff;
 		white-space: nowrap;
@@ -98,11 +109,63 @@ p {
 }
 
 .account-actions {
-	background: #457d8e;
-	height: 2.8rem;
+  background: #354c53;
+	text-align: center;
+	height: 3rem;
 	width: 20rem;
 	position: absolute;
 	left: 0;
+	top: 1.4rem;
+	z-index: 0;
+	transition: all 260ms ease-in;
+}
+
+.user-option-icons {
+	transition: all 230ms ease-in;
+}
+
+.user-options-wrap {
+	margin-top: .6rem;
+}
+
+.user-option-text {
+	color: #fff;
+	font-size: 0rem;
+	transition: all 260ms ease;
+	
+	}
+
+.user-link {
+	padding-top: .4rem;
+	padding: .5rem;
+	transition: all 260ms ease;
+}
+
+.user-link:hover {
+	&>.user-option-text {
+		font-size: .8rem;
+	}
+	&>.user-option-icons {
+		-webkit-filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.85));
+		filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.85));
+	}
+}
+
+.expand-arrow-guest {
+	display: block;
+	vertical-align: bottom;
+	margin-left: 9.4rem;
+	margin-top: .8rem;
+}
+
+.expand-arrow-user {
+	display: block;
+	vertical-align: bottom;
+	margin-left: 9.4rem;
+	margin-top: .6rem;
+}
+
+.actions-visible {
 	top: 3.6rem;
 }
 
@@ -125,6 +188,11 @@ p {
 	margin-right: .2rem;
 }
 
+
+
+
+
+
 	//SIDE-BAR
 
 .side-bar {
@@ -134,10 +202,17 @@ p {
 	padding-top: 8.2rem;
 	background: #232F34;
 	position: fixed;
-	overflow: auto;
 	top: 0;
 	bottom: 0;
+	transition: all 360ms ease;
+	overflow: hidden;
 }
+
+.scroll-visible {
+	overflow: auto;
+}
+
+
 
 
 	//SCROLLBAR

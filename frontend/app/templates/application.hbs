@@ -1,16 +1,50 @@
 <div class='app-bar'>
-	<div class='account-box'>
+	<div class='account-box' {{action "optionsShow" on="mouseEnter"}}>
+		
 		{{#if controllers.session.currentUser}}
-			<img src="avatar-placeholder.png" alt="" class='avatar'>
-			<p>{{controllers.session.currentUser.name}}</p>
-			<div class='account-actions'>
-				{{fa-icon "fa-sign-in"}} {{fa-icon "fa-sign-in"}} {{fa-icon "fa-sign-in"}} {{fa-icon "fa-camera"}}
+		
+			<div class='user-account'>
+				<img src="avatar-placeholder.png" alt="" class='avatar'>
+				<p>{{controllers.session.currentUser.name}}</p>
 			</div>
+			
+			<div {{bind-attr class=":account-actions actionsVisible"}}>	
+				<div class='user-options-wrap'>
+					<a href="#" class='user-link'>
+						<img src="./images/edit-profile.png" alt="edit profile" class='user-option-icons'>
+						<small class='user-option-text'>edit account</small>
+					</a>
+					<a href="#" class='user-link'>
+						<img src="./images/sign-out.png" alt="sign out" class='user-option-icons'>
+						<small class='user-option-text'>sign out</small>
+					</a>
+				</div>
+				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-user'>
+			</div>
+			
 		{{else}}
-			<img src="./images/guest-avatar.png" alt="" class='avatar'>
-			<p>Guest </p>&nbsp;
-			<small class='login'><a href="#" class='login-text'>{{fa-icon "fa-sign-in"}} Sign-in</a></small>
+		
+			<div class='user-account'>
+				<img src="./images/guest-avatar.png" alt="guest" class='avatar'>
+				<p>Guest</p>
+			</div>
+			
+			<div {{bind-attr class=":account-actions actionsVisible"}}>				
+				<div class='user-options-wrap'>
+					<a href="#" class='user-link'>
+						<img src="./images/sign-in.png" alt="edit profile" class='user-option-icons'>
+						<small class='user-option-text'>sign in</small>
+					</a>
+					<a href="#" class='user-link'>
+						<img src="./images/sign-up.png" alt="sign out" class='user-option-icons'>
+						<small class='user-option-text'>sign up</small>
+					</a>
+				</div>
+				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-guest'>
+			</div>
+			
 		{{/if}}
+		
 	</div>
 	<div class='logo-bar'>
 		<h1 class='logo'>Bluebird Feeder</h1>
