@@ -27,5 +27,3 @@ class HashtagsController < ApplicationController
       params.require(:hashtag).permit(:title)
     end
 end
-
-# @hashtag.feeds.find_or_create_by(:article_url => @hashtag.unshortened(url))

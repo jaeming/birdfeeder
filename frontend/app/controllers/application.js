@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Controller.extend({
-  needs: ['session', 'index'],
+  needs: ['session', 'hashtags'],
 	actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,
@@ -14,8 +14,8 @@ export default Ember.Controller.extend({
 			});
 		},
 		showSidePanel: function() {
-			this.get('controllers.index').toggleProperty('sideVisible');
-			this.get('controllers.index').toggleProperty('slidePanel');
+			this.get('controllers.hashtags').toggleProperty('sideVisible');
+			this.get('controllers.hashtags').toggleProperty('slidePanel');
 			this.toggleProperty('accountVisible');
 			this.toggleProperty('smallLogo');
 		}

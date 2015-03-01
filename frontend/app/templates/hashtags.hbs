@@ -1,8 +1,9 @@
-<main {{action "closeSidePanel"}}>
+<main>
+<div {{action "closeSidePanel"}}>
   <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
       {{outlet}}
-
+</div>
   </div>
 
   <section {{bind-attr class=":main-pane slidePanel"}}>
