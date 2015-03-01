@@ -1,14 +1,14 @@
 <div {{bind-attr class=":app-bar accountVisible"}}>
 	<div {{bind-attr class=":account-box accountVisible"}} {{action "optionsShow" on="mouseEnter"}}>
-		
+
 		{{#if controllers.session.currentUser}}
-		
+
 			<div class='user-account'>
 				<img src="avatar-placeholder.png" alt="" class='avatar'>
 				<p>{{controllers.session.currentUser.name}}</p>
 			</div>
-			
-			<div {{bind-attr class=":account-actions actionsVisible"}}>	
+
+			<div {{bind-attr class=":account-actions actionsVisible"}}>
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/edit-profile.png" alt="edit profile" class='user-option-icons'>
@@ -21,15 +21,15 @@
 				</div>
 				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-user'>
 			</div>
-			
+
 		{{else}}
-		
+
 			<div class='user-account'>
 				<img src="./images/guest-avatar.png" alt="guest" class='avatar'>
 				<p>Guest</p>
 			</div>
-			
-			<div {{bind-attr class=":account-actions actionsVisible"}}>				
+
+			<div {{bind-attr class=":account-actions actionsVisible"}}>
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/sign-in.png" alt="edit profile" class='user-option-icons'>
@@ -42,9 +42,9 @@
 				</div>
 				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-guest'>
 			</div>
-			
+
 		{{/if}}
-		
+
 	</div>
 	<div class='logo-bar'>
 		<div class='menu-icon' {{action "showSidePanel"}}>{{fa-icon "fa-bars" size="2"}}</div>

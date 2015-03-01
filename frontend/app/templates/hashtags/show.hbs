@@ -1,1 +1,10 @@
-<div class='row'><h2>#{{title}}</h2></div>
+<div class='row'><h2>&nbsp; {{title}}</h2></div>
+
+  {{#each feeds}}
+    <div class='article'>
+      <h2>{{title}}</h2>
+      <p>{{{body}}}</p>
+    </div>
+    <br>
+  {{/each}}
+

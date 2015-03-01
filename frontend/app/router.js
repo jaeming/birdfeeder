@@ -6,7 +6,7 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.resource('hashtags', function() {
+  this.resource('hashtags', {path: '/'}, function() {
     this.route('show', {path: ':hashtag_id'});
   });
   this.resource('feeds', function() {

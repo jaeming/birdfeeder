@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
-	needs: ['application', 'hashtags/index'],
+export default Ember.ArrayController.extend({
+	needs: ['application'],
 	scrollVisible: false,
 	sideVisible: false,
 	slidePanel: false,

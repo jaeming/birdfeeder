@@ -1,0 +1,15 @@
+<main {{action "closeSidePanel"}}>
+  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
+
+      {{outlet}}
+
+  </div>
+
+  <section {{bind-attr class=":main-pane slidePanel"}}>
+      <div class="row">
+
+      {{outlet 'articles'}}
+
+    </div>
+  </section>
+</main>
