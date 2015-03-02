@@ -4,7 +4,8 @@
 		{{#if controllers.session.currentUser}}
 
 			<div class='user-account'>
-				<img src="avatar-placeholder.png" alt="" class='avatar'>
+				<img {{bind-attr src="controllers.session.currentUser.avatar"}} alt="avatar" class='avatar'>
+
 				<p>{{controllers.session.currentUser.name}}</p>
 			</div>
 			<div {{bind-attr class=":account-actions actionsVisible"}}>

@@ -15,7 +15,8 @@ export default {
         container.lookup('controller:session').set('currentUser', {
           email: data['email'],
           name: data['name'],
-          id: data['id']
+          id: data['id'],
+          avatar: data['avatar']
         });
       },
       error:function() {

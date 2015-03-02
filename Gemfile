@@ -19,6 +19,7 @@ gem 'twitter'
 gem 'figaro'
 gem 'unshorten'
 gem 'feedisco'
+gem 'gravtastic'
 
 
 group :test do

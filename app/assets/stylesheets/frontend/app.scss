@@ -110,6 +110,7 @@ p {
 		color: #fff;
 		white-space: nowrap;
 		display: inline;
+    line-height: 2;
 	}
 }
 
@@ -190,7 +191,8 @@ p {
 .avatar {
 	border-radius: 50%;
 	width: 2rem;
-	margin-right: .2rem;
+	margin-right: .3rem;
+  margin-top: -.1rem;
 }
 
 
@@ -225,13 +227,13 @@ p {
   font-size: 1.1rem;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
-  transition: color 280ms, padding 220ms ease-in, border 220ms ease-in;
+  transition: color 280ms, padding 220ms ease-in, border 220ms ease-in, background 200ms ease-in-out;
   &:hover {
     border-left: 5px solid #8fdae0;
     padding: .7rem 0 .7rem 4.6rem;
     background: #1c2223;
     color: #c5fcf1;
-    transition: all 220ms ease-in;
+    transition: all 220ms ease;
     cursor: pointer;
   }
 }
