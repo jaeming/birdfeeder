@@ -5,13 +5,9 @@
 
 			<div class='user-account'>
 				<img src="avatar-placeholder.png" alt="" class='avatar'>
-
 				<p>{{controllers.session.currentUser.name}}</p>
-
 			</div>
-
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
-
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/edit-profile.png" alt="edit profile" class='user-option-icons'>
@@ -31,9 +27,7 @@
 				<img src="./images/guest-avatar.png" alt="guest" class='avatar'>
 				<p>Guest</p>
 			</div>
-
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
-
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/sign-in.png" alt="edit profile" class='user-option-icons'>
@@ -50,7 +44,6 @@
 		{{/if}}
 
 	</div>
-
 	<div class='logo-bar'>
 		<div class='menu-icon' {{action "showSidePanel"}}>
 			{{fa-icon "fa-bars" size="2"}}
@@ -62,14 +55,13 @@
 
 <div class='topbar-spacer'>
 	<main>
-
 		<div {{action "closeSidePanel"}}>
 		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
 				{{#each}}
-		      <h5>
-		        {{#link-to 'hashtags.show' this}} {{title}} {{/link-to}}
-		      </h5>
+		      {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
+						{{title}}
+					{{/link-to}}
 		    {{/each}}
 
 			</div>
