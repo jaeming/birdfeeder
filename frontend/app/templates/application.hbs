@@ -5,10 +5,13 @@
 
 			<div class='user-account'>
 				<img src="avatar-placeholder.png" alt="" class='avatar'>
+
 				<p>{{controllers.session.currentUser.name}}</p>
+
 			</div>
 
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
+
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/edit-profile.png" alt="edit profile" class='user-option-icons'>
@@ -30,6 +33,7 @@
 			</div>
 
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
+
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
 						<img src="./images/sign-in.png" alt="edit profile" class='user-option-icons'>
@@ -46,11 +50,38 @@
 		{{/if}}
 
 	</div>
+
 	<div class='logo-bar'>
-		<div class='menu-icon' {{action "showSidePanel"}}>{{fa-icon "fa-bars" size="2"}}</div>
+		<div class='menu-icon' {{action "showSidePanel"}}>
+			{{fa-icon "fa-bars" size="2"}}
+		</div>
 		<h1 class='logo' {{bind-attr class=":logo smallLogo"}}>Bluebird Feeder</h1>
 	</div>
+
 </div>
 
+<div class='topbar-spacer'>
+	<main>
 
-<div class='topbar-spacer'>{{outlet}}</div>
+		<div {{action "closeSidePanel"}}>
+		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
+
+				{{#each}}
+		      <h5>
+		        {{#link-to 'hashtags.show' this}} {{title}} {{/link-to}}
+		      </h5>
+		    {{/each}}
+
+			</div>
+	  </div>
+
+	  <section {{bind-attr class=":main-pane slidePanel"}}>
+	    <div class="row">
+
+	      {{outlet 'body'}}
+
+	    </div>
+	  </section>
+
+	</main>
+</div>

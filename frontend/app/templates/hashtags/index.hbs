@@ -1,5 +1,7 @@
-<div class='row'>
+<div class='feed-list'>
     {{#each}}
-      <h5>{{#link-to 'hashtags.show' this}}{{title}}{{/link-to}}</h5>
+      <h5>
+        {{#link-to 'hashtags.show' this}} {{title}} {{/link-to}}
+      </h5>
     {{/each}}
 </div>

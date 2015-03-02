@@ -1,8 +1,10 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+  model: function(params) {
+    return this.store.find('hashtag', params.hashtag_id);
+  },
   renderTemplate: function() {
-    this.render('hashtags.show', {outlet: 'articles'});
-    this.render('hashtags.index', {into: 'hashtags'});
+    this.render({outlet: 'body'});
   }
 });
