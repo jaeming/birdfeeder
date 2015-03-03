@@ -1,4 +1,4 @@
-class Hashtag < ActiveRecord::Base
+  class Hashtag < ActiveRecord::Base
   require 'json'
   has_many :feeds
 

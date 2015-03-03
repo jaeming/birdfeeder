@@ -2,6 +2,14 @@ class Feed < ActiveRecord::Base
   belongs_to :hashtag
   after_create :parse_feed
 
+
+  default_scope -> {order('published DESC')}
+
+  def published_at
+    self.published || self.created_at
+  end
+
+
   def parse_feed
     begin
       url = Feedisco.find(self.article_url)

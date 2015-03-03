@@ -1,5 +1,5 @@
 class FeedSerializer < ActiveModel::Serializer
-  attributes :id, :title, :body, :hashtag
+  attributes :id, :title, :body, :hashtag, :published_at
 
   def hashtag
     object.hashtag_id
