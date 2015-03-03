@@ -2,7 +2,6 @@ class Story < ActiveRecord::Base
   belongs_to :hashtag
   after_create :parse_feed
 
-
   default_scope -> {order('published DESC')}
 
   def published_at

@@ -6,7 +6,7 @@ define("frontend/adapters/application",
 
     __exports__["default"] = DS.RESTAdapter.extend({
         coalesceFindRequests: true,
-        namespace: 'api'
+        namespace: 'api',
     });
   });
 define("frontend/app", 
@@ -37,8 +37,47 @@ define("frontend/controllers/application",
     "use strict";
     var Ember = __dependency1__["default"];
 
-    __exports__["default"] = Ember.Controller.extend({
-      needs: ['session']
+    __exports__["default"] = Ember.ArrayController.extend({
+      needs: ['session'],
+    	actionsVisible: false,
+    	accountVisible: false,
+    	smallLogo: false,
+    	scrollVisible: false,
+      sideVisible: false,
+      slidePanel: false,
+    	actions: {
+    		optionsShow: function() {
+    			var _this = this;
+    			this.set('actionsVisible', true);
+    			Ember.$('.account-box').mouseleave(function() {
+    				_this.set('actionsVisible', false);
+    			});
+    		},
+    		showSidePanel: function() {
+    			this.toggleProperty('sideVisible');
+    			this.toggleProperty('slidePanel');
+    			this.toggleProperty('accountVisible');
+    			this.toggleProperty('smallLogo');
+    		},
+    		showScrollbar: function() {
+        var _this = this;
+        this.set('scrollVisible', true);
+        Ember.$('.side-bar').mouseleave(function() {
+          _this.set('scrollVisible', false);
+        });
+        },
+        closeSidePanel: function() {
+        	if(this.get('slidePanel', true)) {
+    				this.set('sideVisible', false);
+    	      this.set('slidePanel', false);
+    	      this.set('accountVisible', false);
+    	      this.set('smallLogo', false);
+    			}
+    			else {
+    				console.log('slide panel not active yet');
+    			}
+        }
+    	}
     });
   });
 define("frontend/controllers/session", 
@@ -194,9 +233,13 @@ define("frontend/initializers/session",
             container.lookup('controller:session').set('currentUser', {
               email: data['email'],
               name: data['name'],
-              id: data['id']
+              id: data['id'],
+              avatar: data['avatar']
             });
           },
+          error:function() {
+            console.log('hola guest!');
+          }
         });
       }
     };
@@ -209,6 +252,20 @@ define("frontend/models/hashtag",
 
     __exports__["default"] = DS.Model.extend({
       title: DS.attr('string'),
+      stories: DS.hasMany('story' , { async: true })
+    });
+  });
+define("frontend/models/story", 
+  ["ember-data","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var DS = __dependency1__["default"];
+
+    __exports__["default"] = DS.Model.extend({
+      title: DS.attr('string'),
+      body: DS.attr('string'),
+      published_at: DS.attr('string'),
+      hashtag: DS.belongsTo('hashtag', { async: true })
     });
   });
 define("frontend/router", 
@@ -223,14 +280,17 @@ define("frontend/router",
     });
 
     Router.map(function() {
-      this.resource('hashtags', function() {
+      this.resource('hashtags', {path: '/'}, function() {
         this.route('show', {path: ':hashtag_id'});
+      });
+      this.resource('stories', function() {
+        this.route('show', {path: ':story_id'});
       });
     });
 
     __exports__["default"] = Router;
   });
-define("frontend/routes/hashtags", 
+define("frontend/routes/application", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
     "use strict";
@@ -242,6 +302,48 @@ define("frontend/routes/hashtags",
       }
     });
   });
+define("frontend/routes/hashtags/index", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Route.extend({
+      model: function() {
+        return this.store.find('hashtag');
+      },
+      renderTemplate: function() {
+        this.render({outlet: 'sidebar'});
+      }
+    });
+  });
+define("frontend/routes/hashtags/show", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Route.extend({
+      model: function(params) {
+        return this.store.find('hashtag', params.hashtag_id);
+      },
+      renderTemplate: function() {
+        this.render({outlet: 'body'});
+      }
+    });
+  });
+define("frontend/routes/stories/index", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Route.extend({
+      model: function() {
+        return this.store.find('story');
+      }
+    });
+  });
 define("frontend/templates/application", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
@@ -250,31 +352,105 @@ define("frontend/templates/application",
     __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
     this.compilerInfo = [4,'>= 1.0.0'];
     helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-      var buffer = '', stack1, self=this;
+      var buffer = '', stack1, helper, options, escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
     function program1(depth0,data) {
       
       var buffer = '', stack1;
-      data.buffer.push("\n      Hi, ");
+      data.buffer.push("\n\n			<div class='user-account'>\n				<img ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'src': ("controllers.session.currentUser.avatar")
+      },hashTypes:{'src': "STRING"},hashContexts:{'src': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(" alt=\"avatar\" class='avatar'>\n\n				<p>");
       stack1 = helpers._triageMustache.call(depth0, "controllers.session.currentUser.name", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("\n    ");
+      data.buffer.push("</p>\n			</div>\n			<div ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":account-actions actionsVisible")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(">\n				<div class='user-options-wrap'>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/edit-profile.png\" alt=\"edit profile\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; edit account</small>\n					</a>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-out.png\" alt=\"sign out\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign out</small>\n					</a>\n				</div>\n				<img src=\"./images/expand-down.png\" alt=\"user options\" class='expand-arrow-user'>\n			</div>\n\n		");
       return buffer;
       }
 
     function program3(depth0,data) {
       
-      
-      data.buffer.push("\n      Hello, Guest\n    ");
+      var buffer = '';
+      data.buffer.push("\n\n			<div class='user-account'>\n				<img src=\"./images/guest-avatar.png\" alt=\"guest\" class='avatar'>\n				<p>Guest</p>\n			</div>\n			<div ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":account-actions actionsVisible")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(">\n				<div class='user-options-wrap'>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-in.png\" alt=\"edit profile\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign in</small>\n					</a>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-up.png\" alt=\"sign out\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign up</small>\n					</a>\n				</div>\n				<img src=\"./images/expand-down.png\" alt=\"user options\" class='expand-arrow-guest'>\n			</div>\n\n		");
+      return buffer;
       }
 
-      data.buffer.push("<div class=\"row\">\n  <div class=\"margin-top\">\n    <h1 id=\"title\">BirdFeeder</h1>\n  </div>\n  <p>\n    ");
+    function program5(depth0,data) {
+      
+      var buffer = '', stack1, helper, options;
+      data.buffer.push("\n		      ");
+      stack1 = (helper = helpers['link-to'] || (depth0 && depth0['link-to']),options={hash:{
+        'class': ("tag-link"),
+        'activeClass': ("tag-active"),
+        'tagName': ("div")
+      },hashTypes:{'class': "STRING",'activeClass': "STRING",'tagName': "STRING"},hashContexts:{'class': depth0,'activeClass': depth0,'tagName': depth0},inverse:self.noop,fn:self.program(6, program6, data),contexts:[depth0,depth0],types:["STRING","ID"],data:data},helper ? helper.call(depth0, "hashtags.show", "", options) : helperMissing.call(depth0, "link-to", "hashtags.show", "", options));
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("\n		    ");
+      return buffer;
+      }
+    function program6(depth0,data) {
+      
+      var buffer = '', stack1;
+      data.buffer.push("\n						");
+      stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("\n					");
+      return buffer;
+      }
+
+      data.buffer.push("<div ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":app-bar accountVisible")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(">\n	<div ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":account-box accountVisible")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(" ");
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "optionsShow", {hash:{
+        'on': ("mouseEnter")
+      },hashTypes:{'on': "STRING"},hashContexts:{'on': depth0},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(">\n\n		");
       stack1 = helpers['if'].call(depth0, "controllers.session.currentUser", {hash:{},hashTypes:{},hashContexts:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("\n  </p>\n</div>\n\n  ");
-      stack1 = helpers._triageMustache.call(depth0, "outlet", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      data.buffer.push("\n\n	</div>\n	<div class='logo-bar'>\n		<div class='menu-icon' ");
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "showSidePanel", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(">\n			");
+      data.buffer.push(escapeExpression((helper = helpers['fa-icon'] || (depth0 && depth0['fa-icon']),options={hash:{
+        'size': ("2")
+      },hashTypes:{'size': "STRING"},hashContexts:{'size': depth0},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "fa-bars", options) : helperMissing.call(depth0, "fa-icon", "fa-bars", options))));
+      data.buffer.push("\n		</div>\n		<h1 class='logo' ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":logo smallLogo")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(">Bluebird Feeder</h1>\n	</div>\n\n</div>\n\n<div class='topbar-spacer'>\n	<main>\n		<div ");
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "closeSidePanel", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(">\n		  <div ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":side-bar scrollVisible sideVisible")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(" ");
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "showScrollbar", {hash:{
+        'on': ("mouseEnter")
+      },hashTypes:{'on': "STRING"},hashContexts:{'on': depth0},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(">\n\n				");
+      stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[],types:[],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("\n");
+      data.buffer.push("\n\n			</div>\n	  </div>\n\n	  <section ");
+      data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
+        'class': (":main-pane slidePanel")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
+      data.buffer.push(">\n	    <div class=\"row\">\n\n	      ");
+      data.buffer.push(escapeExpression((helper = helpers.outlet || (depth0 && depth0.outlet),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "body", options) : helperMissing.call(depth0, "outlet", "body", options))));
+      data.buffer.push("\n\n	    </div>\n	  </section>\n\n	</main>\n</div>\n");
       return buffer;
       
     });
@@ -292,25 +468,25 @@ define("frontend/templates/hashtags/index",
     function program1(depth0,data) {
       
       var buffer = '', stack1, helper, options;
-      data.buffer.push("\n      <h5>");
+      data.buffer.push("\n  <h5>\n    ");
       stack1 = (helper = helpers['link-to'] || (depth0 && depth0['link-to']),options={hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(2, program2, data),contexts:[depth0,depth0],types:["STRING","ID"],data:data},helper ? helper.call(depth0, "hashtags.show", "", options) : helperMissing.call(depth0, "link-to", "hashtags.show", "", options));
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("</h5>\n    ");
+      data.buffer.push("\n  </h5>\n");
       return buffer;
       }
     function program2(depth0,data) {
       
       var buffer = '', stack1;
-      data.buffer.push("#");
+      data.buffer.push(" ");
       stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push(" ");
       return buffer;
       }
 
-      data.buffer.push("<div class='row'>\n    ");
       stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[],types:[],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("\n</div>\n");
+      data.buffer.push("\n");
       return buffer;
       
     });
@@ -323,18 +499,37 @@ define("frontend/templates/hashtags/show",
     __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
     this.compilerInfo = [4,'>= 1.0.0'];
     helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+      var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+
+    function program1(depth0,data) {
+      
       var buffer = '', stack1;
-
-
-      data.buffer.push("<h2>#");
+      data.buffer.push("\n\n  <div class='article'>\n    <h2>");
       stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
-      data.buffer.push("</h2>\n");
+      data.buffer.push("</h2>\n    <p>");
+      data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "body", {hash:{
+        'unescaped': ("true")
+      },hashTypes:{'unescaped': "STRING"},hashContexts:{'unescaped': depth0},contexts:[depth0],types:["ID"],data:data})));
+      data.buffer.push("</p>\n    <small>");
+      stack1 = helpers._triageMustache.call(depth0, "published_at", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</small>\n  </div>\n  <br>\n\n");
+      return buffer;
+      }
+
+      data.buffer.push("<div class='row'>\n  <h2>&nbsp; ");
+      stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</h2>\n</div>\n\n");
+      stack1 = helpers.each.call(depth0, "stories", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("\n\n");
       return buffer;
       
     });
   });
-define("frontend/templates/index", 
+define("frontend/templates/stories/index", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
     "use strict";
@@ -342,14 +537,52 @@ define("frontend/templates/index",
     __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
     this.compilerInfo = [4,'>= 1.0.0'];
     helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-      var buffer = '', helper, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+      var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+
+    function program1(depth0,data) {
+      
+      var buffer = '', stack1;
+      data.buffer.push("\n    <h2>");
+      stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</h2>\n    <p>");
+      data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "body", {hash:{
+        'unescaped': ("true")
+      },hashTypes:{'unescaped': "STRING"},hashContexts:{'unescaped': depth0},contexts:[depth0],types:["ID"],data:data})));
+      data.buffer.push("</p>\n    <small>");
+      stack1 = helpers._triageMustache.call(depth0, "published_at", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</small>\n    <hr>\n    <hr>\n  ");
+      return buffer;
+      }
+
+      data.buffer.push("<div class=\"row\">\n  ");
+      stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[],types:[],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("\n</div>");
+      return buffer;
+      
+    });
+  });
+define("frontend/templates/stories/show", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+    this.compilerInfo = [4,'>= 1.0.0'];
+    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+      var buffer = '', stack1, escapeExpression=this.escapeExpression;
 
 
-      data.buffer.push("<div class=\"row\">\n  <p>\n    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n  </p>\n  ");
-      data.buffer.push(escapeExpression((helper = helpers['link-to'] || (depth0 && depth0['link-to']),options={hash:{
-        'class': ("button radius")
-      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[depth0,depth0],types:["STRING","STRING"],data:data},helper ? helper.call(depth0, "Hashtags", "hashtags", options) : helperMissing.call(depth0, "link-to", "Hashtags", "hashtags", options))));
-      data.buffer.push("\n</div>\n");
+      data.buffer.push("<div class='row'>\n  <h2>");
+      stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</h2>\n  <p>");
+      data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "body", {hash:{
+        'unescaped': ("true")
+      },hashTypes:{'unescaped': "STRING"},hashContexts:{'unescaped': depth0},contexts:[depth0],types:["ID"],data:data})));
+      data.buffer.push("</p>\n</div>\n");
       return buffer;
       
     });
@@ -435,6 +668,15 @@ define("frontend/tests/frontend/tests/unit/controllers/hashtags-test.jshint",
       ok(true, 'frontend/tests/unit/controllers/hashtags-test.js should pass jshint.'); 
     });
   });
+define("frontend/tests/frontend/tests/unit/controllers/index-test.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - frontend/tests/unit/controllers');
+    test('frontend/tests/unit/controllers/index-test.js should pass jshint', function() { 
+      ok(true, 'frontend/tests/unit/controllers/index-test.js should pass jshint.'); 
+    });
+  });
 define("frontend/tests/frontend/tests/unit/initializers/current-user-test.jshint", 
   [],
   function() {
@@ -442,6 +684,15 @@ define("frontend/tests/frontend/tests/unit/initializers/current-user-test.jshint
     module('JSHint - frontend/tests/unit/initializers');
     test('frontend/tests/unit/initializers/current-user-test.js should pass jshint', function() { 
       ok(true, 'frontend/tests/unit/initializers/current-user-test.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/frontend/tests/unit/models/feed-test.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - frontend/tests/unit/models');
+    test('frontend/tests/unit/models/feed-test.js should pass jshint', function() { 
+      ok(true, 'frontend/tests/unit/models/feed-test.js should pass jshint.'); 
     });
   });
 define("frontend/tests/frontend/tests/unit/models/hashtag-test.jshint", 
@@ -511,6 +762,15 @@ define("frontend/tests/models/hashtag.jshint",
       ok(true, 'models/hashtag.js should pass jshint.'); 
     });
   });
+define("frontend/tests/models/story.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - models');
+    test('models/story.js should pass jshint', function() { 
+      ok(true, 'models/story.js should pass jshint.'); 
+    });
+  });
 define("frontend/tests/router.jshint", 
   [],
   function() {
@@ -520,13 +780,40 @@ define("frontend/tests/router.jshint",
       ok(true, 'router.js should pass jshint.'); 
     });
   });
-define("frontend/tests/routes/hashtags.jshint", 
+define("frontend/tests/routes/application.jshint", 
   [],
   function() {
     "use strict";
     module('JSHint - routes');
-    test('routes/hashtags.js should pass jshint', function() { 
-      ok(true, 'routes/hashtags.js should pass jshint.'); 
+    test('routes/application.js should pass jshint', function() { 
+      ok(true, 'routes/application.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/routes/hashtags/index.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - routes/hashtags');
+    test('routes/hashtags/index.js should pass jshint', function() { 
+      ok(true, 'routes/hashtags/index.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/routes/hashtags/show.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - routes/hashtags');
+    test('routes/hashtags/show.js should pass jshint', function() { 
+      ok(true, 'routes/hashtags/show.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/routes/stories/index.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - routes/stories');
+    test('routes/stories/index.js should pass jshint', function() { 
+      ok(true, 'routes/stories/index.js should pass jshint.'); 
     });
   });
 define("frontend/tests/test-helper", 
@@ -580,6 +867,24 @@ define("frontend/tests/unit/controllers/hashtags-test",
       ok(controller);
     });
   });
+define("frontend/tests/unit/controllers/index-test", 
+  ["ember-qunit"],
+  function(__dependency1__) {
+    "use strict";
+    var moduleFor = __dependency1__.moduleFor;
+    var test = __dependency1__.test;
+
+    moduleFor('controller:index', 'IndexController', {
+      // Specify the other units that are required for this test.
+      // needs: ['controller:foo']
+    });
+
+    // Replace this with your real tests.
+    test('it exists', function() {
+      var controller = this.subject();
+      ok(controller);
+    });
+  });
 define("frontend/tests/unit/initializers/current-user-test", 
   ["ember","frontend/initializers/current-user"],
   function(__dependency1__, __dependency2__) {
@@ -605,6 +910,24 @@ define("frontend/tests/unit/initializers/current-user-test",
 
       // you would normally confirm the results of the initializer here
       ok(true);
+    });
+  });
+define("frontend/tests/unit/models/feed-test", 
+  ["ember-qunit"],
+  function(__dependency1__) {
+    "use strict";
+    var moduleForModel = __dependency1__.moduleForModel;
+    var test = __dependency1__.test;
+
+    moduleForModel('feed', 'Feed', {
+      // Specify the other units that are required for this test.
+      needs: []
+    });
+
+    test('it exists', function() {
+      var model = this.subject();
+      // var store = this.store();
+      ok(!!model);
     });
   });
 define("frontend/tests/unit/models/hashtag-test", 
