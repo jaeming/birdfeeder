@@ -1,8 +1,8 @@
 class HashtagSerializer < ActiveModel::Serializer
-  attributes :id, :title, :feeds
+  attributes :id, :title, :stories
 
-  def feeds
-    object.feed_ids
+  def stories
+    object.story_ids
   end
 
 end

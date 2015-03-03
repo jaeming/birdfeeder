@@ -9,8 +9,8 @@ Router.map(function() {
   this.resource('hashtags', {path: '/'}, function() {
     this.route('show', {path: ':hashtag_id'});
   });
-  this.resource('feeds', function() {
-    this.route('show', {path: ':feed_id'});
+  this.resource('stories', function() {
+    this.route('show', {path: ':story_id'});
   });
 });
 

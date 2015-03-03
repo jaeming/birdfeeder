@@ -1,4 +1,4 @@
-class FeedSerializer < ActiveModel::Serializer
+class StorySerializer < ActiveModel::Serializer
   attributes :id, :title, :body, :hashtag, :published_at
 
   def hashtag

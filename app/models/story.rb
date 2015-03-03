@@ -1,4 +1,4 @@
-class Feed < ActiveRecord::Base
+class Story < ActiveRecord::Base
   belongs_to :hashtag
   after_create :parse_feed
 

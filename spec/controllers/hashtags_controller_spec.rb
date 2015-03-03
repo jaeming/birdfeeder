@@ -50,7 +50,7 @@ RSpec.describe HashtagsController, :type => :controller do
     hashtag = Hashtag.last
 
     expect(hashtag.title).to eq("programming")
-    expect(hashtag.feeds).not_to be_nil
+    expect(hashtag.stories).not_to be_nil
   end
 
 end

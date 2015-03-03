@@ -1,6 +1,6 @@
   class Hashtag < ActiveRecord::Base
   require 'json'
-  has_many :feeds
+  has_many :stories
 
   def search_twitter
     client = Twitter::REST::Client.new do |config|
