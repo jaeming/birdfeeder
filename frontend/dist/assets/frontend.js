@@ -90,6 +90,74 @@ define("frontend/controllers/session",
       currentUser: null
     });
   });
+define("frontend/controllers/signin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Controller.extend({
+      actions: {
+        signin: function() {
+          var _this = this;
+          var email = this.get('email');
+          var password = this.get('email');
+
+          Ember.$.ajax({
+            url : 'api/users/sign_in',
+            type: 'POST',
+            dataType : "json",
+            data: {"user":{"email": email, "password": password}},
+
+            success: function(data) {
+              console.log(data);
+              // probably need to bind something here
+              _this.transitionToRoute('/');
+            },
+            error: function() {
+              //need an error message with response data here.
+              //alert in the meantime:
+              alert('sign in failed');
+            }
+          });
+        }
+      }
+    });
+  });
+define("frontend/controllers/users/signin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Controller.extend({
+      actions: {
+        signin: function() {
+          var _this = this;
+          var email = this.get('email');
+          var password = this.get('email');
+
+          Ember.$.ajax({
+            url : 'api/users/sign_in',
+            type: 'POST',
+            dataType : "json",
+            data: {"user":{"email": email, "password": password}},
+
+            success: function(data) {
+              console.log(data);
+              // probably need to bind something here
+              _this.transitionToRoute('/');
+            },
+            error: function() {
+              //need an error message with response data here.
+              //alert in the meantime:
+              alert('sign in failed');
+            }
+          });
+        }
+      }
+    });
+  });
 define("frontend/helpers/fa-icon", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
@@ -189,6 +257,36 @@ define("frontend/helpers/fa-icon",
 
     __exports__["default"] = Ember.Handlebars.makeBoundHelper(faIcon);
   });
+define("frontend/initializers/ember-cli-dates", 
+  ["ember","ember-cli-dates/helpers/time-format","ember-cli-dates/helpers/time-ago-in-words","ember-cli-dates/helpers/day-of-the-week","ember-cli-dates/helpers/time-ahead-in-words","ember-cli-dates/helpers/time-delta-in-words","ember-cli-dates/helpers/month-and-year","ember-cli-dates/helpers/month-and-day","ember-cli-dates/helpers/date-and-time","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __dependency8__, __dependency9__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var timeFormat = __dependency2__.timeFormat;
+    var timeAgoInWords = __dependency3__.timeAgoInWords;
+    var dayOfTheWeek = __dependency4__.dayOfTheWeek;
+    var timeAheadInWords = __dependency5__.timeAheadInWords;
+    var timeDeltaInWords = __dependency6__.timeDeltaInWords;
+    var monthAndYear = __dependency7__.monthAndYear;
+    var monthAndDay = __dependency8__.monthAndDay;
+    var dateAndTime = __dependency9__.dateAndTime;
+
+    var initialize = function(/* container, app */) {
+      Ember.Handlebars.helper('time-format', timeFormat);
+      Ember.Handlebars.helper('time-ago-in-words', timeAgoInWords);
+      Ember.Handlebars.helper('day-of-the-week', dayOfTheWeek);
+      Ember.Handlebars.helper('time-ahead-in-words', timeAheadInWords);
+      Ember.Handlebars.helper('time-delta-in-words', timeDeltaInWords);
+      Ember.Handlebars.helper('month-and-year', monthAndYear);
+      Ember.Handlebars.helper('month-and-day', monthAndDay);
+      Ember.Handlebars.helper('date-and-time', dateAndTime);
+    };
+    __exports__.initialize = initialize;
+    __exports__["default"] = {
+      name: 'ember-cli-dates',
+      initialize: initialize
+    };
+  });
 define("frontend/initializers/export-application-global", 
   ["ember","frontend/config/environment","exports"],
   function(__dependency1__, __dependency2__, __exports__) {
@@ -268,6 +366,18 @@ define("frontend/models/story",
       hashtag: DS.belongsTo('hashtag', { async: true })
     });
   });
+define("frontend/models/user", 
+  ["ember-data","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var DS = __dependency1__["default"];
+
+    __exports__["default"] = DS.Model.extend({
+      name: DS.attr('string'),
+      email: DS.attr('string'),
+      avatar: DS.attr('string')
+    });
+  });
 define("frontend/router", 
   ["ember","frontend/config/environment","exports"],
   function(__dependency1__, __dependency2__, __exports__) {
@@ -280,11 +390,16 @@ define("frontend/router",
     });
 
     Router.map(function() {
-      this.resource('hashtags', {path: '/'}, function() {
-        this.route('show', {path: ':hashtag_id'});
+      this.resource("hashtags", {
+        path: "/"
+      }, function() {
+        this.route("show", { path: ":hashtag_id" });
       });
-      this.resource('stories', function() {
-        this.route('show', {path: ':story_id'});
+      this.resource("stories", function() {
+        this.route("show", { path: ":story_id" });
+      });
+      this.resource("users", function() {
+        this.route("signin");
       });
     });
 
@@ -344,6 +459,30 @@ define("frontend/routes/stories/index",
       }
     });
   });
+define("frontend/routes/users", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Route.extend({
+      renderTemplate: function() {
+        this.render({outlet: 'body'});
+      }
+    });
+  });
+define("frontend/routes/users/signin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Route.extend({
+      renderTemplate: function() {
+        this.render({outlet: 'body'});
+      }
+    });
+  });
 define("frontend/templates/application", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
@@ -374,16 +513,26 @@ define("frontend/templates/application",
 
     function program3(depth0,data) {
       
-      var buffer = '';
+      var buffer = '', stack1, helper, options;
       data.buffer.push("\n\n			<div class='user-account'>\n				<img src=\"./images/guest-avatar.png\" alt=\"guest\" class='avatar'>\n				<p>Guest</p>\n			</div>\n			<div ");
       data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
         'class': (":account-actions actionsVisible")
       },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},contexts:[],types:[],data:data})));
-      data.buffer.push(">\n				<div class='user-options-wrap'>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-in.png\" alt=\"edit profile\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign in</small>\n					</a>\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-up.png\" alt=\"sign out\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign up</small>\n					</a>\n				</div>\n				<img src=\"./images/expand-down.png\" alt=\"user options\" class='expand-arrow-guest'>\n			</div>\n\n		");
+      data.buffer.push(">\n				<div class='user-options-wrap'>\n					");
+      stack1 = (helper = helpers['link-to'] || (depth0 && depth0['link-to']),options={hash:{
+        'class': ("user-link")
+      },hashTypes:{'class': "STRING"},hashContexts:{'class': depth0},inverse:self.noop,fn:self.program(4, program4, data),contexts:[depth0],types:["STRING"],data:data},helper ? helper.call(depth0, "users.signin", options) : helperMissing.call(depth0, "link-to", "users.signin", options));
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("\n					<a href=\"#\" class='user-link'>\n						<img src=\"./images/sign-up.png\" alt=\"sign out\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign up</small>\n					</a>\n				</div>\n				<img src=\"./images/expand-down.png\" alt=\"user options\" class='expand-arrow-guest'>\n			</div>\n\n		");
       return buffer;
       }
+    function program4(depth0,data) {
+      
+      
+      data.buffer.push("\n						<img src=\"./images/sign-in.png\" alt=\"edit profile\" class='user-option-icons'>\n						<small class='user-option-text'>&nbsp; sign in</small>\n					");
+      }
 
-    function program5(depth0,data) {
+    function program6(depth0,data) {
       
       var buffer = '', stack1, helper, options;
       data.buffer.push("\n		      ");
@@ -391,12 +540,12 @@ define("frontend/templates/application",
         'class': ("tag-link"),
         'activeClass': ("tag-active"),
         'tagName': ("div")
-      },hashTypes:{'class': "STRING",'activeClass': "STRING",'tagName': "STRING"},hashContexts:{'class': depth0,'activeClass': depth0,'tagName': depth0},inverse:self.noop,fn:self.program(6, program6, data),contexts:[depth0,depth0],types:["STRING","ID"],data:data},helper ? helper.call(depth0, "hashtags.show", "", options) : helperMissing.call(depth0, "link-to", "hashtags.show", "", options));
+      },hashTypes:{'class': "STRING",'activeClass': "STRING",'tagName': "STRING"},hashContexts:{'class': depth0,'activeClass': depth0,'tagName': depth0},inverse:self.noop,fn:self.program(7, program7, data),contexts:[depth0,depth0],types:["STRING","ID"],data:data},helper ? helper.call(depth0, "hashtags.show", "", options) : helperMissing.call(depth0, "link-to", "hashtags.show", "", options));
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
       data.buffer.push("\n		    ");
       return buffer;
       }
-    function program6(depth0,data) {
+    function program7(depth0,data) {
       
       var buffer = '', stack1;
       data.buffer.push("\n						");
@@ -442,7 +591,7 @@ define("frontend/templates/application",
         'on': ("mouseEnter")
       },hashTypes:{'on': "STRING"},hashContexts:{'on': depth0},contexts:[depth0],types:["STRING"],data:data})));
       data.buffer.push(">\n\n				");
-      stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[],types:[],data:data});
+      stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(6, program6, data),contexts:[],types:[],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
       data.buffer.push("\n\n			</div>\n	  </div>\n\n	  <section ");
       data.buffer.push(escapeExpression(helpers['bind-attr'].call(depth0, {hash:{
@@ -499,11 +648,11 @@ define("frontend/templates/hashtags/show",
     __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
     this.compilerInfo = [4,'>= 1.0.0'];
     helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-      var buffer = '', stack1, escapeExpression=this.escapeExpression, self=this;
+      var buffer = '', stack1, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
     function program1(depth0,data) {
       
-      var buffer = '', stack1;
+      var buffer = '', stack1, helper, options;
       data.buffer.push("\n\n  <div class='article'>\n    <h2>");
       stack1 = helpers._triageMustache.call(depth0, "title", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
@@ -511,9 +660,8 @@ define("frontend/templates/hashtags/show",
       data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "body", {hash:{
         'unescaped': ("true")
       },hashTypes:{'unescaped': "STRING"},hashContexts:{'unescaped': depth0},contexts:[depth0],types:["ID"],data:data})));
-      data.buffer.push("</p>\n    <small>");
-      stack1 = helpers._triageMustache.call(depth0, "published_at", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
-      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      data.buffer.push("</p>\n    <small>published ");
+      data.buffer.push(escapeExpression((helper = helpers['date-and-time'] || (depth0 && depth0['date-and-time']),options={hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data},helper ? helper.call(depth0, "published_at", options) : helperMissing.call(depth0, "date-and-time", "published_at", options))));
       data.buffer.push("</small>\n  </div>\n  <br>\n\n");
       return buffer;
       }
@@ -587,6 +735,52 @@ define("frontend/templates/stories/show",
       
     });
   });
+define("frontend/templates/users", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+    this.compilerInfo = [4,'>= 1.0.0'];
+    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+      var stack1;
+
+
+      stack1 = helpers._triageMustache.call(depth0, "outlet", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["ID"],data:data});
+      if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
+      else { data.buffer.push(''); }
+      
+    });
+  });
+define("frontend/templates/users/signin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    __exports__["default"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+    this.compilerInfo = [4,'>= 1.0.0'];
+    helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+      var buffer = '', helper, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+
+
+      data.buffer.push("\n<div class='row'>\n\n  <div class='columns medium-8'>\n    <h2>Log in</h2>\n    <form ");
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "signin", {hash:{
+        'on': ("submit")
+      },hashTypes:{'on': "STRING"},hashContexts:{'on': depth0},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(">\n\n\n\n\n\n      <div class=\"field\">\n        <label for=\"user_email\">Email</label><br />\n        ");
+      data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+        'value': ("email")
+      },hashTypes:{'value': "ID"},hashContexts:{'value': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+      data.buffer.push("\n      </div>\n\n      <div class=\"field\">\n        <label for=\"user_password\">Password</label><br />\n        ");
+      data.buffer.push(escapeExpression((helper = helpers.input || (depth0 && depth0.input),options={hash:{
+        'value': ("password"),
+        'type': ("password")
+      },hashTypes:{'value': "ID",'type': "STRING"},hashContexts:{'value': depth0,'type': depth0},contexts:[],types:[],data:data},helper ? helper.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+      data.buffer.push("\n      </div>\n\n\n\n      <div class=\"actions\">\n        <input type=\"submit\" class=\"tiny button\" value=\"Log in\" />\n      </div>\n    </form>\n\n    <a href=\"/api/users/sign_up\">Sign up</a><br />\n\n    <a href=\"/api/users/password/new\">Forgot your password?</a><br />\n\n    <a href=\"/api/users/confirmation/new\">Didn&#39;t receive confirmation instructions?</a><br />\n  </div>\n</div>");
+      return buffer;
+      
+    });
+  });
 define("frontend/tests/adapters/application.jshint", 
   [],
   function() {
@@ -621,6 +815,24 @@ define("frontend/tests/controllers/session.jshint",
     module('JSHint - controllers');
     test('controllers/session.js should pass jshint', function() { 
       ok(true, 'controllers/session.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/controllers/signin.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - controllers');
+    test('controllers/signin.js should pass jshint', function() { 
+      ok(true, 'controllers/signin.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/controllers/users/signin.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - controllers/users');
+    test('controllers/users/signin.js should pass jshint', function() { 
+      ok(true, 'controllers/users/signin.js should pass jshint.'); 
     });
   });
 define("frontend/tests/frontend/tests/helpers/resolver.jshint", 
@@ -677,6 +889,15 @@ define("frontend/tests/frontend/tests/unit/controllers/index-test.jshint",
       ok(true, 'frontend/tests/unit/controllers/index-test.js should pass jshint.'); 
     });
   });
+define("frontend/tests/frontend/tests/unit/controllers/users-test.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - frontend/tests/unit/controllers');
+    test('frontend/tests/unit/controllers/users-test.js should pass jshint', function() { 
+      ok(true, 'frontend/tests/unit/controllers/users-test.js should pass jshint.'); 
+    });
+  });
 define("frontend/tests/frontend/tests/unit/initializers/current-user-test.jshint", 
   [],
   function() {
@@ -702,6 +923,24 @@ define("frontend/tests/frontend/tests/unit/models/hashtag-test.jshint",
     module('JSHint - frontend/tests/unit/models');
     test('frontend/tests/unit/models/hashtag-test.js should pass jshint', function() { 
       ok(true, 'frontend/tests/unit/models/hashtag-test.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/frontend/tests/unit/models/user-test.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - frontend/tests/unit/models');
+    test('frontend/tests/unit/models/user-test.js should pass jshint', function() { 
+      ok(true, 'frontend/tests/unit/models/user-test.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/frontend/tests/unit/routes/users-test.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - frontend/tests/unit/routes');
+    test('frontend/tests/unit/routes/users-test.js should pass jshint', function() { 
+      ok(true, 'frontend/tests/unit/routes/users-test.js should pass jshint.'); 
     });
   });
 define("frontend/tests/helpers/resolver", 
@@ -771,6 +1010,15 @@ define("frontend/tests/models/story.jshint",
       ok(true, 'models/story.js should pass jshint.'); 
     });
   });
+define("frontend/tests/models/user.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - models');
+    test('models/user.js should pass jshint', function() { 
+      ok(true, 'models/user.js should pass jshint.'); 
+    });
+  });
 define("frontend/tests/router.jshint", 
   [],
   function() {
@@ -814,6 +1062,24 @@ define("frontend/tests/routes/stories/index.jshint",
     module('JSHint - routes/stories');
     test('routes/stories/index.js should pass jshint', function() { 
       ok(true, 'routes/stories/index.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/routes/users.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - routes');
+    test('routes/users.js should pass jshint', function() { 
+      ok(true, 'routes/users.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/routes/users/signin.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - routes/users');
+    test('routes/users/signin.js should pass jshint', function() { 
+      ok(true, 'routes/users/signin.js should pass jshint.'); 
     });
   });
 define("frontend/tests/test-helper", 
@@ -885,6 +1151,24 @@ define("frontend/tests/unit/controllers/index-test",
       ok(controller);
     });
   });
+define("frontend/tests/unit/controllers/users-test", 
+  ["ember-qunit"],
+  function(__dependency1__) {
+    "use strict";
+    var moduleFor = __dependency1__.moduleFor;
+    var test = __dependency1__.test;
+
+    moduleFor('controller:users', 'UsersController', {
+      // Specify the other units that are required for this test.
+      // needs: ['controller:foo']
+    });
+
+    // Replace this with your real tests.
+    test('it exists', function() {
+      var controller = this.subject();
+      ok(controller);
+    });
+  });
 define("frontend/tests/unit/initializers/current-user-test", 
   ["ember","frontend/initializers/current-user"],
   function(__dependency1__, __dependency2__) {
@@ -946,6 +1230,41 @@ define("frontend/tests/unit/models/hashtag-test",
       var model = this.subject();
       // var store = this.store();
       ok(!!model);
+    });
+  });
+define("frontend/tests/unit/models/user-test", 
+  ["ember-qunit"],
+  function(__dependency1__) {
+    "use strict";
+    var moduleForModel = __dependency1__.moduleForModel;
+    var test = __dependency1__.test;
+
+    moduleForModel('user', 'User', {
+      // Specify the other units that are required for this test.
+      needs: []
+    });
+
+    test('it exists', function() {
+      var model = this.subject();
+      // var store = this.store();
+      ok(!!model);
+    });
+  });
+define("frontend/tests/unit/routes/users-test", 
+  ["ember-qunit"],
+  function(__dependency1__) {
+    "use strict";
+    var moduleFor = __dependency1__.moduleFor;
+    var test = __dependency1__.test;
+
+    moduleFor('route:users', 'UsersRoute', {
+      // Specify the other units that are required for this test.
+      // needs: ['controller:foo']
+    });
+
+    test('it exists', function() {
+      var route = this.subject();
+      ok(route);
     });
   });
 /* jshint ignore:start */

@@ -1,7 +1,7 @@
 <div {{bind-attr class=":app-bar accountVisible"}}>
 	<div {{bind-attr class=":account-box accountVisible"}} {{action "optionsShow" on="mouseEnter"}}>
 
-		{{#if controllers.session.currentUser}}
+		{{#if controllers.session.currentUser.authenticated}}
 
 			<div class='user-account'>
 				<img {{bind-attr src="controllers.session.currentUser.avatar"}} alt="avatar" class='avatar'>
@@ -11,35 +11,35 @@
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
-						<img src="./images/edit-profile.png" alt="edit profile" class='user-option-icons'>
+						<img src="/images/edit-profile.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; edit account</small>
 					</a>
 					<a href="#" class='user-link'>
-						<img src="./images/sign-out.png" alt="sign out" class='user-option-icons'>
+						<img src="/images/sign-out.png" alt="sign out" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign out</small>
 					</a>
 				</div>
-				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-user'>
+				<img src="/images/expand-down.png" alt="user options" class='expand-arrow-user'>
 			</div>
 
 		{{else}}
 
 			<div class='user-account'>
-				<img src="./images/guest-avatar.png" alt="guest" class='avatar'>
+				<img src="/images/guest-avatar.png" alt="guest" class='avatar'>
 				<p>Guest</p>
 			</div>
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
 				<div class='user-options-wrap'>
-					<a href="#" class='user-link'>
-						<img src="./images/sign-in.png" alt="edit profile" class='user-option-icons'>
+					{{#link-to 'users.signin' class='user-link'}}
+						<img src="/images/sign-in.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign in</small>
-					</a>
+					{{/link-to}}
 					<a href="#" class='user-link'>
-						<img src="./images/sign-up.png" alt="sign out" class='user-option-icons'>
+						<img src="/images/sign-up.png" alt="sign out" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign up</small>
 					</a>
 				</div>
-				<img src="./images/expand-down.png" alt="user options" class='expand-arrow-guest'>
+				<img src="/images/expand-down.png" alt="user options" class='expand-arrow-guest'>
 			</div>
 
 		{{/if}}

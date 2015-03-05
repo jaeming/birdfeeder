@@ -11,17 +11,21 @@ export default {
       url: '/api/sessions/current',
       type: 'GET',
       dataType: "json",
-      success:function(data) {
+      success: function(data) {
         container.lookup('controller:session').set('currentUser', {
+          authenticated: data['authenticated'],
           email: data['email'],
           name: data['name'],
           id: data['id'],
-          avatar: data['avatar']
+          avatar: data['avatar'],
+          token: data['token']
         });
       },
-      error:function() {
+      error: function() {
         console.log('hola guest!');
       }
     });
   }
 };
+
+
