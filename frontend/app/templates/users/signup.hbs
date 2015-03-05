@@ -1,0 +1,36 @@
+
+<div class='row'>
+
+  <div class='columns medium-8'>
+    <h2>Sign up</h2>
+    <form {{action 'signup' on='submit'}}>
+
+      <div class="field">
+        <label for="user_email">Email</label><br />
+        {{input value=email}}
+      </div>
+
+      <div class="field">
+        <label for="user_name">Name</label><br />
+        {{input value=name}}
+      </div>
+
+      <div class="field">
+        <label for="user_password">Password</label><br />
+        {{input value=password type='password'}}
+      </div>
+
+      <div class="field">
+        <label for="user_password_confirmation">Confirm Password</label><br />
+        {{input value=passwordConfirmation type='password'}}
+      </div>
+
+      <div class="actions">
+        <input type="submit" class="tiny button" value="Log in" />
+      </div>
+    </form>
+
+    <a href="/api/users/sign_in">Log in</a><br />
+    <a href="/api/users/confirmation/new">Didn&#39;t receive confirmation instructions?</a><br />
+  </div>
+</div>

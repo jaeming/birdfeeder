@@ -16,6 +16,7 @@ Router.map(function() {
   });
   this.resource("users", function() {
     this.route("signin");
+    this.route("signup");    
   });
 });
 

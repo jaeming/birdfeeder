@@ -34,10 +34,10 @@
 						<img src="/images/sign-in.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign in</small>
 					{{/link-to}}
-					<a href="#" class='user-link'>
+					{{#link-to 'users.signup' class='user-link'}}
 						<img src="/images/sign-up.png" alt="sign out" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign up</small>
-					</a>
+					{{/link-to}}
 				</div>
 				<img src="/images/expand-down.png" alt="user options" class='expand-arrow-guest'>
 			</div>
