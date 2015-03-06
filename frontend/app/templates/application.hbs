@@ -59,11 +59,7 @@
 		<div {{action "closeSidePanel"}}>
 		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
-				{{#each}}
-		      {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
-						{{title}}
-					{{/link-to}}
-		    {{/each}}
+				{{outlet 'sidebar'}}
 
 			</div>
 	  </div>

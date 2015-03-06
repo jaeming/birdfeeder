@@ -1,6 +1,6 @@
 import Ember from 'ember';
 
-export default Ember.ArrayController.extend({
+export default Ember.ObjectController.extend({
   needs: ['session'],
 	actionsVisible: false,
 	accountVisible: false,

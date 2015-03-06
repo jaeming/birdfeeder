@@ -1,5 +1,5 @@
-{{#each}}
-  <h5>
-    {{#link-to 'hashtags.show' this}} {{title}} {{/link-to}}
-  </h5>
+{{#each hashtags}}
+  {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
+    {{title}}
+  {{/link-to}}
 {{/each}}
