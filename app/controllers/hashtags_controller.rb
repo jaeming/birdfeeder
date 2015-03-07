@@ -15,12 +15,12 @@ class HashtagsController < ApplicationController
     render json: @hashtag
   end
 
-  def search_twitter
-    @hashtag = Hashtag.find_or_create_by(hashtag_params)
-    tweets = @hashtag.search_twitter
-    tweets.each { |url| @hashtag.stories.find_or_create_by(:article_url => @hashtag.unshortened(url))}
-    render json: @hashtag
-  end
+  # def search_twitter
+  #   @hashtag = Hashtag.find_or_create_by(hashtag_params)
+  #   tweets = @hashtag.search_twitter
+  #   tweets.each { |url| @hashtag.stories.find_or_create_by(:article_url => @hashtag.unshortened(url))}
+  #   render json: @hashtag
+  # end
 
   private
     def hashtag_params

@@ -59,6 +59,10 @@
 		<div {{action "closeSidePanel"}}>
 		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
+				{{#link-to 'stories.new' class='outlined button tiny round'}}
+				  {{fa-icon "fa-plus"}}	Add Feed
+				{{/link-to}}
+
 				{{outlet 'sidebar'}}
 
 			</div>

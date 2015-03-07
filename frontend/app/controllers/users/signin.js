@@ -11,7 +11,7 @@ export default Ember.Controller.extend({
       Ember.$.ajax({
         url : '/api/users/sign_in',
         type: 'POST',
-        dataType : "json",
+        dataType: "json",
         data: {"authenticity_token": token, "user":{"email": email, "password": password}},
         success: function(data) {
           console.log(data.user);

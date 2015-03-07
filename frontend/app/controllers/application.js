@@ -1,6 +1,10 @@
 import Ember from 'ember';
 
-export default Ember.ObjectController.extend({
+export default Ember.Controller.extend({
+    // sortAscending: false,
+  // sortProperties: ['likes', 'published_at'],
+  sortProperties: ['likes:desc', 'published_at:desc'],
+  sortedStories: Ember.computed.sort('stories', 'sortProperties'),
   needs: ['session'],
 	actionsVisible: false,
 	accountVisible: false,

@@ -7,6 +7,10 @@ export default Ember.Route.extend({
       stories: this.store.find('story')
     });
   },
+  setupController: function(controller, modelHash) {
+    controller.set('stories', modelHash.stories);
+    controller.set('hashtags', modelHash.hashtags);
+  },
   renderTemplate: function(controller, model){
     this.render(); // render application template
     this.render('stories.all',{
