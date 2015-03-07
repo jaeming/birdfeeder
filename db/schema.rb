@@ -11,10 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150303115819) do
+ActiveRecord::Schema.define(version: 20150307131944) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "feeds", force: :cascade do |t|
+    t.string   "rss"
+    t.string   "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "hashtag_id"
+  end
 
   create_table "hashtags", force: :cascade do |t|
     t.string   "title"
@@ -32,6 +40,7 @@ ActiveRecord::Schema.define(version: 20150303115819) do
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.integer  "hashtag_id"
+    t.integer  "feed_id"
   end
 
   create_table "users", force: :cascade do |t|

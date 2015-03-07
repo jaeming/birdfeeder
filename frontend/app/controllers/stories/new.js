@@ -8,10 +8,10 @@ export default Ember.ObjectController.extend({
       var category = this.get('category');
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
-        url: '/api/stories/',
+        url: '/api/feeds/',
         type: 'POST',
         dataType: "json",
-        data: {"authenticity_token": token, "story":{"feed_url": url,}},
+        data: {"authenticity_token": token, "feed":{"url": url, "hashtag": category}},
         success: function(data) {
           console.log(data);
           console.log('Great!, we should be generating stories now!');
@@ -19,7 +19,6 @@ export default Ember.ObjectController.extend({
         error: function() {
           console.log('that went badly');
         }
-
       });
     }
   }

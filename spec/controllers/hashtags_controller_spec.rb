@@ -41,7 +41,7 @@ RSpec.describe HashtagsController, :type => :controller do
     expect(Hashtag.last[:title]).to eq("programming")
   end
 
-  it "searches twitter for hashtag tweets with urls" do
+  xit "searches twitter for hashtag tweets with urls" do
     @user = create(:user)
     sign_in @user
     params = {"hashtag" => {"title" => "programming"}}

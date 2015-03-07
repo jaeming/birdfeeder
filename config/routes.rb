@@ -6,6 +6,7 @@ scope '/api' do
   post 'hashtags/twitter' => 'hashtags#search_twitter'
   resources :hashtags
   resources :stories
+  resources :feeds
 end
 
   root 'ember#loader'
