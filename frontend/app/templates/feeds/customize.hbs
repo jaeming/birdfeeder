@@ -1,0 +1,37 @@
+<div class="row">
+  <div class="columns medium-9">
+    <h2>Search categories</h2>
+    <div class="row collapse postfix-radius">
+      <div class="small-10 columns">
+        {{input value=feedCategory placeholder="Search Categories"}}
+      </div>
+      <div class="small-2 columns">
+        <a href="#" class="button postfix">Go!</a>
+      </div>
+    </div>
+
+  <hr>
+
+  <h2>or add a feed</h2>
+  <p>paste in a url and we'll try to find a feed for you:</p>
+  <form {{action "addFeed" on="submit"}}>
+    <div class="row collapse prefix-radius">
+      <div class="small-3 large-2 columns">
+        <span class="prefix">http://</span>
+      </div>
+      <div class="small-9 large-10 columns">
+        {{input value=url placeholder="Enter your URL..."}}
+      </div>
+    </div>
+    <div class="row collapse prefix-radius">
+      <div class="small-3 large-2 columns">
+        <span class="prefix">Category:</span>
+      </div>
+      <div class="small-9 large-10 columns">
+        {{input value=category placeholder="Give this feed a category"}}
+      </div>
+    </div>
+    <input type="submit" value="Add feed" class="submit button tiny radius" />
+  </form>
+  </div>
+</div>

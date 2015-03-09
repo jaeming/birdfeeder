@@ -11,7 +11,7 @@
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
 				<div class='user-options-wrap'>
 					<a href="#" class='user-link'>
-						<img src="/images/edit-profile.png" alt="edit profile" class='user-option-icons'>
+						<img src="/images/edit.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; edit account</small>
 					</a>
 					<a href="#" class='user-link'>
@@ -59,9 +59,11 @@
 		<div {{action "closeSidePanel"}}>
 		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
 
-				{{#link-to 'stories.new' class='outlined button tiny round'}}
-				  {{fa-icon "fa-plus"}}	Add Feed
-				{{/link-to}}
+				{{#if controllers.session.currentUser.authenticated}}
+					{{#link-to 'feeds.customize' class='outlined button tiny round'}}
+					  {{fa-icon "fa-pencil"}}	customize
+					{{/link-to}}
+				{{/if}}
 
 				{{outlet 'sidebar'}}
 

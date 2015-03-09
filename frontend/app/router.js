@@ -11,12 +11,15 @@ Router.map(function() {
   });
   this.resource("stories", function() {
     this.route("show", { path: ":story_id" });
-    this.route("new");
   });
   this.resource("users", function() {
     this.route("signin");
     this.route("signup");
   });
+  this.resource("feeds", function() {
+    this.route("customize");
+    this.route("new");
+  })
 });
 
 export default Router;

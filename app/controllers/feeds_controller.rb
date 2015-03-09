@@ -7,8 +7,11 @@ class FeedsController < ApplicationController
       @feed = Feed.new(url: feed_params[:url], rss: @rss)
       @feed.hashtag = Hashtag.find_or_create_by!(title: feed_params[:hashtag])
       @feed.save!
-      head :no_content
+      render json: @feed.hashtag.id
+    else
+      render json: "No Feeds found"
     end
+
   end
 
   private
