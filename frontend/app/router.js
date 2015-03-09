@@ -19,7 +19,7 @@ Router.map(function() {
   this.resource("feeds", function() {
     this.route("customize");
     this.route("new");
-  })
+  });
 });
 
 export default Router;

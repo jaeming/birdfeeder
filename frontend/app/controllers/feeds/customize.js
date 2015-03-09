@@ -1,5 +1,5 @@
 import Ember from 'ember';
-export default Ember.ObjectController.extend({
+export default Ember.ArrayController.extend({
   needs: ['session'],
   actions: {
     addFeed: function() {
@@ -14,6 +14,8 @@ export default Ember.ObjectController.extend({
         data: {"authenticity_token": token, "feed":{"url": url, "hashtag": category}},
         success: function(data) {
           console.log(data);
+          _this.set('url', '');
+          _this.set('category', '');
           _this.store.find('story');
           _this.store.find('hashtag');
           _this.transitionToRoute('hashtags.show', data);
@@ -22,6 +24,11 @@ export default Ember.ObjectController.extend({
           console.log('that went badly');
         }
       });
+    },
+    searchCategories: function() {
+      var searchTerm = this.get('search');
+      var results = this.store.find('hashtag', { title: searchTerm });
+      this.set('results', results);
     }
   }
 });

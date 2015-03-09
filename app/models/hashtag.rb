@@ -2,6 +2,12 @@
   require 'json'
   has_many :stories
   has_many :feeds
+  after_create :titleize
+
+  def self.search(title)
+    search = "%#{title.downcase}%"
+    self.where('lower(title) LIKE ?', search)
+  end
 
   def search_twitter
     client = Twitter::REST::Client.new do |config|
@@ -14,6 +20,9 @@
     urls
   end
 
+def titleize
+  self.update!(title: self.title.split(' ').map(&:capitalize).join(' '))
+end
 
   def unshortened(url)
     Unshorten["#{url.expanded_url}"]
