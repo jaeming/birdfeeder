@@ -59,6 +59,17 @@ span.prefix {
   color: #5a5a5a;
 }
 
+.category-header {
+ margin: 3rem 1rem 0 2rem;
+ display: inline;
+ line-height: 2;
+}
+
+.subscribe {
+  display: inline;
+  vertical-align: super;
+}
+
 
 ////////////////////LAYOUT
 
@@ -312,9 +323,10 @@ main {
 	//UI
 
 button, .button {
-  background: #50B5D6;
+  background: #7AB1C3;
   box-shadow: inset -1px -1px 15px 1px rgba(0,0,0,0.1);
   transition: all 200ms ease-in;
+  border: 2px solid #7aabb8;
   &:hover {
     border: 2px solid #F07272;
     background: #F07272;

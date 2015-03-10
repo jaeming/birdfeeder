@@ -2,6 +2,8 @@
   require 'json'
   has_many :stories
   has_many :feeds
+  has_many :subscriptions
+  has_many :users, through: :subscriptions
   after_create :titleize
 
   def self.search(title)
