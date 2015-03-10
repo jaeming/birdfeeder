@@ -60,14 +60,24 @@ span.prefix {
 }
 
 .category-header {
- margin: 3rem 1rem 0 2rem;
+ margin: 3.5rem 1rem 1rem 2rem;
  display: inline;
- line-height: 2;
+ color: #6b6b6b;
 }
 
 .subscribe {
   display: inline;
+  font-size: .8rem;
   vertical-align: super;
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
+  }
 }
 
 
