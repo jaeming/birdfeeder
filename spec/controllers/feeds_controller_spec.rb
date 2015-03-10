@@ -14,7 +14,7 @@ RSpec.describe FeedsController, :type => :controller do
 
     expect(feed).not_to be_nil
     expect(feed.rss).not_to be_nil
-    expect(hashtag.title).to eq('webdev')
+    expect(hashtag.title).to eq('Webdev')
   end
 
 

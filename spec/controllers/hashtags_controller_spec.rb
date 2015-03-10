@@ -28,7 +28,7 @@ RSpec.describe HashtagsController, :type => :controller do
 
     expect(response).to have_http_status(:success)
     json = JSON.parse(response.body)
-    expect(JsonPath.on(json, '$..title')).to eq(["lolcats"])
+    expect(JsonPath.on(json, '$..title')).to eq(["Lolcats"])
   end
 
   it "creates a new hashtag" do
@@ -38,7 +38,7 @@ RSpec.describe HashtagsController, :type => :controller do
 
     post :create, params
 
-    expect(Hashtag.last[:title]).to eq("programming")
+    expect(Hashtag.last[:title]).to eq("Programming")
   end
 
   xit "searches twitter for hashtag tweets with urls" do
@@ -49,7 +49,7 @@ RSpec.describe HashtagsController, :type => :controller do
     post :search_twitter, params
     hashtag = Hashtag.last
 
-    expect(hashtag.title).to eq("programming")
+    expect(hashtag.title).to eq("Programming")
     expect(hashtag.stories).not_to be_nil
   end
 

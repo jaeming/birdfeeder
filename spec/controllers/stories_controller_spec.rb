@@ -31,17 +31,4 @@ RSpec.describe StoriesController, :type => :controller do
     expect(JsonPath.on(json, '$..title')).to eq(["lolcats"])
   end
 
-  it "creates a new story" do
-    @user = create(:user)
-    sign_in @user
-    params = {"story" => {"feed_url" => "http://aspiringwebdev.com/feed/", "category" => "webdev"}}
-
-    post :create, params
-    story = Story.last
-
-    expect(story).not_to be_nil
-    expect(story.hashtag).to eq('webdev')
-  end
-
-
 end
