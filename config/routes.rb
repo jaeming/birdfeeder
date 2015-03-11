@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
 scope '/api' do
   devise_for :users
+
   get 'sessions/current' => 'sessions#show'
   post 'hashtags/twitter' => 'hashtags#search_twitter'
   delete '/subscriptions/:hashtag_id' => 'subscriptions#destroy'
@@ -9,7 +10,8 @@ scope '/api' do
   resources :hashtags
   resources :stories
   resources :feeds
-  resources :subscriptions, only: :create
+  resources :users, except: :destroy
+  resources :subscriptions, only: [:create, :destroy]
 end
 
   root 'ember#loader'

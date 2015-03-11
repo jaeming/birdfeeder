@@ -2,6 +2,11 @@ class UsersController < ApplicationController
   respond_to :json
   before_action :authenticate_user!, except: [:create, :show]
 
+  def index
+    @users = User.all
+    render json: @users
+  end
+
   def show
     @user = User.find(params[:id])
     render json: @user

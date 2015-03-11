@@ -3,12 +3,12 @@ class SubscriptionsController < ApplicationController
   def create
     @hashtag = Hashtag.find(params[:hashtag_id])
     @subscription = current_user.subscriptions.create! hashtag: @hashtag
-    render json: @subscription
+    render json: @hashtag
   end
 
   def destroy
-    @hashtag = Subscription.find(params[:hashtag_id])
-    current_user.subscriptions.delete(@hashtag)
+    @hashtag = Hashtag.find(params[:hashtag_id])
+    current_user.hashtags.delete(@hashtag)
     head :no_content
   end
 

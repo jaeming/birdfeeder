@@ -1,3 +1,11 @@
+{{#if errors}}
+	<div id='flash-wrapper'>
+		<div class='flash-message'>
+			<h3 class='flash-text'>{{errors}}</h3>
+		</div>
+	</div>
+{{/if}}
+
 <div {{bind-attr class=":app-bar accountVisible"}}>
 	<div {{bind-attr class=":account-box accountVisible"}} {{action "optionsShow" on="mouseEnter"}}>
 

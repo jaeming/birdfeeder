@@ -1,8 +1,12 @@
 class UserSerializer < ActiveModel::Serializer
-  attributes :id, :name, :email, :avatar
+  attributes :id, :name, :avatar, :hashtags
 
   def avatar
     object.gravatar_url
+  end
+
+  def hashtags
+    object.hashtag_ids
   end
 
 end

@@ -1,8 +1,13 @@
 <div class='row'>
   <h2 class='category-header'>{{title}}</h2>
-  <a href="#" class="subscribe">
-    Subscribe
-  </a>
+{{#if controllers.session.currentUser.authenticated}}
+  {{#if subscribed}}
+    <a href="#" class="unsubscribe" {{action 'unsubscribe' id}}>Unsubscribe</a>
+  {{else}}
+    <a href="#" class="subscribe" {{action 'subscribe' id}}>Subscribe</a>
+  {{/if}}
+{{/if}}
+
 </div>
 
 {{#each stories}}

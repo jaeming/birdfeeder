@@ -2,6 +2,7 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
   needs: ['session'],
+  errors: null,
   sortProperties: ['likes:desc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('stories', 'sortProperties'),
 	actionsVisible: false,
