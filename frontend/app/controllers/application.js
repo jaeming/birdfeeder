@@ -1,17 +1,26 @@
 import Ember from 'ember';
+import pagedArray from 'ember-cli-pagination/computed/paged-array';
 
 export default Ember.Controller.extend({
   needs: ['session'],
   errors: null,
   sortProperties: ['likes:desc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('stories', 'sortProperties'),
-	actionsVisible: false,
+
+
+  pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
+
+
+  actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,
 	scrollVisible: false,
   sideVisible: false,
   slidePanel: false,
 	actions: {
+    loadNext: function() {
+      this.get('pagedContent').loadNextPage();
+    },
 		optionsShow: function() {
 			var _this = this;
 			this.set('actionsVisible', true);

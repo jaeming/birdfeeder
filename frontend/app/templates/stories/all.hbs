@@ -1,6 +1,6 @@
 <h2>&nbsp; All Stories:</h2>
 <div class="row">
-  {{#each sortedStories}}
+  {{#each pagedContent}}
     <div class='article'>
       <h2>{{title}}</h2>
       <p>{{{body}}}</p>
@@ -8,4 +8,7 @@
     </div>
     <br>
   {{/each}}
+  <div class="overflow">
+    <a href="#" {{action 'loadNext'}} class='load-button'>More Stories</a>
+  </div>
 </div>

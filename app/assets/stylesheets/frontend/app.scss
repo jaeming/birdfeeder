@@ -374,7 +374,26 @@ button, .button {
   border: 2px dashed rgba(81, 94, 101, 0.59);
   margin-left: 4rem;
   color: #c3d6dd;
+}
 
+.overflow {
+  text-align: center;
+}
+
+.load-button {
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
+  }
+  &:focus {
+    color: #fff;
+    background: #d38b8b;
+  }
 }
 
 .menu-icon {
