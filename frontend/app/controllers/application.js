@@ -6,11 +6,7 @@ export default Ember.Controller.extend({
   errors: null,
   sortProperties: ['likes:desc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('stories', 'sortProperties'),
-
-
   pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
-
-
   actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,

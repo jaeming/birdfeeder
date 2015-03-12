@@ -1,9 +1,15 @@
 import Ember from 'ember';
-// import _ from "npm:underscore";
+import pagedArray from 'ember-cli-pagination/computed/paged-array';
 
 export default Ember.ObjectController.extend({
   needs: ['session', 'application'],
+  sortProperties: ['likes:desc', 'published_at:desc'],
+  sortedStories: Ember.computed.sort('stories', 'sortProperties'),
+  pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
   actions: {
+    loadNext: function() {
+      this.get('pagedContent').loadNextPage();
+    },
     subscribe: function(id) {
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
