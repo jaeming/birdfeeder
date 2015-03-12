@@ -8,7 +8,8 @@ class SubscriptionsController < ApplicationController
 
   def destroy
     @hashtag = Hashtag.find(params[:hashtag_id])
-    current_user.hashtags.delete(@hashtag)
+    @subscription = current_user.subscriptions.find_by(hashtag: @hashtag)
+    @subscription.destroy!
     head :no_content
   end
 

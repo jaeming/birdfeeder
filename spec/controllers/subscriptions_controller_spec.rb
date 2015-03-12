@@ -22,10 +22,13 @@ RSpec.describe SubscriptionsController, :type => :controller do
     hashtag2 = create(:hashtag, title: "Cobol", users: [user])
 
     delete :destroy, hashtag_id: hashtag2.id
+    hashtag1.reload
+    hashtag2.reload
 
-    expect(user.hashtags).to eq([hashtag1])
-    expect(user.hashtags).not_to eq([hashtag2])
+    expect(user.hashtags).to include(hashtag1)
+    expect(user.hashtags).not_to include(hashtag2)
+    expect(hashtag1.users).to include(user)
+    expect(hashtag2.users).not_to include(user)
   end
-
 
 end
