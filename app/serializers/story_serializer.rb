@@ -1,6 +1,7 @@
 class StorySerializer < ActiveModel::Serializer
-  attributes :id, :title, :body, :hashtag, :published_at, :users
-
+  attributes :id, :title, :body, :hashtag, :published_at, :users, :favorited
+  delegate :current_user, to: :scope
+  
   def hashtag
     object.hashtag_id
   end
@@ -11,6 +12,10 @@ class StorySerializer < ActiveModel::Serializer
 
   def users
     object.user_ids
+  end
+
+  def favorited
+    object.users.include?(current_user)
   end
 
 end
