@@ -10,7 +10,7 @@
 
 </div>
 
-{{#each pagedContent}}
+{{#each filteredStories}}
 
   <div class='article'>
     <h2>{{title}}</h2>
@@ -19,6 +19,7 @@
   </div>
   <br>
 {{/each}}
-<div class="overflow">
+
+<!-- <div class="overflow">
   <a href="#" {{action 'loadNext'}} class='load-button'>More Stories</a>
-</div>
+</div> -->

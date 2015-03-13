@@ -3,13 +3,24 @@ import pagedArray from 'ember-cli-pagination/computed/paged-array';
 
 export default Ember.ObjectController.extend({
   needs: ['session', 'application'],
+
+  currentPathChanged: function () {
+    window.scrollTo(0, 0);
+  }.observes('currentPath'),
   sortProperties: ['likes:desc', 'published_at:desc'],
-  sortedStories: Ember.computed.sort('stories', 'sortProperties'),
-  pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
+  filteredStories: Ember.computed.sort('stories', 'sortProperties'),
+  // pagedContent: pagedArray('filteredStories', {infinite: 'filteredStories'}),
+
+  // page: 1,
+  // perPage: 5,
+  // sortProperties: ['likes:desc', 'published_at:desc'],
+  // filteredContent: Ember.computed.sort('stories', 'sortProperties'),
+  // pagedContent: pagedArray('filteredContent', {pageBinding: "page", perPageBinding: "perPage"}),
+  // pageBinding: "pagedContent.page",
+  // perPageBinding: "pagedContent.perPage",
+  // totalPagesBinding: "pagedContent.totalPages",
+
   actions: {
-    loadNext: function() {
-      this.get('pagedContent').loadNextPage();
-    },
     subscribe: function(id) {
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
