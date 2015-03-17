@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Controller.extend({
-  needs: ['session'],
+  needs: ['session', 'application'],
   actions: {
     signin: function() {
       var _this = this;
@@ -24,13 +24,15 @@ export default Ember.Controller.extend({
         });
           _this.transitionToRoute('/');
         },
-        error: function() {
-          //need an error message with response data here.
-          console.log('sign in failed');
+        error: function(data) {
+          var message = data.responseJSON.error;
+          console.log(message);
+          _this.set('controllers.application.errors', message);
+          Ember.run.later( function() {
+            _this.set('controllers.application.errors', false);
+          }, 3000);
         }
       });
     }
   }
 });
-
-

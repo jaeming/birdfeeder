@@ -10,4 +10,6 @@ class User < ActiveRecord::Base
   has_many :hashtags, through: :subscriptions
   has_many :stories, through: :favorites
 
+  validates :name, uniqueness: { case_sensitive: false }, presence: true
+
 end

@@ -20,6 +20,7 @@ gem 'figaro'
 gem 'unshorten'
 gem 'feedisco'
 gem 'gravtastic'
+gem 'jquery-rails'
 
 
 group :test do

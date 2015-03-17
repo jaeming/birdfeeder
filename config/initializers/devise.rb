@@ -6,6 +6,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # config.secret_key = 'e2f294b46c9984b40935af8328cb0a42c1368fbd888fd6d2afc45a3b0bbb7601dbdff0b66fccb4ccfea84e7ec9f7ba15ca72c53a9af48f74b923d8aa7c9fdfd5'
 
+
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
@@ -63,7 +64,7 @@ Devise.setup do |config|
 
   # If 401 status code should be returned for AJAX requests. True by default.
   config.http_authenticatable_on_xhr = true
-  config.navigational_formats = ["*/*", :html, :json]
+  config.navigational_formats = []
 
   # The realm used in Http Basic Authentication. 'Application' by default.
   # config.http_authentication_realm = 'Application'

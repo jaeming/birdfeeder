@@ -1,32 +1,43 @@
 
 <div class='row'>
-
   <div class='columns medium-8'>
     <h2>Sign up</h2>
     <form {{action 'signup' on='submit'}}>
 
       <div class="field">
-        <label for="user_email">Email</label><br />
+        <label for="user_email">Email</label>
+        {{#if errors.email}}
+        <small class='errors'>Email {{errors.email}}.</small>
+        {{/if}}
         {{input value=email}}
       </div>
 
       <div class="field">
-        <label for="user_name">Name</label><br />
+        <label for="user_name">Name</label>
+        {{#if errors.name}}
+          <small class='errors'>Name {{errors.name}}.</small>
+        {{/if}}
         {{input value=name}}
       </div>
 
       <div class="field">
-        <label for="user_password">Password</label><br />
+        <label for="user_password">Password</label>
+        {{#if errors.password}}
+        <small class='errors'> Password {{errors.password}}.</small>
+        {{/if}}
         {{input value=password type='password'}}
       </div>
 
       <div class="field">
-        <label for="user_password_confirmation">Confirm Password</label><br />
+        <label for="user_password_confirmation">Confirm Password</label>
+        {{#if errors.password_confirmation}}
+        <small class='errors'> Confirmation {{errors.password_confirmation}}.</small>
+        {{/if}}
         {{input value=passwordConfirmation type='password'}}
       </div>
 
       <div class="actions">
-        <input type="submit" class="tiny button" value="Log in" />
+        <input type="submit" class="tiny button" value="Sign up" />
       </div>
     </form>
 

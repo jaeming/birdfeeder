@@ -22,13 +22,19 @@ export default Ember.Controller.extend({
           name: data.user['name'],
           id: data.user['id'],
           avatar: data.user['avatar'],
-          authenticated: true
+          authenticated: true,
         });
+          _this.set('errors', false);
           _this.transitionToRoute('/');
         },
-        error: function() {
-          //need an error message with response data here.
-          console.log('sign in failed');
+        error: function(data) {
+          var errors = data.responseJSON.errors;
+          _this.set('errors', {
+            email: errors['email'],
+            password: errors['password'],
+            password_confirmation: errors['password_confirmation'],
+            name: errors['name']
+          });
         }
       });
     }
