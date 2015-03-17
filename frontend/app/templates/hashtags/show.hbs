@@ -10,7 +10,7 @@
 
 </div>
 
-{{#each filteredStories}}
+{{#each topStories}}
   <div class='article'>
     <h2>{{title}}</h2>
     <p>{{{body}}}</p>
@@ -19,6 +19,19 @@
   <br>
 {{/each}}
 
-<div class="overflow">
-  <a href="#" {{action 'loadNext'}} class='load-button'>More Stories</a>
-</div>
+{{#if showAllStories}}
+  {{#each allStories}}
+    <div class='article'>
+      <h2>{{title}}</h2>
+      <p>{{{body}}}</p>
+      <small>published {{date-and-time published_at}}</small>
+    </div>
+    <br>
+  {{/each}}
+{{/if}}
+
+{{#if showMoreButton}}
+  <div class="overflow">
+    <a href="#" {{action 'loadAll'}} class='load-button'>More Stories</a>
+  </div>
+{{/if}}
