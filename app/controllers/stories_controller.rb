@@ -1,7 +1,7 @@
 class StoriesController < ApplicationController
 
   def index
-    @stories = Story.all
+    @stories = Story.includes(:hashtag, :users).all
     render json: @stories
   end
 

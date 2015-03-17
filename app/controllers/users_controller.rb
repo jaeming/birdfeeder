@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :authenticate_user!, except: [:create, :show]
 
   def index
-    @users = User.all
+    @users = User.includes(:hashtags, :stories).all
     render json: @users
   end
 

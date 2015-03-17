@@ -2,7 +2,7 @@ class HashtagsController < ApplicationController
 
   def index
     unless params[:title]
-      @hashtags = Hashtag.all
+      @hashtags = Hashtag.includes(:stories, :users).all
     else
       @hashtags = Hashtag.search(params[:title])
     end
