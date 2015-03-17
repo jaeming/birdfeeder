@@ -7,9 +7,5 @@ export default Ember.Route.extend(resetScrollMixin, {
   },
   renderTemplate: function() {
     this.render({outlet: 'body'});
-  },
-  setupController: function(controller, model) {
-    this._super(controller, model);
-    
   }
 });

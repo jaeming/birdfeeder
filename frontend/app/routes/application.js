@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import pagedArray from 'ember-cli-pagination/computed/paged-array';
 
 export default Ember.Route.extend({
   model: function() {
@@ -21,5 +22,5 @@ export default Ember.Route.extend({
      into: 'application',
      outlet: 'sidebar'
      });
- }
+  },
 });
