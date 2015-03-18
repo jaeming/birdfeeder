@@ -47,6 +47,19 @@ export default Ember.Controller.extend({
 			else {
 				console.log('slide panel not active yet');
 			}
+    },
+    signOut: function() {
+      var _this = this;
+      var token = this.get('controllers.session.currentUser.token');
+      Ember.$.ajax({
+        url: '/api/users/sign_out',
+        type: 'DELETE',
+        data: {"authenticity_token": token},
+        success: function(result) {
+          console.log(result);
+          _this.get('controllers.session').set('currentUser', false);
+        }
+      });
     }
 	}
 });
