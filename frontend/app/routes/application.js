@@ -1,16 +1,15 @@
 import Ember from 'ember';
-import pagedArray from 'ember-cli-pagination/computed/paged-array';
 
 export default Ember.Route.extend({
   model: function() {
     return Ember.RSVP.hash({
-      hashtags: this.store.find('hashtag'),
+      user: this.store.find('user', 'default_user'),
       stories: this.store.find('story')
     });
   },
   setupController: function(controller, modelHash) {
     controller.set('stories', modelHash.stories);
-    controller.set('hashtags', modelHash.hashtags);
+    controller.set('defaultUser', modelHash.user);
   },
   renderTemplate: function(){
     this.render(); // render application template
@@ -18,7 +17,7 @@ export default Ember.Route.extend({
      into: 'application',
      outlet: 'body'
      });
-    this.render('hashtags.index',{
+    this.render('users.subscribed',{
      into: 'application',
      outlet: 'sidebar'
      });

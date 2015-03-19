@@ -13,6 +13,7 @@ Router.map(function() {
     this.route("show", { path: ":story_id" });
   });
   this.resource("users", function() {
+    this.route("subscribed");
     this.route("signin");
     this.route("signup");
   });

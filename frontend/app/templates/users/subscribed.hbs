@@ -1,0 +1,5 @@
+{{#each defaultUser.hashtags}}
+  {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
+    {{title}}
+  {{/link-to}}
+{{/each}}
