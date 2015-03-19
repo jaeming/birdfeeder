@@ -1,11 +1,7 @@
 class HashtagsController < ApplicationController
 
   def index
-    unless params[:title]
-      @hashtags = Hashtag.includes(:stories, :users).all
-    else
-      @hashtags = Hashtag.search(params[:title])
-    end
+    @hashtags = Hashtag.includes(:stories, :users).all
     render json: @hashtags
   end
 
@@ -17,6 +13,11 @@ class HashtagsController < ApplicationController
   def create
     @hashtag = Hashtag.create!(hashtag_params)
     render json: @hashtag
+  end
+
+  def search
+    @hashtags = Hashtag.search(params[:title])
+    render json: @hashtags
   end
 
   def search_twitter
