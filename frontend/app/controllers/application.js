@@ -4,7 +4,7 @@ import pagedArray from 'ember-cli-pagination/computed/paged-array';
 export default Ember.Controller.extend({
   needs: ['session'],
   errors: null,
-  sortProperties: ['likes:desc', 'published_at:desc'],
+  sortProperties: ['favorites_count:desc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('stories', 'sortProperties'),
   pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
   actionsVisible: false,

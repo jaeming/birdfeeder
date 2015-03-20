@@ -29,15 +29,5 @@ class UsersController < ApplicationController
     def user_params
       params.require(:user).permit(:email, :password, :password_confirmation, :name)
     end
-
-    def guest_user
-      unless user = User.find_by(name: "guest")
-        password = Devise.friendly_token[0,8]
-        user = User.new(name: "guest", email: "guest@bluebirdreader.com", password: password, password_confirmation: password)
-        user.skip_confirmation!
-        user.save!
-      end
-      user
-    end
-
+    
 end

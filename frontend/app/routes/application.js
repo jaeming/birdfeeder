@@ -1,10 +1,13 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+  beforeModel: function(posts, transition) {
+    this.transitionTo('stories.all');
+  },
   model: function() {
     return Ember.RSVP.hash({
       user: this.store.find('user', 'default_user'),
-      stories: this.store.find('story')
+      stories: this.store.find('story', { subscribed: true })
     });
   },
   setupController: function(controller, modelHash) {
@@ -21,5 +24,5 @@ export default Ember.Route.extend({
      into: 'application',
      outlet: 'sidebar'
      });
-  },
+  }
 });

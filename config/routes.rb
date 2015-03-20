@@ -13,6 +13,9 @@ scope '/api' do
   get "hashtags" => "hashtags#search",
     :constraints => lambda { |request| request.params[:title] }
 
+  get 'stories' => 'stories#subscribed_stories',
+    :constraints => lambda { |request| request.params[:subscribed] == "true"}    
+
   resources :hashtags
   resources :stories
   resources :feeds

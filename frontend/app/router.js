@@ -11,6 +11,7 @@ Router.map(function() {
   });
   this.resource("stories", function() {
     this.route("show", { path: ":story_id" });
+    this.route("all");    
   });
   this.resource("users", function() {
     this.route("subscribed");

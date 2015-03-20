@@ -65,6 +65,10 @@ span.prefix {
  color: #6b6b6b;
 }
 
+.hashtag-subtitle {
+  color: #7fc7e3;
+}
+
 ////////////////////LAYOUT
 
 	//TOP-BAR
@@ -237,7 +241,7 @@ span.prefix {
   transition: color 280ms, padding 220ms ease-in, border 220ms ease-in, background 200ms ease-in-out;
   &:hover {
     border-left: 5px solid #8fdae0;
-    padding: .7rem 0 .7rem 4.6rem;
+
     background: #1c2223;
     color: #c5fcf1;
     transition: all 220ms ease;
@@ -247,10 +251,8 @@ span.prefix {
 
 .tag-active {
   border-left: 5px solid #8fdae0;
-  padding: .7rem 0 .7rem 5rem;
   background: #212729;
   color: #acf5e9;
-  font-size: 1.4rem;
   position: relative;
 }
 
