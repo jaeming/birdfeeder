@@ -7,6 +7,7 @@ define("frontend/adapters/application",
     __exports__["default"] = DS.RESTAdapter.extend({
         coalesceFindRequests: true,
         namespace: 'api',
+        host: 'http://localhost:3000',
     });
   });
 define("frontend/app", 

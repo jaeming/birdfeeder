@@ -74,9 +74,6 @@ GEM
       warden (~> 1.2.3)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    ember-cli-rails (0.1.7)
-      railties (~> 4.0)
-      sprockets-rails (~> 2.0)
     equalizer (0.0.9)
     erubis (2.7.0)
     execjs (2.3.0)
@@ -154,6 +151,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rack (1.6.0)
+    rack-cors (0.3.1)
     rack-test (0.6.3)
       rack (>= 1.0)
     rails (4.2.0)
@@ -270,7 +268,6 @@ DEPENDENCIES
   capybara
   database_cleaner
   devise
-  ember-cli-rails
   factory_girl_rails
   faker
   feedisco
@@ -285,6 +282,7 @@ DEPENDENCIES
   normalize-rails
   pg
   pry
+  rack-cors
   rails (= 4.2.0)
   rspec-rails (~> 3.0)
   sass-rails (~> 5.0)
