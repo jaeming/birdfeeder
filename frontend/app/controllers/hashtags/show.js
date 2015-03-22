@@ -8,7 +8,11 @@ export default Ember.ObjectController.extend({
     window.scrollTo(0, 0);
     this.set('showAllStories', false);
     var storyCount = this.get('stories.length');
-    (storyCount < 16)? this.set('showMoreButton', false): this.set('showMoreButton', true)
+    if(storyCount < 16) {
+      this.set('showMoreButton', false);
+    } else {
+      this.set('showMoreButton', true);
+    }
   }.observes('currentPath'),
 
   sortProperties: ['likes:desc', 'published_at:desc'],
@@ -17,13 +21,14 @@ export default Ember.ObjectController.extend({
     return this.get('filteredStories').slice(0, 15);
   }.property('filteredStories.[]'),
   allStories: function() {
-    var last = this.get('hashtags.lastObject')
+    var last = this.get('filteredStories.length');
     return this.get('filteredStories').slice(15, last);
   }.property('filteredStories.[]'),
 
   actions: {
     loadAll: function() {
       this.set('showAllStories', true);
+      this.set('showMoreButton', false);
     },
     subscribe: function(id) {
       var _this = this;
