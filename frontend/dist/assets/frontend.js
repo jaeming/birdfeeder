@@ -321,6 +321,17 @@ define("frontend/controllers/session",
       currentUser: null
     });
   });
+define("frontend/controllers/stories/all", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.ArrayController.extend({
+      sortAscending: false,
+      sortProperties: ['likes', 'published_at'],
+    });
+  });
 define("frontend/controllers/stories/index", 
   ["ember","exports"],
   function(__dependency1__, __exports__) {
@@ -659,7 +670,8 @@ define("frontend/models/user",
     __exports__["default"] = DS.Model.extend({
       name: DS.attr('string'),
       avatar: DS.attr('string'),
-      hashtags: DS.hasMany('hashtag', { async: true })
+      hashtags: DS.hasMany('hashtag', { async: true }),
+      stories: DS.hasMany('stories')
     });
   });
 define("frontend/router", 
@@ -794,7 +806,9 @@ define("frontend/routes/stories/all",
     var Ember = __dependency1__["default"];
 
     __exports__["default"] = Ember.Route.extend({
-
+      model: function() {
+        return this.store.find('story');
+      },
       renderTemplate: function() {
         this.render('stories.all',{
          into: 'application',
@@ -1671,6 +1685,15 @@ define("frontend/tests/controllers/session.jshint",
     module('JSHint - controllers');
     test('controllers/session.js should pass jshint', function() { 
       ok(true, 'controllers/session.js should pass jshint.'); 
+    });
+  });
+define("frontend/tests/controllers/stories/all.jshint", 
+  [],
+  function() {
+    "use strict";
+    module('JSHint - controllers/stories');
+    test('controllers/stories/all.js should pass jshint', function() { 
+      ok(true, 'controllers/stories/all.js should pass jshint.'); 
     });
   });
 define("frontend/tests/controllers/stories/index.jshint", 
