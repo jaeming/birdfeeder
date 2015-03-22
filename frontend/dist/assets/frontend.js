@@ -330,6 +330,15 @@ define("frontend/controllers/stories/all",
     __exports__["default"] = Ember.ArrayController.extend({
       sortAscending: false,
       sortProperties: ['likes', 'published_at'],
+      currentPage: 1,
+      hasMore: true,
+      actions: {
+        fetchMore: function(callback) {
+          this.incrementProperty('currentPage');
+          var promise = this.store.find('story', {page: this.get('currentPage')});
+          this.set('model', promise)
+        }
+      }
     });
   });
 define("frontend/controllers/stories/index", 
@@ -813,7 +822,6 @@ define("frontend/routes/stories/all",
         this.render('stories.all',{
          into: 'application',
          outlet: 'body',
-         controller: 'application'
          });
       }
     });
@@ -1379,10 +1387,10 @@ define("frontend/templates/stories/all",
       }
 
       data.buffer.push("<h2>&nbsp; All Stories:</h2>\n<div class=\"row\">\n    ");
-      stack1 = helpers.each.call(depth0, "pagedContent", {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],data:data});
+      stack1 = helpers.each.call(depth0, {hash:{},hashTypes:{},hashContexts:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[],types:[],data:data});
       if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
       data.buffer.push("\n  <div class=\"overflow\">\n    <a href=\"#\" ");
-      data.buffer.push(escapeExpression(helpers.action.call(depth0, "loadNext", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
+      data.buffer.push(escapeExpression(helpers.action.call(depth0, "fetchMore", {hash:{},hashTypes:{},hashContexts:{},contexts:[depth0],types:["STRING"],data:data})));
       data.buffer.push(" class='load-button'>More Stories</a>\n  </div>\n</div>\n");
       return buffer;
       
@@ -1693,7 +1701,7 @@ define("frontend/tests/controllers/stories/all.jshint",
     "use strict";
     module('JSHint - controllers/stories');
     test('controllers/stories/all.js should pass jshint', function() { 
-      ok(true, 'controllers/stories/all.js should pass jshint.'); 
+      ok(false, 'controllers/stories/all.js should pass jshint.\ncontrollers/stories/all.js: line 12, col 33, Missing semicolon.\ncontrollers/stories/all.js: line 9, col 25, \'callback\' is defined but never used.\n\n2 errors'); 
     });
   });
 define("frontend/tests/controllers/stories/index.jshint", 

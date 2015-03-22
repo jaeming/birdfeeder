@@ -8,7 +8,6 @@ export default Ember.Route.extend({
     this.render('stories.all',{
      into: 'application',
      outlet: 'body',
-     controller: 'application'
      });
   }
 });
