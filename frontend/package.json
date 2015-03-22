@@ -38,8 +38,8 @@
     "ember-export-application-global": "^1.0.0",
     "ember-infinite-scroll": "^0.1.4",
     "express": "^4.8.5",
-    "rimraf": "2.2.8",
     "glob": "4.0.5",
+    "rimraf": "2.2.8",
     "underscore": "~> 1.6.0"
   },
   "dependencies": {
