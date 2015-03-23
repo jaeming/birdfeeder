@@ -1,7 +1,10 @@
 class StoriesController < ApplicationController
 
   def index
-    @stories = Story.includes(:hashtag, :users).all
+    page = params[:page].try(:to_i) || 1
+    si = page - 1
+    @stories = Story.includes(:hashtag, :users).limit(25).offset(si * 25)
+    puts @stories.to_sql
     render json: @stories
   end
 

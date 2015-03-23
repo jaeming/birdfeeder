@@ -1,6 +1,6 @@
 <h2>&nbsp; All Stories:</h2>
 <div class="row">
-    {{#each pagedContent}}
+    {{#each}}
       <div class='article'>
         <h2>
           {{title}}
@@ -12,6 +12,6 @@
       <br>
     {{/each}}
   <div class="overflow">
-    <a href="#" {{action 'loadNext'}} class='load-button'>More Stories</a>
+    <a href="#" {{action 'fetchMore'}} class='load-button'>More Stories</a>
   </div>
 </div>

@@ -63063,38 +63063,22 @@ define("ember/resolver",
     };
   }
 
-  function chooseModuleName(moduleEntries, moduleName) {
-    var underscoredModuleName = Ember.String.underscore(moduleName);
-
-    if (moduleName !== underscoredModuleName && moduleEntries[moduleName] && moduleEntries[underscoredModuleName]) {
-      throw new TypeError("Ambiguous module names: `" + moduleName + "` and `" + underscoredModuleName + "`");
-    }
-
-    if (moduleEntries[moduleName]) {
-      return moduleName;
-    } else if (moduleEntries[underscoredModuleName]) {
-      return underscoredModuleName;
-    } else {
-      // workaround for dasherized partials:
-      // something/something/-something => something/something/_something
-      var partializedModuleName = moduleName.replace(/\/-([^\/]*)$/, '/_$1');
-
-      if (moduleEntries[partializedModuleName]) {
-        Ember.deprecate('Modules should not contain underscores. ' +
-                        'Attempted to lookup "'+moduleName+'" which ' +
-                        'was not found. Please rename "'+partializedModuleName+'" '+
-                        'to "'+moduleName+'" instead.', false);
-
-        return partializedModuleName;
-      } else {
-        return moduleName;
-      }
-    }
-  }
-
   function resolveOther(parsedName) {
     /*jshint validthis:true */
+    
+    // Temporarily disabling podModulePrefix deprecation
+    /*
+    if (!this._deprecatedPodModulePrefix) {
+      var podModulePrefix = this.namespace.podModulePrefix || '';
+      var podPath = podModulePrefix.substr(podModulePrefix.lastIndexOf('/') + 1);
 
+      Ember.deprecate('`podModulePrefix` is deprecated and will be removed '+
+        'from future versions of ember-cli. Please move existing pods from '+
+        '\'app/' + podPath + '/\' to \'app/\'.', !this.namespace.podModulePrefix);
+
+      this._deprecatedPodModulePrefix = true;
+    }
+    */
     Ember.assert('`modulePrefix` must be defined', this.namespace.modulePrefix);
 
     var normalizedModuleName = this.findModuleName(parsedName);
@@ -63141,6 +63125,8 @@ define("ember/resolver",
       if (!this.pluralizedTypes.config) {
         this.pluralizedTypes.config = 'config';
       }
+
+      this._deprecatedPodModulePrefix = false;
     },
     normalize: function(fullName) {
       return this._normalizeCache[fullName] || (this._normalizeCache[fullName] = this._normalize(fullName));
@@ -63239,7 +63225,7 @@ define("ember/resolver",
         // allow treat all dashed and all underscored as the same thing
         // supports components with dashes and other stuff with underscores.
         if (tmpModuleName) {
-          tmpModuleName = chooseModuleName(moduleEntries, tmpModuleName);
+          tmpModuleName = self.chooseModuleName(moduleEntries, tmpModuleName);
         }
 
         if (tmpModuleName && moduleEntries[tmpModuleName]) {
@@ -63258,6 +63244,35 @@ define("ember/resolver",
       });
 
       return moduleName;
+    },
+
+    chooseModuleName: function(moduleEntries, moduleName) {
+      var underscoredModuleName = Ember.String.underscore(moduleName);
+
+      if (moduleName !== underscoredModuleName && moduleEntries[moduleName] && moduleEntries[underscoredModuleName]) {
+        throw new TypeError("Ambiguous module names: `" + moduleName + "` and `" + underscoredModuleName + "`");
+      }
+
+      if (moduleEntries[moduleName]) {
+        return moduleName;
+      } else if (moduleEntries[underscoredModuleName]) {
+        return underscoredModuleName;
+      } else {
+        // workaround for dasherized partials:
+        // something/something/-something => something/something/_something
+        var partializedModuleName = moduleName.replace(/\/-([^\/]*)$/, '/_$1');
+
+        if (moduleEntries[partializedModuleName]) {
+          Ember.deprecate('Modules should not contain underscores. ' +
+                          'Attempted to lookup "'+moduleName+'" which ' +
+                          'was not found. Please rename "'+partializedModuleName+'" '+
+                          'to "'+moduleName+'" instead.', false);
+
+          return partializedModuleName;
+        } else {
+          return moduleName;
+        }
+      }
     },
 
     // used by Ember.DefaultResolver.prototype._logLookup
@@ -63364,6 +63379,17 @@ define("ember/container-debug-adapter",
     },
 
     /**
+     * Get all defined modules.
+     *
+     * @method _getEntries
+     * @return {Array} the list of registered modules.
+     * @private
+     */
+    _getEntries: function() {
+      return requirejs.entries;
+    },
+
+    /**
       Returns the available classes a given type.
 
       @method catalogEntriesByType
@@ -63371,7 +63397,7 @@ define("ember/container-debug-adapter",
       @return {Array} An array of classes.
     */
     catalogEntriesByType: function(type) {
-      var entries = requirejs.entries,
+      var entries = this._getEntries(),
           module,
           types = Ember.A();
 
@@ -63379,24 +63405,39 @@ define("ember/container-debug-adapter",
         return this.shortname;
       };
 
+      var prefix = this.namespace.modulePrefix;
+
       for(var key in entries) {
-        if(entries.hasOwnProperty(key) && key.indexOf(type) !== -1)
-        {
-          // // TODO return the name instead of the module itself
-          // module = require(key, null, null, true);
+        if(entries.hasOwnProperty(key) && key.indexOf(type) !== -1) {
+          // Check if it's a pod module
+          var name = getPod(type, key, this.namespace.podModulePrefix || prefix);
+          if (!name) {
+            // Not pod
+            name = key.split(type + 's/').pop();
 
-          // if (module && module['default']) { module = module['default']; }
-          // module.shortname = key.split(type +'s/').pop();
-          // module.toString = makeToString;
+            // Support for different prefix (such as ember-cli addons).
+            // Uncomment the code below when
+            // https://github.com/ember-cli/ember-resolver/pull/80 is merged.
 
-          // types.push(module);
-          types.push(key.split(type +'s/').pop());
+            //var match = key.match('^/?(.+)/' + type);
+            //if (match && match[1] !== prefix) {
+              // Different prefix such as an addon
+              //name = match[1] + '@' + name;
+            //}
+          }
+          types.addObject(name);
         }
       }
-
       return types;
     }
   });
+
+  function getPod(type, key, prefix) {
+    var match = key.match(new RegExp('^/?' + prefix + '/(.+)/' + type + '$'));
+    if (match) {
+      return match[1];
+    }
+  }
 
   ContainerDebugAdapter['default'] = ContainerDebugAdapter;
   return ContainerDebugAdapter;
@@ -63413,11 +63454,12 @@ define("ember/container-debug-adapter",
   Ember.Application.initializer({
     name: 'container-debug-adapter',
 
-    initialize: function(container) {
+    initialize: function(container, app) {
       var ContainerDebugAdapter = require('ember/container-debug-adapter');
       var Resolver = require('ember/resolver');
 
       container.register('container-debug-adapter:main', ContainerDebugAdapter);
+      app.inject('container-debug-adapter:main', 'namespace', 'application:main');
     }
   });
 }());
@@ -63453,6 +63495,10 @@ define("ember/load-initializers",
   }
 );
 })();
+
+;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"./browserify_stubs.js":[function(require,module,exports){
+
+},{}]},{},["./browserify_stubs.js"])
 
 ;//! moment.js
 //! version : 2.9.0
@@ -66512,6 +66558,478 @@ define("ember/load-initializers",
   generateModule('moment', { 'default': moment});
 })();
 
+;/**
+ * sifter.js
+ * Copyright (c) 2013 Brian Reavis & contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ *
+ * @author Brian Reavis <brian@thirdroute.com>
+ */
+
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(factory);
+	} else if (typeof exports === 'object') {
+		module.exports = factory();
+	} else {
+		root.Sifter = factory();
+	}
+}(this, function() {
+
+	/**
+	 * Textually searches arrays and hashes of objects
+	 * by property (or multiple properties). Designed
+	 * specifically for autocomplete.
+	 *
+	 * @constructor
+	 * @param {array|object} items
+	 * @param {object} items
+	 */
+	var Sifter = function(items, settings) {
+		this.items = items;
+		this.settings = settings || {diacritics: true};
+	};
+
+	/**
+	 * Splits a search string into an array of individual
+	 * regexps to be used to match results.
+	 *
+	 * @param {string} query
+	 * @returns {array}
+	 */
+	Sifter.prototype.tokenize = function(query) {
+		query = trim(String(query || '').toLowerCase());
+		if (!query || !query.length) return [];
+
+		var i, n, regex, letter;
+		var tokens = [];
+		var words = query.split(/ +/);
+
+		for (i = 0, n = words.length; i < n; i++) {
+			regex = escape_regex(words[i]);
+			if (this.settings.diacritics) {
+				for (letter in DIACRITICS) {
+					if (DIACRITICS.hasOwnProperty(letter)) {
+						regex = regex.replace(new RegExp(letter, 'g'), DIACRITICS[letter]);
+					}
+				}
+			}
+			tokens.push({
+				string : words[i],
+				regex  : new RegExp(regex, 'i')
+			});
+		}
+
+		return tokens;
+	};
+
+	/**
+	 * Iterates over arrays and hashes.
+	 *
+	 * ```
+	 * this.iterator(this.items, function(item, id) {
+	 *    // invoked for each item
+	 * });
+	 * ```
+	 *
+	 * @param {array|object} object
+	 */
+	Sifter.prototype.iterator = function(object, callback) {
+		var iterator;
+		if (is_array(object)) {
+			iterator = Array.prototype.forEach || function(callback) {
+				for (var i = 0, n = this.length; i < n; i++) {
+					callback(this[i], i, this);
+				}
+			};
+		} else {
+			iterator = function(callback) {
+				for (var key in this) {
+					if (this.hasOwnProperty(key)) {
+						callback(this[key], key, this);
+					}
+				}
+			};
+		}
+
+		iterator.apply(object, [callback]);
+	};
+
+	/**
+	 * Returns a function to be used to score individual results.
+	 *
+	 * Good matches will have a higher score than poor matches.
+	 * If an item is not a match, 0 will be returned by the function.
+	 *
+	 * @param {object|string} search
+	 * @param {object} options (optional)
+	 * @returns {function}
+	 */
+	Sifter.prototype.getScoreFunction = function(search, options) {
+		var self, fields, tokens, token_count;
+
+		self        = this;
+		search      = self.prepareSearch(search, options);
+		tokens      = search.tokens;
+		fields      = search.options.fields;
+		token_count = tokens.length;
+
+		/**
+		 * Calculates how close of a match the
+		 * given value is against a search token.
+		 *
+		 * @param {mixed} value
+		 * @param {object} token
+		 * @return {number}
+		 */
+		var scoreValue = function(value, token) {
+			var score, pos;
+
+			if (!value) return 0;
+			value = String(value || '');
+			pos = value.search(token.regex);
+			if (pos === -1) return 0;
+			score = token.string.length / value.length;
+			if (pos === 0) score += 0.5;
+			return score;
+		};
+
+		/**
+		 * Calculates the score of an object
+		 * against the search query.
+		 *
+		 * @param {object} token
+		 * @param {object} data
+		 * @return {number}
+		 */
+		var scoreObject = (function() {
+			var field_count = fields.length;
+			if (!field_count) {
+				return function() { return 0; };
+			}
+			if (field_count === 1) {
+				return function(token, data) {
+					return scoreValue(data[fields[0]], token);
+				};
+			}
+			return function(token, data) {
+				for (var i = 0, sum = 0; i < field_count; i++) {
+					sum += scoreValue(data[fields[i]], token);
+				}
+				return sum / field_count;
+			};
+		})();
+
+		if (!token_count) {
+			return function() { return 0; };
+		}
+		if (token_count === 1) {
+			return function(data) {
+				return scoreObject(tokens[0], data);
+			};
+		}
+
+		if (search.options.conjunction === 'and') {
+			return function(data) {
+				var score;
+				for (var i = 0, sum = 0; i < token_count; i++) {
+					score = scoreObject(tokens[i], data);
+					if (score <= 0) return 0;
+					sum += score;
+				}
+				return sum / token_count;
+			};
+		} else {
+			return function(data) {
+				for (var i = 0, sum = 0; i < token_count; i++) {
+					sum += scoreObject(tokens[i], data);
+				}
+				return sum / token_count;
+			};
+		}
+	};
+
+	/**
+	 * Returns a function that can be used to compare two
+	 * results, for sorting purposes. If no sorting should
+	 * be performed, `null` will be returned.
+	 *
+	 * @param {string|object} search
+	 * @param {object} options
+	 * @return function(a,b)
+	 */
+	Sifter.prototype.getSortFunction = function(search, options) {
+		var i, n, self, field, fields, fields_count, multiplier, multipliers, get_field, implicit_score, sort;
+
+		self   = this;
+		search = self.prepareSearch(search, options);
+		sort   = (!search.query && options.sort_empty) || options.sort;
+
+		/**
+		 * Fetches the specified sort field value
+		 * from a search result item.
+		 *
+		 * @param  {string} name
+		 * @param  {object} result
+		 * @return {mixed}
+		 */
+		get_field = function(name, result) {
+			if (name === '$score') return result.score;
+			return self.items[result.id][name];
+		};
+
+		// parse options
+		fields = [];
+		if (sort) {
+			for (i = 0, n = sort.length; i < n; i++) {
+				if (search.query || sort[i].field !== '$score') {
+					fields.push(sort[i]);
+				}
+			}
+		}
+
+		// the "$score" field is implied to be the primary
+		// sort field, unless it's manually specified
+		if (search.query) {
+			implicit_score = true;
+			for (i = 0, n = fields.length; i < n; i++) {
+				if (fields[i].field === '$score') {
+					implicit_score = false;
+					break;
+				}
+			}
+			if (implicit_score) {
+				fields.unshift({field: '$score', direction: 'desc'});
+			}
+		} else {
+			for (i = 0, n = fields.length; i < n; i++) {
+				if (fields[i].field === '$score') {
+					fields.splice(i, 1);
+					break;
+				}
+			}
+		}
+
+		multipliers = [];
+		for (i = 0, n = fields.length; i < n; i++) {
+			multipliers.push(fields[i].direction === 'desc' ? -1 : 1);
+		}
+
+		// build function
+		fields_count = fields.length;
+		if (!fields_count) {
+			return null;
+		} else if (fields_count === 1) {
+			field = fields[0].field;
+			multiplier = multipliers[0];
+			return function(a, b) {
+				return multiplier * cmp(
+					get_field(field, a),
+					get_field(field, b)
+				);
+			};
+		} else {
+			return function(a, b) {
+				var i, result, a_value, b_value, field;
+				for (i = 0; i < fields_count; i++) {
+					field = fields[i].field;
+					result = multipliers[i] * cmp(
+						get_field(field, a),
+						get_field(field, b)
+					);
+					if (result) return result;
+				}
+				return 0;
+			};
+		}
+	};
+
+	/**
+	 * Parses a search query and returns an object
+	 * with tokens and fields ready to be populated
+	 * with results.
+	 *
+	 * @param {string} query
+	 * @param {object} options
+	 * @returns {object}
+	 */
+	Sifter.prototype.prepareSearch = function(query, options) {
+		if (typeof query === 'object') return query;
+
+		options = extend({}, options);
+
+		var option_fields     = options.fields;
+		var option_sort       = options.sort;
+		var option_sort_empty = options.sort_empty;
+
+		if (option_fields && !is_array(option_fields)) options.fields = [option_fields];
+		if (option_sort && !is_array(option_sort)) options.sort = [option_sort];
+		if (option_sort_empty && !is_array(option_sort_empty)) options.sort_empty = [option_sort_empty];
+
+		return {
+			options : options,
+			query   : String(query || '').toLowerCase(),
+			tokens  : this.tokenize(query),
+			total   : 0,
+			items   : []
+		};
+	};
+
+	/**
+	 * Searches through all items and returns a sorted array of matches.
+	 *
+	 * The `options` parameter can contain:
+	 *
+	 *   - fields {string|array}
+	 *   - sort {array}
+	 *   - score {function}
+	 *   - filter {bool}
+	 *   - limit {integer}
+	 *
+	 * Returns an object containing:
+	 *
+	 *   - options {object}
+	 *   - query {string}
+	 *   - tokens {array}
+	 *   - total {int}
+	 *   - items {array}
+	 *
+	 * @param {string} query
+	 * @param {object} options
+	 * @returns {object}
+	 */
+	Sifter.prototype.search = function(query, options) {
+		var self = this, value, score, search, calculateScore;
+		var fn_sort;
+		var fn_score;
+
+		search  = this.prepareSearch(query, options);
+		options = search.options;
+		query   = search.query;
+
+		// generate result scoring function
+		fn_score = options.score || self.getScoreFunction(search);
+
+		// perform search and sort
+		if (query.length) {
+			self.iterator(self.items, function(item, id) {
+				score = fn_score(item);
+				if (options.filter === false || score > 0) {
+					search.items.push({'score': score, 'id': id});
+				}
+			});
+		} else {
+			self.iterator(self.items, function(item, id) {
+				search.items.push({'score': 1, 'id': id});
+			});
+		}
+
+		fn_sort = self.getSortFunction(search, options);
+		if (fn_sort) search.items.sort(fn_sort);
+
+		// apply limits
+		search.total = search.items.length;
+		if (typeof options.limit === 'number') {
+			search.items = search.items.slice(0, options.limit);
+		}
+
+		return search;
+	};
+
+	// utilities
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	var cmp = function(a, b) {
+		if (typeof a === 'number' && typeof b === 'number') {
+			return a > b ? 1 : (a < b ? -1 : 0);
+		}
+		a = asciifold(String(a || ''));
+		b = asciifold(String(b || ''));
+		if (a > b) return 1;
+		if (b > a) return -1;
+		return 0;
+	};
+
+	var extend = function(a, b) {
+		var i, n, k, object;
+		for (i = 1, n = arguments.length; i < n; i++) {
+			object = arguments[i];
+			if (!object) continue;
+			for (k in object) {
+				if (object.hasOwnProperty(k)) {
+					a[k] = object[k];
+				}
+			}
+		}
+		return a;
+	};
+
+	var trim = function(str) {
+		return (str + '').replace(/^\s+|\s+$|/g, '');
+	};
+
+	var escape_regex = function(str) {
+		return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1');
+	};
+
+	var is_array = Array.isArray || ($ && $.isArray) || function(object) {
+		return Object.prototype.toString.call(object) === '[object Array]';
+	};
+
+	var DIACRITICS = {
+		'a': '[aÀÁÂÃÄÅàáâãäåĀāąĄ]',
+		'c': '[cÇçćĆčČ]',
+		'd': '[dđĐďĎ]',
+		'e': '[eÈÉÊËèéêëěĚĒēęĘ]',
+		'i': '[iÌÍÎÏìíîïĪī]',
+		'l': '[lłŁ]',
+		'n': '[nÑñňŇńŃ]',
+		'o': '[oÒÓÔÕÕÖØòóôõöøŌō]',
+		'r': '[rřŘ]',
+		's': '[sŠšśŚ]',
+		't': '[tťŤ]',
+		'u': '[uÙÚÛÜùúûüůŮŪū]',
+		'y': '[yŸÿýÝ]',
+		'z': '[zŽžżŻźŹ]'
+	};
+
+	var asciifold = (function() {
+		var i, n, k, chunk;
+		var foreignletters = '';
+		var lookup = {};
+		for (k in DIACRITICS) {
+			if (DIACRITICS.hasOwnProperty(k)) {
+				chunk = DIACRITICS[k].substring(2, DIACRITICS[k].length - 1);
+				foreignletters += chunk;
+				for (i = 0, n = chunk.length; i < n; i++) {
+					lookup[chunk.charAt(i)] = k;
+				}
+			}
+		}
+		var regexp = new RegExp('[' +  foreignletters + ']', 'g');
+		return function(str) {
+			return str.replace(regexp, function(foreignletter) {
+				return lookup[foreignletter];
+			}).toLowerCase();
+		};
+	})();
+
+
+	// export
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	return Sifter;
+}));
+
+
 ;define("ic-ajax",
   ["ember","exports"],
   function(__dependency1__, __exports__) {
@@ -66640,6 +67158,1874 @@ define("ember/load-initializers",
       };
     }
   });
+;// ==========================================================================
+// Project:   Ember ListView
+// Copyright: ©2012-2013 Erik Bryn, Yapp Inc., and contributors.
+// License:   Licensed under MIT license
+// Version:   0.0.5
+// ==========================================================================
+
+(function(global){
+var define, requireModule, require, requirejs;
+
+(function() {
+
+  var _isArray;
+  if (!Array.isArray) {
+    _isArray = function (x) {
+      return Object.prototype.toString.call(x) === "[object Array]";
+    };
+  } else {
+    _isArray = Array.isArray;
+  }
+  
+  var registry = {}, seen = {}, state = {};
+  var FAILED = false;
+
+  define = function(name, deps, callback) {
+  
+    if (!_isArray(deps)) {
+      callback = deps;
+      deps     =  [];
+    }
+  
+    registry[name] = {
+      deps: deps,
+      callback: callback
+    };
+  };
+
+  function reify(deps, name, seen) {
+    var length = deps.length;
+    var reified = new Array(length);
+    var dep;
+    var exports;
+
+    for (var i = 0, l = length; i < l; i++) {
+      dep = deps[i];
+      if (dep === 'exports') {
+        exports = reified[i] = seen;
+      } else {
+        reified[i] = require(resolve(dep, name));
+      }
+    }
+
+    return {
+      deps: reified,
+      exports: exports
+    };
+  }
+
+  requirejs = require = requireModule = function(name) {
+    if (state[name] !== FAILED &&
+        seen.hasOwnProperty(name)) {
+      return seen[name];
+    }
+
+    if (!registry[name]) {
+      throw new Error('Could not find module ' + name);
+    }
+
+    var mod = registry[name];
+    var reified;
+    var module;
+    var loaded = false;
+
+    seen[name] = { }; // placeholder for run-time cycles
+
+    try {
+      reified = reify(mod.deps, name, seen[name]);
+      module = mod.callback.apply(this, reified.deps);
+      loaded = true;
+    } finally {
+      if (!loaded) {
+        state[name] = FAILED;
+      }
+    }
+
+    return reified.exports ? seen[name] : (seen[name] = module);
+  };
+
+  function resolve(child, name) {
+    if (child.charAt(0) !== '.') { return child; }
+
+    var parts = child.split('/');
+    var nameParts = name.split('/');
+    var parentBase;
+
+    if (nameParts.length === 1) {
+      parentBase = nameParts;
+    } else {
+      parentBase = nameParts.slice(0, -1);
+    }
+
+    for (var i = 0, l = parts.length; i < l; i++) {
+      var part = parts[i];
+
+      if (part === '..') { parentBase.pop(); }
+      else if (part === '.') { continue; }
+      else { parentBase.push(part); }
+    }
+
+    return parentBase.join('/');
+  }
+
+  requirejs.entries = requirejs._eak_seen = registry;
+  requirejs.clear = function(){
+    requirejs.entries = requirejs._eak_seen = registry = {};
+    seen = state = {};
+  };
+})();
+
+define("list-view/helper",
+  ["./list_view","./virtual_list_view","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var EmberListView = __dependency1__["default"];
+    var EmberVirtualListView = __dependency2__["default"];
+
+    var EmberVirtualList = createHelper(EmberVirtualListView);
+    var EmberList = createHelper(EmberListView);
+
+    function createHelper(view) {
+      if (Ember.HTMLBars) {
+        return function htmlBarsHelper(params, hash, options, env) {
+          hash.content = hash.items;
+          delete hash.items;
+
+          for (var prop in hash) {
+            if (/-/.test(prop)) {
+              var camelized = Ember.String.camelize(prop);
+              hash[camelized] = hash[prop];
+              delete hash[prop];
+            }
+          }
+
+          /*jshint validthis:true */
+          return Ember.HTMLBars.helpers.collection.helperFunction.call(this, [view], hash, options, env);
+        };
+      }
+      return function handelbarsHelperFactory(options) {
+        return createHandlebarsHelper.call(this, view, options);
+      };
+    }
+
+    function createHandlebarsHelper(view, options) {
+      var hash = options.hash;
+      var types = options.hashTypes;
+
+      hash.content = hash.items;
+      delete hash.items;
+
+      types.content = types.items;
+      delete types.items;
+
+      if (!hash.content) {
+        hash.content = 'this';
+        types.content = 'ID';
+      }
+
+      for (var prop in hash) {
+        if (/-/.test(prop)) {
+          var camelized = Ember.String.camelize(prop);
+          hash[camelized] = hash[prop];
+          types[camelized] = types[prop];
+          delete hash[prop];
+          delete types[prop];
+        }
+      }
+
+      /*jshint validthis:true */
+      return Ember.Handlebars.helpers.collection.call(this, view, options);
+    }
+
+    __exports__.EmberList = EmberList;
+    __exports__.EmberVirtualList = EmberVirtualList;
+  });
+define("list-view/list_item_view",
+  ["list-view/list_item_view_mixin","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /*jshint validthis:true */
+
+    var ListItemViewMixin = __dependency1__["default"];
+
+    var get = Ember.get, set = Ember.set;
+
+    /**
+      The `Ember.ListItemView` view class renders a
+      [div](https://developer.mozilla.org/en/HTML/Element/div) HTML element
+      with `ember-list-item-view` class. It allows you to specify a custom item
+      handlebars template for `Ember.ListView`.
+
+      Example:
+
+      ```handlebars
+      <script type="text/x-handlebars" data-template-name="row_item">
+        {{name}}
+      </script>
+      ```
+
+      ```javascript
+      App.ListView = Ember.ListView.extend({
+        height: 500,
+        rowHeight: 20,
+        itemViewClass: Ember.ListItemView.extend({templateName: "row_item"})
+      });
+      ```
+
+      @extends Ember.View
+      @class ListItemView
+      @namespace Ember
+    */
+    __exports__["default"] = Ember.View.extend(ListItemViewMixin, {
+      updateContext: function(newContext) {
+        var context = get(this, 'context');
+
+        Ember.instrument('view.updateContext.render', this, function() {
+          if (context !== newContext) {
+            set(this, 'context', newContext);
+            if (newContext && newContext.isController) {
+              set(this, 'controller', newContext);
+            }
+          }
+        }, this);
+      },
+
+      rerender: function () {
+        if (this.isDestroying || this.isDestroyed) {
+          return;
+        }
+
+        return this._super.apply(this, arguments);
+      },
+
+      _contextDidChange: Ember.observer(function () {
+        Ember.run.once(this, this.rerender);
+      }, 'context', 'controller')
+    });
+  });
+define("list-view/list_item_view_mixin",
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    /*jshint validthis:true */
+
+    function samePosition(a, b) {
+      return a && b && a.x === b.x && a.y === b.y;
+    }
+
+    function positionElement() {
+      var element, position, _position;
+
+      Ember.instrument('view.updateContext.positionElement', this, function() {
+        element = this.element;
+        position = this.position;
+        _position = this._position;
+
+        if (!position || !element) {
+          return;
+        }
+
+        // // TODO: avoid needing this by avoiding unnecessary
+        // // calls to this method in the first place
+        if (samePosition(position, _position)) {
+          return;
+        }
+
+        Ember.run.schedule('render', this, this._parentView.applyTransform, this, position.x, position.y);
+        this._position = position;
+      }, this);
+    }
+
+    __exports__["default"] = Ember.Mixin.create({
+      classNames: ['ember-list-item-view'],
+      style: '',
+      attributeBindings: ['style'],
+      _position: null,
+      _positionElement: positionElement,
+
+      positionElementWhenInserted: Ember.on('init', function(){
+        this.one('didInsertElement', positionElement);
+      }),
+
+      updatePosition: function(position) {
+        this.position = position;
+        this._positionElement();
+      }
+    });
+  });
+define("list-view/list_view",
+  ["list-view/list_view_helper","list-view/list_view_mixin","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var ListViewHelper = __dependency1__["default"];
+    var ListViewMixin = __dependency2__["default"];
+
+    var get = Ember.get;
+
+    /**
+      The `Ember.ListView` view class renders a
+      [div](https://developer.mozilla.org/en/HTML/Element/div) HTML element,
+      with `ember-list-view` class.
+
+      The context of each item element within the `Ember.ListView` are populated
+      from the objects in the `Element.ListView`'s `content` property.
+
+      ### `content` as an Array of Objects
+
+      The simplest version of an `Ember.ListView` takes an array of object as its
+      `content` property. The object will be used as the `context` each item element
+      inside the rendered `div`.
+
+      Example:
+
+      ```javascript
+      App.ContributorsRoute = Ember.Route.extend({
+        model: function() {
+          return [{ name: 'Stefan Penner' }, { name: 'Alex Navasardyan' }, { name: 'Ray Cohen'}];
+        }
+      });
+      ```
+
+      ```handlebars
+      {{#ember-list items=contributors height=500 rowHeight=50}}
+        {{name}}
+      {{/ember-list}}
+      ```
+
+      Would result in the following HTML:
+
+      ```html
+       <div id="ember181" class="ember-view ember-list-view" style="height:500px;width:500px;position:relative;overflow:scroll;-webkit-overflow-scrolling:touch;overflow-scrolling:touch;">
+        <div class="ember-list-container">
+          <div id="ember186" class="ember-view ember-list-item-view" style="-webkit-transform: translate3d(0px, 0px, 0);">
+            <script id="metamorph-0-start" type="text/x-placeholder"></script>Stefan Penner<script id="metamorph-0-end" type="text/x-placeholder"></script>
+          </div>
+          <div id="ember187" class="ember-view ember-list-item-view" style="-webkit-transform: translate3d(0px, 50px, 0);">
+            <script id="metamorph-1-start" type="text/x-placeholder"></script>Alex Navasardyan<script id="metamorph-1-end" type="text/x-placeholder"></script>
+          </div>
+          <div id="ember188" class="ember-view ember-list-item-view" style="-webkit-transform: translate3d(0px, 100px, 0);">
+            <script id="metamorph-2-start" type="text/x-placeholder"></script>Rey Cohen<script id="metamorph-2-end" type="text/x-placeholder"></script>
+          </div>
+          <div id="ember189" class="ember-view ember-list-scrolling-view" style="height: 150px"></div>
+        </div>
+      </div>
+      ```
+
+      By default `Ember.ListView` provides support for `height`,
+      `rowHeight`, `width`, `elementWidth`, `scrollTop` parameters.
+
+      Note, that `height` and `rowHeight` are required parameters.
+
+      ```handlebars
+      {{#ember-list items=this height=500 rowHeight=50}}
+        {{name}}
+      {{/ember-list}}
+      ```
+
+      If you would like to have multiple columns in your view layout, you can
+      set `width` and `elementWidth` parameters respectively.
+
+      ```handlebars
+      {{#ember-list items=this height=500 rowHeight=50 width=500 elementWidth=80}}
+        {{name}}
+      {{/ember-list}}
+      ```
+
+      ### extending `Ember.ListView`
+
+      Example:
+
+      ```handlebars
+      {{view App.ListView contentBinding="content"}}
+
+      <script type="text/x-handlebars" data-template-name="row_item">
+        {{name}}
+      </script>
+      ```
+
+      ```javascript
+      App.ListView = Ember.ListView.extend({
+        height: 500,
+        width: 500,
+        elementWidth: 80,
+        rowHeight: 20,
+        itemViewClass: Ember.ListItemView.extend({templateName: "row_item"})
+      });
+      ```
+
+      @extends Ember.ContainerView
+      @class ListView
+      @namespace Ember
+    */
+    __exports__["default"] = Ember.ContainerView.extend(ListViewMixin, {
+      css: {
+        position: 'relative',
+        overflow: 'auto',
+        '-webkit-overflow-scrolling': 'touch',
+        'overflow-scrolling': 'touch'
+      },
+
+      applyTransform: ListViewHelper.applyTransform,
+
+      _scrollTo: function(scrollTop) {
+        var element = this.element;
+
+        if (element) { element.scrollTop = scrollTop; }
+      },
+
+      didInsertElement: function() {
+        var that = this;
+
+        this._updateScrollableHeight();
+
+        this._scroll = function(e) { that.scroll(e); };
+
+        Ember.$(this.element).on('scroll', this._scroll);
+      },
+
+      willDestroyElement: function() {
+        Ember.$(this.element).off('scroll', this._scroll);
+      },
+
+      scroll: function(e) {
+        this.scrollTo(e.target.scrollTop);
+      },
+
+      scrollTo: function(y) {
+        this._scrollTo(y);
+        this._scrollContentTo(y);
+      },
+
+      totalHeightDidChange: Ember.observer(function () {
+        Ember.run.scheduleOnce('afterRender', this, this._updateScrollableHeight);
+      }, 'totalHeight'),
+
+      _updateScrollableHeight: function () {
+        var height, state;
+
+        // Support old and new Ember versions
+        state = this._state || this.state;
+
+        if (state === 'inDOM') {
+          // if the list is currently displaying the emptyView, remove the height
+          if (this._isChildEmptyView()) {
+              height = '';
+          } else {
+              height = get(this, 'totalHeight');
+          }
+
+          this.$('.ember-list-container').css({
+            height: height
+          });
+        }
+      }
+    });
+  });
+define("list-view/list_view_helper",
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    // TODO - remove this!
+    var el    = document.body || document.createElement('div');
+    var style = el.style;
+    var set   = Ember.set;
+
+    function getElementStyle (prop) {
+      var uppercaseProp = prop.charAt(0).toUpperCase() + prop.slice(1);
+
+      var props = [
+        prop,
+        'webkit' + prop,
+        'webkit' + uppercaseProp,
+        'Moz'    + uppercaseProp,
+        'moz'    + uppercaseProp,
+        'ms'     + uppercaseProp,
+        'ms'     + prop
+      ];
+
+      for (var i=0; i < props.length; i++) {
+        var property = props[i];
+
+        if (property in style) {
+          return property;
+        }
+      }
+
+      return null;
+    }
+
+    function getCSSStyle (attr) {
+      var styleName = getElementStyle(attr);
+      var prefix    = styleName.toLowerCase().replace(attr, '');
+
+      var dic = {
+        webkit: '-webkit-' + attr,
+        moz:    '-moz-' + attr,
+        ms:     '-ms-' + attr
+      };
+
+      if (prefix && dic[prefix]) {
+        return dic[prefix];
+      }
+
+      return styleName;
+    }
+
+    var styleAttributeName = getElementStyle('transform');
+    var transformProp      = getCSSStyle('transform');
+    var perspectiveProp    = getElementStyle('perspective');
+    var supports2D         = !!transformProp;
+    var supports3D         = !!perspectiveProp;
+
+    function setStyle (optionalStyleString) {
+      return function (obj, x, y) {
+        var isElement = obj instanceof Element;
+
+        if (optionalStyleString && (supports2D || supports3D)) {
+          var style = Ember.String.fmt(optionalStyleString, x, y);
+
+          if (isElement) {
+            obj.style[styleAttributeName] = style;
+          } else {
+            set(obj, 'style', transformProp + ': ' + style);
+          }
+        } else {
+          if (isElement) {
+            obj.style.top = y;
+            obj.style.left = x;
+          }
+        }
+      };
+    }
+
+    __exports__["default"] = {
+      transformProp: transformProp,
+      applyTransform: (function () {
+        if (supports2D) {
+          return setStyle('translate(%@px, %@px)');
+        }
+
+        return setStyle();
+      })(),
+      apply3DTransform: (function () {
+        if (supports3D) {
+          return setStyle('translate3d(%@px, %@px, 0)');
+        } else if (supports2D) {
+          return setStyle('translate(%@px, %@px)');
+        }
+
+        return setStyle();
+      })()
+    };
+  });
+define("list-view/list_view_mixin",
+  ["list-view/reusable_list_item_view","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /*jshint validthis:true */
+
+    var ReusableListItemView = __dependency1__["default"];
+
+    var get     = Ember.get;
+    var set     = Ember.set;
+    var min     = Math.min;
+    var max     = Math.max;
+    var floor   = Math.floor;
+    var ceil    = Math.ceil;
+    var forEach = Ember.ArrayPolyfills.forEach;
+
+    function addContentArrayObserver() {
+      var content = get(this, 'content');
+      if (content) {
+        content.addArrayObserver(this);
+      }
+    }
+
+    function removeAndDestroy(object) {
+      this.removeObject(object);
+      object.destroy();
+    }
+
+    function syncChildViews() {
+      Ember.run.once(this, '_syncChildViews');
+    }
+
+    function sortByContentIndex (viewOne, viewTwo) {
+      return get(viewOne, 'contentIndex') - get(viewTwo, 'contentIndex');
+    }
+
+    function removeEmptyView() {
+      var emptyView = get(this, 'emptyView');
+      if (emptyView && emptyView instanceof Ember.View) {
+        emptyView.removeFromParent();
+        if (this.totalHeightDidChange !== undefined) {
+            this.totalHeightDidChange();
+        }
+      }
+    }
+
+    function addEmptyView() {
+      var emptyView = get(this, 'emptyView');
+
+      if (!emptyView) {
+        return;
+      }
+
+      if ('string' === typeof emptyView) {
+        emptyView = get(emptyView) || emptyView;
+      }
+
+      emptyView = this.createChildView(emptyView);
+      set(this, 'emptyView', emptyView);
+
+      if (Ember.CoreView.detect(emptyView)) {
+        this._createdEmptyView = emptyView;
+      }
+
+      this.unshiftObject(emptyView);
+    }
+
+    function enableProfilingOutput() {
+      function before(name, time/*, payload*/) {
+        console.time(name);
+      }
+
+      function after (name, time/*, payload*/) {
+        console.timeEnd(name);
+      }
+
+      if (Ember.ENABLE_PROFILING) {
+        Ember.subscribe('view._scrollContentTo', {
+          before: before,
+          after: after
+        });
+        Ember.subscribe('view.updateContext', {
+          before: before,
+          after: after
+        });
+      }
+    }
+
+    /**
+      @class Ember.ListViewMixin
+      @namespace Ember
+    */
+    __exports__["default"] = Ember.Mixin.create({
+      itemViewClass: ReusableListItemView,
+      emptyViewClass: Ember.View,
+      classNames: ['ember-list-view'],
+      attributeBindings: ['style'],
+      classNameBindings: ['_isGrid:ember-list-view-grid:ember-list-view-list'],
+      scrollTop: 0,
+      bottomPadding: 0, // TODO: maybe this can go away
+      _lastEndingIndex: 0,
+      paddingCount: 1,
+      _cachedPos: 0,
+
+      _isGrid: Ember.computed('columnCount', function() {
+        return this.get('columnCount') > 1;
+      }).readOnly(),
+
+      /**
+        @private
+
+        Setup a mixin.
+        - adding observer to content array
+        - creating child views based on height and length of the content array
+
+        @method init
+      */
+      init: function() {
+        this._super();
+        this._cachedHeights = [0];
+        this.on('didInsertElement', this._syncListContainerWidth);
+        this.columnCountDidChange();
+        this._syncChildViews();
+        this._addContentArrayObserver();
+      },
+
+      _addContentArrayObserver: Ember.beforeObserver(function() {
+        addContentArrayObserver.call(this);
+      }, 'content'),
+
+      /**
+        Called on your view when it should push strings of HTML into a
+        `Ember.RenderBuffer`.
+
+        Adds a [div](https://developer.mozilla.org/en-US/docs/HTML/Element/div)
+        with a required `ember-list-container` class.
+
+        @method render
+        @param {Ember.RenderBuffer} buffer The render buffer
+      */
+      render: function (buffer) {
+        var element          = buffer.element();
+        var dom              = buffer.dom;
+        var container        = dom.createElement('div');
+        container.className  = 'ember-list-container';
+        element.appendChild(container);
+
+        this._childViewsMorph = dom.createMorph(container, container, null);
+
+        return container;
+      },
+
+      createChildViewsMorph: function (element) {
+        this._childViewsMorph = this._renderer._dom.createMorph(element.lastChild, element.lastChild, null);
+        return element;
+      },
+
+      willInsertElement: function() {
+        if (!this.get('height') || !this.get('rowHeight')) {
+          throw new Error('A ListView must be created with a height and a rowHeight.');
+        }
+        this._super();
+      },
+
+      /**
+        @private
+
+        Sets inline styles of the view:
+        - height
+        - width
+        - position
+        - overflow
+        - -webkit-overflow
+        - overflow-scrolling
+
+        Called while attributes binding.
+
+        @property {Ember.ComputedProperty} style
+      */
+      style: Ember.computed('height', 'width', function() {
+        var height, width, style, css;
+
+        height = get(this, 'height');
+        width = get(this, 'width');
+        css = get(this, 'css');
+
+        style = '';
+
+        if (height) {
+          style += 'height:' + height + 'px;';
+        }
+
+        if (width)  {
+          style += 'width:' + width  + 'px;';
+        }
+
+        for ( var rule in css ) {
+          if (css.hasOwnProperty(rule)) {
+            style += rule + ':' + css[rule] + ';';
+          }
+        }
+
+        return style;
+      }),
+
+      /**
+        @private
+
+        Performs visual scrolling. Is overridden in Ember.ListView.
+
+        @method scrollTo
+      */
+      scrollTo: function(y) {
+        throw new Error('must override to perform the visual scroll and effectively delegate to _scrollContentTo');
+      },
+
+      /**
+        @private
+
+        Internal method used to force scroll position
+
+        @method scrollTo
+      */
+      _scrollTo: Ember.K,
+
+      /**
+        @private
+        @method _scrollContentTo
+      */
+      _scrollContentTo: function(y) {
+        var startingIndex, endingIndex,
+            contentIndex, visibleEndingIndex, maxContentIndex,
+            contentIndexEnd, contentLength, scrollTop, content;
+
+        scrollTop = max(0, y);
+
+        if (this.scrollTop === scrollTop) {
+          return;
+        }
+
+        // allow a visual overscroll, but don't scroll the content. As we are doing needless
+        // recycyling, and adding unexpected nodes to the DOM.
+        var maxScrollTop = max(0, get(this, 'totalHeight') - get(this, 'height'));
+        scrollTop = min(scrollTop, maxScrollTop);
+
+        content = get(this, 'content');
+        contentLength = get(content, 'length');
+        startingIndex = this._startingIndex(contentLength);
+
+        Ember.instrument('view._scrollContentTo', {
+          scrollTop: scrollTop,
+          content: content,
+          startingIndex: startingIndex,
+          endingIndex: min(max(contentLength - 1, 0), startingIndex + this._numChildViewsForViewport())
+        }, function () {
+          this.scrollTop = scrollTop;
+
+          maxContentIndex = max(contentLength - 1, 0);
+
+          startingIndex = this._startingIndex();
+          visibleEndingIndex = startingIndex + this._numChildViewsForViewport();
+
+          endingIndex = min(maxContentIndex, visibleEndingIndex);
+
+          if (startingIndex === this._lastStartingIndex &&
+              endingIndex === this._lastEndingIndex) {
+
+            this.trigger('scrollYChanged', y);
+            return;
+          } else {
+
+            Ember.run(this, function() {
+              this._reuseChildren();
+
+              this._lastStartingIndex = startingIndex;
+              this._lastEndingIndex = endingIndex;
+              this.trigger('scrollYChanged', y);
+            });
+          }
+        }, this);
+
+      },
+
+      /**
+        @private
+
+        Computes the height for a `Ember.ListView` scrollable container div.
+        You must specify `rowHeight` parameter for the height to be computed properly.
+
+        @property {Ember.ComputedProperty} totalHeight
+      */
+      totalHeight: Ember.computed('content.length',
+                                  'rowHeight',
+                                  'columnCount',
+                                  'bottomPadding', function() {
+        if (typeof this.heightForIndex === 'function') {
+          return this._totalHeightWithHeightForIndex();
+        } else {
+          return this._totalHeightWithStaticRowHeight();
+       }
+      }),
+
+      _doRowHeightDidChange: function() {
+        this._cachedHeights = [0];
+        this._cachedPos = 0;
+        this._syncChildViews();
+      },
+
+      _rowHeightDidChange: Ember.observer('rowHeight', function() {
+        Ember.run.once(this, this._doRowHeightDidChange);
+      }),
+
+      _totalHeightWithHeightForIndex: function() {
+        var length = this.get('content.length');
+        return this._cachedHeightLookup(length);
+      },
+
+      _totalHeightWithStaticRowHeight: function() {
+        var contentLength, rowHeight, columnCount, bottomPadding;
+
+        contentLength = get(this, 'content.length');
+        rowHeight = get(this, 'rowHeight');
+        columnCount = get(this, 'columnCount');
+        bottomPadding = get(this, 'bottomPadding');
+
+        return ((ceil(contentLength / columnCount)) * rowHeight) + bottomPadding;
+      },
+
+      /**
+        @private
+        @method _prepareChildForReuse
+      */
+      _prepareChildForReuse: function(childView) {
+        childView.prepareForReuse();
+      },
+
+      createChildView: function (_view) {
+        return this._super(_view, this._itemViewProps || {});
+      },
+
+      /**
+        @private
+        @method _reuseChildForContentIndex
+      */
+      _reuseChildForContentIndex: function(childView, contentIndex) {
+        var content, context, newContext, childsCurrentContentIndex, position, enableProfiling, oldChildView;
+
+        var contentViewClass = this.itemViewForIndex(contentIndex);
+
+        if (childView.constructor !== contentViewClass) {
+          // rather then associative arrays, lets move childView + contentEntry maping to a Map
+          var i = this._childViews.indexOf(childView);
+          childView.destroy();
+          childView = this.createChildView(contentViewClass);
+          this.insertAt(i, childView);
+        }
+
+        content         = get(this, 'content');
+        enableProfiling = get(this, 'enableProfiling');
+        position        = this.positionForIndex(contentIndex);
+        childView.updatePosition(position);
+
+        set(childView, 'contentIndex', contentIndex);
+
+        if (enableProfiling) {
+          Ember.instrument('view._reuseChildForContentIndex', position, function() {
+
+          }, this);
+        }
+
+        newContext = content.objectAt(contentIndex);
+        childView.updateContext(newContext);
+      },
+
+      /**
+        @private
+        @method positionForIndex
+      */
+      positionForIndex: function(index) {
+        if (typeof this.heightForIndex !== 'function') {
+          return this._singleHeightPosForIndex(index);
+        }
+        else {
+          return this._multiHeightPosForIndex(index);
+        }
+      },
+
+      _singleHeightPosForIndex: function(index) {
+        var elementWidth, width, columnCount, rowHeight, y, x;
+
+        elementWidth = get(this, 'elementWidth') || 1;
+        width = get(this, 'width') || 1;
+        columnCount = get(this, 'columnCount');
+        rowHeight = get(this, 'rowHeight');
+
+        y = (rowHeight * floor(index/columnCount));
+        x = (index % columnCount) * elementWidth;
+
+        return {
+          y: y,
+          x: x
+        };
+      },
+
+      // 0 maps to 0, 1 maps to heightForIndex(i)
+      _multiHeightPosForIndex: function(index) {
+        var elementWidth, width, columnCount, rowHeight, y, x;
+
+        elementWidth = get(this, 'elementWidth') || 1;
+        width = get(this, 'width') || 1;
+        columnCount = get(this, 'columnCount');
+
+        x = (index % columnCount) * elementWidth;
+        y = this._cachedHeightLookup(index);
+
+        return {
+          x: x,
+          y: y
+        };
+      },
+
+      _cachedHeightLookup: function(index) {
+        for (var i = this._cachedPos; i < index; i++) {
+          this._cachedHeights[i + 1] = this._cachedHeights[i] + this.heightForIndex(i);
+        }
+        this._cachedPos = i;
+        return this._cachedHeights[index];
+      },
+
+      /**
+        @private
+        @method _childViewCount
+      */
+      _childViewCount: function() {
+        var contentLength, childViewCountForHeight;
+
+        contentLength = get(this, 'content.length');
+        childViewCountForHeight = this._numChildViewsForViewport();
+
+        return min(contentLength, childViewCountForHeight);
+      },
+
+      /**
+        @private
+
+        Returns a number of columns in the Ember.ListView (for grid layout).
+
+        If you want to have a multi column layout, you need to specify both
+        `width` and `elementWidth`.
+
+        If no `elementWidth` is specified, it returns `1`. Otherwise, it will
+        try to fit as many columns as possible for a given `width`.
+
+        @property {Ember.ComputedProperty} columnCount
+      */
+      columnCount: Ember.computed('width', 'elementWidth', function() {
+        var elementWidth, width, count;
+
+        elementWidth = get(this, 'elementWidth');
+        width = get(this, 'width');
+
+        if (elementWidth && width > elementWidth) {
+          count = floor(width / elementWidth);
+        } else {
+          count = 1;
+        }
+
+        return count;
+      }),
+
+      /**
+        @private
+
+        Fires every time column count is changed.
+
+        @event columnCountDidChange
+      */
+      columnCountDidChange: Ember.observer(function() {
+        var ratio, currentScrollTop, proposedScrollTop, maxScrollTop,
+            scrollTop, lastColumnCount, newColumnCount, element;
+
+        lastColumnCount = this._lastColumnCount;
+
+        currentScrollTop = this.scrollTop;
+        newColumnCount = get(this, 'columnCount');
+        maxScrollTop = get(this, 'maxScrollTop');
+        element = this.element;
+
+        this._lastColumnCount = newColumnCount;
+
+        if (lastColumnCount) {
+          ratio = (lastColumnCount / newColumnCount);
+          proposedScrollTop = currentScrollTop * ratio;
+          scrollTop = min(maxScrollTop, proposedScrollTop);
+
+          this._scrollTo(scrollTop);
+          this.scrollTop = scrollTop;
+        }
+
+        if (arguments.length > 0) {
+          // invoked by observer
+          Ember.run.schedule('afterRender', this, this._syncListContainerWidth);
+        }
+      }, 'columnCount'),
+
+      /**
+        @private
+
+        Computes max possible scrollTop value given the visible viewport
+        and scrollable container div height.
+
+        @property {Ember.ComputedProperty} maxScrollTop
+      */
+      maxScrollTop: Ember.computed('height', 'totalHeight', function(){
+        var totalHeight, viewportHeight;
+
+        totalHeight = get(this, 'totalHeight');
+        viewportHeight = get(this, 'height');
+
+        return max(0, totalHeight - viewportHeight);
+      }),
+
+      /**
+        @private
+
+        Determines whether the emptyView is the current childView.
+
+        @method _isChildEmptyView
+      */
+      _isChildEmptyView: function() {
+        var emptyView = get(this, 'emptyView');
+
+        return emptyView && emptyView instanceof Ember.View &&
+               this._childViews.length === 1 && this._childViews.indexOf(emptyView) === 0;
+      },
+
+      /**
+        @private
+
+        Computes the number of views that would fit in the viewport area.
+        You must specify `height` and `rowHeight` parameters for the number of
+        views to be computed properly.
+
+        @method _numChildViewsForViewport
+      */
+      _numChildViewsForViewport: function() {
+
+        if (this.heightForIndex) {
+          return this._numChildViewsForViewportWithMultiHeight();
+        } else {
+          return this._numChildViewsForViewportWithoutMultiHeight();
+        }
+      },
+
+      _numChildViewsForViewportWithoutMultiHeight:  function() {
+        var height, rowHeight, paddingCount, columnCount;
+
+        height = get(this, 'height');
+        rowHeight = get(this, 'rowHeight');
+        paddingCount = get(this, 'paddingCount');
+        columnCount = get(this, 'columnCount');
+
+        return (ceil(height / rowHeight) * columnCount) + (paddingCount * columnCount);
+      },
+
+      _numChildViewsForViewportWithMultiHeight:  function() {
+        var rowHeight, paddingCount, columnCount;
+        var scrollTop = this.scrollTop;
+        var viewportHeight = this.get('height');
+        var length = this.get('content.length');
+        var heightfromTop = 0;
+        var padding = get(this, 'paddingCount');
+
+        var startingIndex = this._calculatedStartingIndex();
+        var currentHeight = 0;
+
+        var offsetHeight = this._cachedHeightLookup(startingIndex);
+        for (var i = 0; i < length; i++) {
+          if (this._cachedHeightLookup(startingIndex + i + 1) - offsetHeight > viewportHeight) {
+            break;
+          }
+        }
+
+        return i + padding + 1;
+      },
+
+
+      /**
+        @private
+
+        Computes the starting index of the item views array.
+        Takes `scrollTop` property of the element into account.
+
+        Is used in `_syncChildViews`.
+
+        @method _startingIndex
+      */
+      _startingIndex: function(_contentLength) {
+        var scrollTop, rowHeight, columnCount, calculatedStartingIndex,
+            contentLength;
+
+        if (_contentLength === undefined) {
+          contentLength = get(this, 'content.length');
+        } else {
+          contentLength = _contentLength;
+        }
+
+        scrollTop = this.scrollTop;
+        rowHeight = get(this, 'rowHeight');
+        columnCount = get(this, 'columnCount');
+
+        if (this.heightForIndex) {
+          calculatedStartingIndex = this._calculatedStartingIndex();
+        } else {
+          calculatedStartingIndex = floor(scrollTop / rowHeight) * columnCount;
+        }
+
+        var viewsNeededForViewport = this._numChildViewsForViewport();
+        var paddingCount = (1 * columnCount);
+        var largestStartingIndex = max(contentLength - viewsNeededForViewport, 0);
+
+        return min(calculatedStartingIndex, largestStartingIndex);
+      },
+
+      _calculatedStartingIndex: function() {
+        var rowHeight, paddingCount, columnCount;
+        var scrollTop = this.scrollTop;
+        var viewportHeight = this.get('height');
+        var length = this.get('content.length');
+        var heightfromTop = 0;
+        var padding = get(this, 'paddingCount');
+
+        for (var i = 0; i < length; i++) {
+          if (this._cachedHeightLookup(i + 1) >= scrollTop) {
+            break;
+          }
+        }
+
+        return i;
+      },
+
+      /**
+        @private
+        @event contentWillChange
+      */
+      contentWillChange: Ember.beforeObserver(function() {
+        var content = get(this, 'content');
+
+        if (content) {
+          content.removeArrayObserver(this);
+        }
+      }, 'content'),
+
+      /**),
+        @private
+        @event contentDidChange
+      */
+      contentDidChange: Ember.observer(function() {
+        addContentArrayObserver.call(this);
+        syncChildViews.call(this);
+      }, 'content'),
+
+      /**
+        @private
+        @property {Function} needsSyncChildViews
+      */
+      needsSyncChildViews: Ember.observer(syncChildViews, 'height', 'width', 'columnCount'),
+
+      /**
+        @private
+
+        Returns a new item view. Takes `contentIndex` to set the context
+        of the returned view properly.
+
+        @param {Number} contentIndex item index in the content array
+        @method _addItemView
+      */
+      _addItemView: function (contentIndex) {
+        var itemViewClass, childView;
+
+        itemViewClass = this.itemViewForIndex(contentIndex);
+        childView = this.createChildView(itemViewClass);
+        this.pushObject(childView);
+      },
+
+      /**
+        @public
+
+        Returns a view class for the provided contentIndex. If the view is
+        different then the one currently present it will remove the existing view
+        and replace it with an instance of the class provided
+
+        @param {Number} contentIndex item index in the content array
+        @method _addItemView
+        @returns {Ember.View} ember view class for this index
+      */
+      itemViewForIndex: function(contentIndex) {
+        return get(this, 'itemViewClass');
+      },
+
+      /**
+        @public
+
+        Returns a view class for the provided contentIndex. If the view is
+        different then the one currently present it will remove the existing view
+        and replace it with an instance of the class provided
+
+        @param {Number} contentIndex item index in the content array
+        @method _addItemView
+        @returns {Ember.View} ember view class for this index
+      */
+      heightForIndex: null,
+
+      /**
+        @private
+
+        Intelligently manages the number of childviews.
+
+        @method _syncChildViews
+       **/
+      _syncChildViews: function () {
+        var childViews, childViewCount,
+            numberOfChildViews, numberOfChildViewsNeeded,
+            contentIndex, startingIndex, endingIndex,
+            contentLength, emptyView, count, delta;
+
+        if (this.isDestroyed || this.isDestroying) {
+          return;
+        }
+
+        contentLength = get(this, 'content.length');
+        emptyView = get(this, 'emptyView');
+
+        childViewCount = this._childViewCount();
+        childViews = this.positionOrderedChildViews();
+
+        if (this._isChildEmptyView()) {
+          removeEmptyView.call(this);
+        }
+
+        startingIndex = this._startingIndex();
+        endingIndex = startingIndex + childViewCount;
+
+        numberOfChildViewsNeeded = childViewCount;
+        numberOfChildViews = childViews.length;
+
+        delta = numberOfChildViewsNeeded - numberOfChildViews;
+
+        if (delta === 0) {
+          // no change
+        } else if (delta > 0) {
+          // more views are needed
+          contentIndex = this._lastEndingIndex;
+
+          for (count = 0; count < delta; count++, contentIndex++) {
+            this._addItemView(contentIndex);
+          }
+        } else {
+          // less views are needed
+          forEach.call(
+            childViews.splice(numberOfChildViewsNeeded, numberOfChildViews),
+            removeAndDestroy,
+            this
+          );
+        }
+
+        this._reuseChildren();
+
+        this._lastStartingIndex = startingIndex;
+        this._lastEndingIndex   = this._lastEndingIndex + delta;
+
+        if (contentLength === 0 || contentLength === undefined) {
+          addEmptyView.call(this);
+        }
+      },
+
+      /**
+        @private
+
+        Applies an inline width style to the list container.
+
+        @method _syncListContainerWidth
+       **/
+      _syncListContainerWidth: function() {
+        var elementWidth, columnCount, containerWidth, element;
+
+        elementWidth = get(this, 'elementWidth');
+        columnCount = get(this, 'columnCount');
+        containerWidth = elementWidth * columnCount;
+        element = this.$('.ember-list-container');
+
+        if (containerWidth && element) {
+          element.css('width', containerWidth);
+        }
+      },
+
+      /**
+        @private
+        @method _reuseChildren
+      */
+      _reuseChildren: function(){
+        var contentLength, childViews, childViewsLength,
+            startingIndex, endingIndex, childView, attrs,
+            contentIndex, visibleEndingIndex, maxContentIndex,
+            contentIndexEnd, scrollTop;
+
+        scrollTop          = this.scrollTop;
+        contentLength      = get(this, 'content.length');
+        maxContentIndex    = max(contentLength - 1, 0);
+        childViews         = this.getReusableChildViews();
+        childViewsLength   =  childViews.length;
+
+        startingIndex      = this._startingIndex();
+        visibleEndingIndex = startingIndex + this._numChildViewsForViewport();
+
+        endingIndex        = min(maxContentIndex, visibleEndingIndex);
+
+        contentIndexEnd    = min(visibleEndingIndex, startingIndex + childViewsLength);
+
+        for (contentIndex = startingIndex; contentIndex < contentIndexEnd; contentIndex++) {
+          childView = childViews[contentIndex % childViewsLength];
+          this._reuseChildForContentIndex(childView, contentIndex);
+        }
+      },
+
+      /**
+        @private
+        @method getReusableChildViews
+      */
+      getReusableChildViews: function() {
+        return this._childViews;
+      },
+
+      /**
+        @private
+        @method positionOrderedChildViews
+      */
+      positionOrderedChildViews: function() {
+        return this.getReusableChildViews().sort(sortByContentIndex);
+      },
+
+      arrayWillChange: Ember.K,
+
+      /**
+        @private
+        @event arrayDidChange
+      */
+      // TODO: refactor
+      arrayDidChange: function(content, start, removedCount, addedCount) {
+        var index, contentIndex, state;
+
+        if (this._isChildEmptyView()) {
+          removeEmptyView.call(this);
+        }
+
+        // Support old and new Ember versions
+        state = this._state || this.state;
+
+        if (state === 'inDOM') {
+          // ignore if all changes are out of the visible change
+          if (start >= this._lastStartingIndex || start < this._lastEndingIndex) {
+            index = 0;
+            // ignore all changes not in the visible range
+            // this can re-position many, rather then causing a cascade of re-renders
+            forEach.call(
+              this.positionOrderedChildViews(),
+              function(childView) {
+                contentIndex = this._lastStartingIndex + index;
+                this._reuseChildForContentIndex(childView, contentIndex);
+                index++;
+              },
+              this
+            );
+          }
+
+          syncChildViews.call(this);
+        }
+      },
+
+      destroy: function () {
+        if (!this._super()) {
+          return;
+        }
+
+        if (this._createdEmptyView) {
+          this._createdEmptyView.destroy();
+        }
+
+        return this;
+      }
+    });
+  });
+define("list-view/main",
+  ["list-view/reusable_list_item_view","list-view/virtual_list_view","list-view/list_item_view","list-view/helper","list-view/list_view","list-view/list_view_helper"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__) {
+    "use strict";
+    var ReusableListItemView = __dependency1__["default"];
+    var VirtualListView = __dependency2__["default"];
+    var ListItemView = __dependency3__["default"];
+    var EmberList = __dependency4__.EmberList;
+    var EmberVirtualList = __dependency4__.EmberVirtualList;
+    var ListView = __dependency5__["default"];
+    var ListViewHelper = __dependency6__["default"];
+
+    Ember.ReusableListItemView = ReusableListItemView;
+    Ember.VirtualListView      = VirtualListView;
+    Ember.ListItemView         = ListItemView;
+    Ember.ListView             = ListView;
+    Ember.ListViewHelper       = ListViewHelper;
+
+    (Ember.HTMLBars || Ember.Handlebars).registerHelper('ember-list', EmberList);
+    (Ember.HTMLBars || Ember.Handlebars).registerHelper('ember-virtual-list', EmberVirtualList);
+  });
+define("list-view/reusable_list_item_view",
+  ["list-view/list_item_view_mixin","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var ListItemViewMixin = __dependency1__["default"];
+
+    var get = Ember.get, set = Ember.set;
+
+    __exports__["default"] = Ember.View.extend(ListItemViewMixin, {
+      prepareForReuse: Ember.K,
+
+      init: function () {
+        this._super();
+        var context = Ember.ObjectProxy.create();
+        this.set('context', context);
+        this._proxyContext = context;
+      },
+
+      isVisible: Ember.computed('context.content', function () {
+        return !!this.get('context.content');
+      }),
+
+      updateContext: function (newContext) {
+        var context = get(this._proxyContext, 'content');
+
+        // Support old and new Ember versions
+        var state = this._state || this.state;
+
+        if (context !== newContext) {
+          if (state === 'inDOM') {
+            this.prepareForReuse(newContext);
+          }
+
+          set(this._proxyContext, 'content', newContext);
+
+          if (newContext && newContext.isController) {
+            set(this, 'controller', newContext);
+          }
+        }
+      }
+    });
+  });
+define("list-view/virtual_list_scroller_events",
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    /*jshint validthis:true */
+
+    var fieldRegex = /input|textarea|select/i,
+      hasTouch = ('ontouchstart' in window) || window.DocumentTouch && document instanceof window.DocumentTouch,
+      handleStart, handleMove, handleEnd, handleCancel,
+      startEvent, moveEvent, endEvent, cancelEvent;
+    if (hasTouch) {
+      startEvent = 'touchstart';
+      handleStart = function (e) {
+        var touch = e.touches[0],
+          target = touch && touch.target;
+        // avoid e.preventDefault() on fields
+        if (target && fieldRegex.test(target.tagName)) {
+          return;
+        }
+        bindWindow(this.scrollerEventHandlers);
+        this.willBeginScroll(e.touches, e.timeStamp);
+        e.preventDefault();
+      };
+      moveEvent = 'touchmove';
+      handleMove = function (e) {
+        this.continueScroll(e.touches, e.timeStamp);
+      };
+      endEvent = 'touchend';
+      handleEnd = function (e) {
+        // if we didn't end up scrolling we need to
+        // synthesize click since we did e.preventDefault()
+        // on touchstart
+        if (!this._isScrolling) {
+          synthesizeClick(e);
+        }
+        unbindWindow(this.scrollerEventHandlers);
+        this.endScroll(e.timeStamp);
+      };
+      cancelEvent = 'touchcancel';
+      handleCancel = function (e) {
+        unbindWindow(this.scrollerEventHandlers);
+        this.endScroll(e.timeStamp);
+      };
+    } else {
+      startEvent = 'mousedown';
+      handleStart = function (e) {
+        if (e.which !== 1) {
+          return;
+        }
+        var target = e.target;
+        // avoid e.preventDefault() on fields
+        if (target && fieldRegex.test(target.tagName)) {
+          return;
+        }
+        bindWindow(this.scrollerEventHandlers);
+        this.willBeginScroll([e], e.timeStamp);
+        e.preventDefault();
+      };
+      moveEvent = 'mousemove';
+      handleMove = function (e) {
+        this.continueScroll([e], e.timeStamp);
+      };
+      endEvent = 'mouseup';
+      handleEnd = function (e) {
+        unbindWindow(this.scrollerEventHandlers);
+        this.endScroll(e.timeStamp);
+      };
+      cancelEvent = 'mouseout';
+      handleCancel = function (e) {
+        if (e.relatedTarget) {
+          return;
+        }
+        unbindWindow(this.scrollerEventHandlers);
+        this.endScroll(e.timeStamp);
+      };
+    }
+
+    function handleWheel(e) {
+      this.mouseWheel(e);
+      e.preventDefault();
+    }
+
+    function bindElement(el, handlers) {
+      el.addEventListener(startEvent, handlers.start, false);
+      el.addEventListener('mousewheel', handlers.wheel, false);
+    }
+
+    function unbindElement(el, handlers) {
+      el.removeEventListener(startEvent, handlers.start, false);
+      el.removeEventListener('mousewheel', handlers.wheel, false);
+    }
+
+    function bindWindow(handlers) {
+      window.addEventListener(moveEvent, handlers.move, true);
+      window.addEventListener(endEvent, handlers.end, true);
+      window.addEventListener(cancelEvent, handlers.cancel, true);
+    }
+
+    function unbindWindow(handlers) {
+      window.removeEventListener(moveEvent, handlers.move, true);
+      window.removeEventListener(endEvent, handlers.end, true);
+      window.removeEventListener(cancelEvent, handlers.cancel, true);
+    }
+
+    __exports__["default"] = Ember.Mixin.create({
+      init: function() {
+        this.on('didInsertElement', this, 'bindScrollerEvents');
+        this.on('willDestroyElement', this, 'unbindScrollerEvents');
+        this.scrollerEventHandlers = {
+          start: bind(this, handleStart),
+          move: bind(this, handleMove),
+          end: bind(this, handleEnd),
+          cancel: bind(this, handleCancel),
+          wheel: bind(this, handleWheel)
+        };
+        return this._super();
+      },
+      scrollElement: Ember.computed.oneWay('element').readOnly(),
+      bindScrollerEvents: function() {
+        var el = this.get('scrollElement'),
+          handlers = this.scrollerEventHandlers;
+        bindElement(el, handlers);
+      },
+      unbindScrollerEvents: function() {
+        var el = this.get('scrollElement'),
+          handlers = this.scrollerEventHandlers;
+        unbindElement(el, handlers);
+        unbindWindow(handlers);
+      }
+    });
+
+    function bind(view, handler) {
+      return function (evt) {
+        handler.call(view, evt);
+      };
+    }
+
+    function synthesizeClick(e) {
+      var point = e.changedTouches[0],
+        target = point.target,
+        ev;
+      if (target && !fieldRegex.test(target.tagName)) {
+        ev = document.createEvent('MouseEvents');
+        ev.initMouseEvent('click', true, true, e.view, 1, point.screenX, point.screenY, point.clientX, point.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, 0, null);
+        return target.dispatchEvent(ev);
+      }
+    }
+  });
+define("list-view/virtual_list_view",
+  ["list-view/list_view_mixin","list-view/list_view_helper","list-view/virtual_list_scroller_events","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    /*
+      global Scroller
+    */
+
+    var ListViewMixin = __dependency1__["default"];
+    var ListViewHelper = __dependency2__["default"];
+    var VirtualListScrollerEvents = __dependency3__["default"];
+
+    var get = Ember.get;
+
+    function updateScrollerDimensions(target) {
+      var width, height, totalHeight;
+
+      target = target || this; // jshint ignore:line
+
+      width = get(target, 'width');
+      height = get(target, 'height');
+      totalHeight = get(target, 'totalHeight'); // jshint ignore:line
+
+      target.scroller.setDimensions(width, height, width, totalHeight);
+      target.trigger('scrollerDimensionsDidChange');
+    }
+
+    /**
+      VirtualListView
+
+      @class VirtualListView
+      @namespace Ember
+    */
+    __exports__["default"] = Ember.ContainerView.extend(ListViewMixin, VirtualListScrollerEvents, {
+      _isScrolling: false,
+      _mouseWheel: null,
+      css: {
+        position: 'relative',
+        overflow: 'hidden'
+      },
+
+      init: function(){
+        this._super();
+        this.setupScroller();
+        this.setupPullToRefresh();
+      },
+      _scrollerTop: 0,
+      applyTransform: ListViewHelper.apply3DTransform,
+
+      setupScroller: function(){
+        var view = this;
+
+        view.scroller = new Scroller(function(left, top/*, zoom*/) {
+          // Support old and new Ember versions
+          var state = view._state || view.state;
+
+          if (state !== 'inDOM') {
+            return;
+          }
+
+          if (view.listContainerElement) {
+            view._scrollerTop = top;
+            view._scrollContentTo(top);
+            view.applyTransform(view.listContainerElement, 0, -top);
+          }
+        }, {
+          scrollingX: false,
+          scrollingComplete: function(){
+            view.trigger('scrollingDidComplete');
+          }
+        });
+
+        view.trigger('didInitializeScroller');
+        updateScrollerDimensions(view);
+      },
+      setupPullToRefresh: function() {
+        if (!this.pullToRefreshViewClass) {
+          return;
+        }
+
+        this._insertPullToRefreshView();
+        this._activateScrollerPullToRefresh();
+      },
+      _insertPullToRefreshView: function(){
+        this.pullToRefreshView = this.createChildView(this.pullToRefreshViewClass);
+        this.insertAt(0, this.pullToRefreshView);
+
+        var view = this;
+
+        this.pullToRefreshView.on('didInsertElement', function() {
+          Ember.run.scheduleOnce('afterRender', this, function(){
+            view.applyTransform(this.element, 0, -1 * view.pullToRefreshViewHeight);
+          });
+        });
+      },
+      _activateScrollerPullToRefresh: function(){
+        var view = this;
+        function activatePullToRefresh(){
+          view.pullToRefreshView.set('active', true);
+          view.trigger('activatePullToRefresh');
+        }
+        function deactivatePullToRefresh() {
+          view.pullToRefreshView.set('active', false);
+          view.trigger('deactivatePullToRefresh');
+        }
+        function startPullToRefresh() {
+          Ember.run(function(){
+            view.pullToRefreshView.set('refreshing', true);
+
+            function finishRefresh(){
+              if (view && !view.get('isDestroyed') && !view.get('isDestroying')) {
+                view.scroller.finishPullToRefresh();
+                view.pullToRefreshView.set('refreshing', false);
+              }
+            }
+            view.startRefresh(finishRefresh);
+          });
+        }
+        this.scroller.activatePullToRefresh(
+          this.pullToRefreshViewHeight,
+          activatePullToRefresh,
+          deactivatePullToRefresh,
+          startPullToRefresh
+        );
+      },
+
+      getReusableChildViews: function(){
+        var firstView = this._childViews[0];
+        if (firstView && firstView === this.pullToRefreshView) {
+          return this._childViews.slice(1);
+        } else {
+          return this._childViews;
+        }
+      },
+
+      scrollerDimensionsNeedToChange: Ember.observer(function() {
+        Ember.run.once(this, updateScrollerDimensions);
+      }, 'width', 'height', 'totalHeight'),
+
+      didInsertElement: function() {
+        this.listContainerElement = this.$('> .ember-list-container')[0];
+      },
+
+      willBeginScroll: function(touches, timeStamp) {
+        this._isScrolling = false;
+        this.trigger('scrollingDidStart');
+
+        this.scroller.doTouchStart(touches, timeStamp);
+      },
+
+      continueScroll: function(touches, timeStamp) {
+        var startingScrollTop, endingScrollTop, event;
+
+        if (this._isScrolling) {
+          this.scroller.doTouchMove(touches, timeStamp);
+        } else {
+          startingScrollTop = this._scrollerTop;
+
+          this.scroller.doTouchMove(touches, timeStamp);
+
+          endingScrollTop = this._scrollerTop;
+
+          if (startingScrollTop !== endingScrollTop) {
+            event = Ember.$.Event("scrollerstart");
+            Ember.$(touches[0].target).trigger(event);
+
+            this._isScrolling = true;
+          }
+        }
+      },
+
+      endScroll: function(timeStamp) {
+        this.scroller.doTouchEnd(timeStamp);
+      },
+
+      // api
+      scrollTo: function(y, animate) {
+        if (animate === undefined) {
+          animate = true;
+        }
+
+        this.scroller.scrollTo(0, y, animate, 1);
+      },
+
+      // events
+      mouseWheel: function(e){
+        var inverted, delta, candidatePosition;
+
+        inverted = e.webkitDirectionInvertedFromDevice;
+        delta = e.wheelDeltaY * (inverted ? 0.8 : -0.8);
+        candidatePosition = this.scroller.__scrollTop + delta;
+
+        if ((candidatePosition >= 0) && (candidatePosition <= this.scroller.__maxScrollTop)) {
+          this.scroller.scrollBy(0, delta, true);
+          e.stopPropagation();
+        }
+
+        return false;
+      }
+    });
+  });
+ requireModule('list-view/main');
+})(this);
 ;(function(global){
 var enifed, requireModule, eriuqer, requirejs;
 
@@ -79585,6 +81971,1598 @@ enifed("ember-inflector/system/string",
   });
  global.DS = requireModule('ember-data')['default'];
  })(this);
+;/*
+ * Scroller
+ * http://github.com/zynga/scroller
+ *
+ * Copyright 2011, Zynga Inc.
+ * Licensed under the MIT License.
+ * https://raw.github.com/zynga/scroller/master/MIT-LICENSE.txt
+ *
+ * Based on the work of: Unify Project (unify-project.org)
+ * http://unify-project.org
+ * Copyright 2011, Deutsche Telekom AG
+ * License: MIT + Apache (V2)
+ */
+
+var Scroller;
+
+(function() {
+	var NOOP = function(){};
+
+	/**
+	 * A pure logic 'component' for 'virtual' scrolling/zooming.
+	 */
+	Scroller = function(callback, options) {
+
+		this.__callback = callback;
+
+		this.options = {
+
+			/** Enable scrolling on x-axis */
+			scrollingX: true,
+
+			/** Enable scrolling on y-axis */
+			scrollingY: true,
+
+			/** Enable animations for deceleration, snap back, zooming and scrolling */
+			animating: true,
+
+			/** duration for animations triggered by scrollTo/zoomTo */
+			animationDuration: 250,
+
+			/** Enable bouncing (content can be slowly moved outside and jumps back after releasing) */
+			bouncing: true,
+
+			/** Enable locking to the main axis if user moves only slightly on one of them at start */
+			locking: true,
+
+			/** Enable pagination mode (switching between full page content panes) */
+			paging: false,
+
+			/** Enable snapping of content to a configured pixel grid */
+			snapping: false,
+
+			/** Enable zooming of content via API, fingers and mouse wheel */
+			zooming: false,
+
+			/** Minimum zoom level */
+			minZoom: 0.5,
+
+			/** Maximum zoom level */
+			maxZoom: 3,
+
+			/** Multiply or decrease scrolling speed **/
+			speedMultiplier: 1,
+
+			/** Callback that is fired on the later of touch end or deceleration end,
+				provided that another scrolling action has not begun. Used to know
+				when to fade out a scrollbar. */
+			scrollingComplete: NOOP,
+			
+			/** This configures the amount of change applied to deceleration when reaching boundaries  **/
+            penetrationDeceleration : 0.03,
+
+            /** This configures the amount of change applied to acceleration when reaching boundaries  **/
+            penetrationAcceleration : 0.08
+
+		};
+
+		for (var key in options) {
+			this.options[key] = options[key];
+		}
+
+	};
+
+
+	// Easing Equations (c) 2003 Robert Penner, all rights reserved.
+	// Open source under the BSD License.
+
+	/**
+	 * @param pos {Number} position between 0 (start of effect) and 1 (end of effect)
+	**/
+	var easeOutCubic = function(pos) {
+		return (Math.pow((pos - 1), 3) + 1);
+	};
+
+	/**
+	 * @param pos {Number} position between 0 (start of effect) and 1 (end of effect)
+	**/
+	var easeInOutCubic = function(pos) {
+		if ((pos /= 0.5) < 1) {
+			return 0.5 * Math.pow(pos, 3);
+		}
+
+		return 0.5 * (Math.pow((pos - 2), 3) + 2);
+	};
+
+
+	var members = {
+
+		/*
+		---------------------------------------------------------------------------
+			INTERNAL FIELDS :: STATUS
+		---------------------------------------------------------------------------
+		*/
+
+		/** {Boolean} Whether only a single finger is used in touch handling */
+		__isSingleTouch: false,
+
+		/** {Boolean} Whether a touch event sequence is in progress */
+		__isTracking: false,
+
+		/** {Boolean} Whether a deceleration animation went to completion. */
+		__didDecelerationComplete: false,
+
+		/**
+		 * {Boolean} Whether a gesture zoom/rotate event is in progress. Activates when
+		 * a gesturestart event happens. This has higher priority than dragging.
+		 */
+		__isGesturing: false,
+
+		/**
+		 * {Boolean} Whether the user has moved by such a distance that we have enabled
+		 * dragging mode. Hint: It's only enabled after some pixels of movement to
+		 * not interrupt with clicks etc.
+		 */
+		__isDragging: false,
+
+		/**
+		 * {Boolean} Not touching and dragging anymore, and smoothly animating the
+		 * touch sequence using deceleration.
+		 */
+		__isDecelerating: false,
+
+		/**
+		 * {Boolean} Smoothly animating the currently configured change
+		 */
+		__isAnimating: false,
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			INTERNAL FIELDS :: DIMENSIONS
+		---------------------------------------------------------------------------
+		*/
+
+		/** {Integer} Available outer left position (from document perspective) */
+		__clientLeft: 0,
+
+		/** {Integer} Available outer top position (from document perspective) */
+		__clientTop: 0,
+
+		/** {Integer} Available outer width */
+		__clientWidth: 0,
+
+		/** {Integer} Available outer height */
+		__clientHeight: 0,
+
+		/** {Integer} Outer width of content */
+		__contentWidth: 0,
+
+		/** {Integer} Outer height of content */
+		__contentHeight: 0,
+
+		/** {Integer} Snapping width for content */
+		__snapWidth: 100,
+
+		/** {Integer} Snapping height for content */
+		__snapHeight: 100,
+
+		/** {Integer} Height to assign to refresh area */
+		__refreshHeight: null,
+
+		/** {Boolean} Whether the refresh process is enabled when the event is released now */
+		__refreshActive: false,
+
+		/** {Function} Callback to execute on activation. This is for signalling the user about a refresh is about to happen when he release */
+		__refreshActivate: null,
+
+		/** {Function} Callback to execute on deactivation. This is for signalling the user about the refresh being cancelled */
+		__refreshDeactivate: null,
+
+		/** {Function} Callback to execute to start the actual refresh. Call {@link #refreshFinish} when done */
+		__refreshStart: null,
+
+		/** {Number} Zoom level */
+		__zoomLevel: 1,
+
+		/** {Number} Scroll position on x-axis */
+		__scrollLeft: 0,
+
+		/** {Number} Scroll position on y-axis */
+		__scrollTop: 0,
+
+		/** {Integer} Maximum allowed scroll position on x-axis */
+		__maxScrollLeft: 0,
+
+		/** {Integer} Maximum allowed scroll position on y-axis */
+		__maxScrollTop: 0,
+
+		/* {Number} Scheduled left position (final position when animating) */
+		__scheduledLeft: 0,
+
+		/* {Number} Scheduled top position (final position when animating) */
+		__scheduledTop: 0,
+
+		/* {Number} Scheduled zoom level (final scale when animating) */
+		__scheduledZoom: 0,
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			INTERNAL FIELDS :: LAST POSITIONS
+		---------------------------------------------------------------------------
+		*/
+
+		/** {Number} Left position of finger at start */
+		__lastTouchLeft: null,
+
+		/** {Number} Top position of finger at start */
+		__lastTouchTop: null,
+
+		/** {Date} Timestamp of last move of finger. Used to limit tracking range for deceleration speed. */
+		__lastTouchMove: null,
+
+		/** {Array} List of positions, uses three indexes for each state: left, top, timestamp */
+		__positions: null,
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			INTERNAL FIELDS :: DECELERATION SUPPORT
+		---------------------------------------------------------------------------
+		*/
+
+		/** {Integer} Minimum left scroll position during deceleration */
+		__minDecelerationScrollLeft: null,
+
+		/** {Integer} Minimum top scroll position during deceleration */
+		__minDecelerationScrollTop: null,
+
+		/** {Integer} Maximum left scroll position during deceleration */
+		__maxDecelerationScrollLeft: null,
+
+		/** {Integer} Maximum top scroll position during deceleration */
+		__maxDecelerationScrollTop: null,
+
+		/** {Number} Current factor to modify horizontal scroll position with on every step */
+		__decelerationVelocityX: null,
+
+		/** {Number} Current factor to modify vertical scroll position with on every step */
+		__decelerationVelocityY: null,
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			PUBLIC API
+		---------------------------------------------------------------------------
+		*/
+
+		/**
+		 * Configures the dimensions of the client (outer) and content (inner) elements.
+		 * Requires the available space for the outer element and the outer size of the inner element.
+		 * All values which are falsy (null or zero etc.) are ignored and the old value is kept.
+		 *
+		 * @param clientWidth {Integer ? null} Inner width of outer element
+		 * @param clientHeight {Integer ? null} Inner height of outer element
+		 * @param contentWidth {Integer ? null} Outer width of inner element
+		 * @param contentHeight {Integer ? null} Outer height of inner element
+		 */
+		setDimensions: function(clientWidth, clientHeight, contentWidth, contentHeight) {
+
+			var self = this;
+
+			// Only update values which are defined
+			if (clientWidth === +clientWidth) {
+				self.__clientWidth = clientWidth;
+			}
+
+			if (clientHeight === +clientHeight) {
+				self.__clientHeight = clientHeight;
+			}
+
+			if (contentWidth === +contentWidth) {
+				self.__contentWidth = contentWidth;
+			}
+
+			if (contentHeight === +contentHeight) {
+				self.__contentHeight = contentHeight;
+			}
+
+			// Refresh maximums
+			self.__computeScrollMax();
+
+			// Refresh scroll position
+			self.scrollTo(self.__scrollLeft, self.__scrollTop, true);
+
+		},
+
+
+		/**
+		 * Sets the client coordinates in relation to the document.
+		 *
+		 * @param left {Integer ? 0} Left position of outer element
+		 * @param top {Integer ? 0} Top position of outer element
+		 */
+		setPosition: function(left, top) {
+
+			var self = this;
+
+			self.__clientLeft = left || 0;
+			self.__clientTop = top || 0;
+
+		},
+
+
+		/**
+		 * Configures the snapping (when snapping is active)
+		 *
+		 * @param width {Integer} Snapping width
+		 * @param height {Integer} Snapping height
+		 */
+		setSnapSize: function(width, height) {
+
+			var self = this;
+
+			self.__snapWidth = width;
+			self.__snapHeight = height;
+
+		},
+
+
+		/**
+		 * Activates pull-to-refresh. A special zone on the top of the list to start a list refresh whenever
+		 * the user event is released during visibility of this zone. This was introduced by some apps on iOS like
+		 * the official Twitter client.
+		 *
+		 * @param height {Integer} Height of pull-to-refresh zone on top of rendered list
+		 * @param activateCallback {Function} Callback to execute on activation. This is for signalling the user about a refresh is about to happen when he release.
+		 * @param deactivateCallback {Function} Callback to execute on deactivation. This is for signalling the user about the refresh being cancelled.
+		 * @param startCallback {Function} Callback to execute to start the real async refresh action. Call {@link #finishPullToRefresh} after finish of refresh.
+		 */
+		activatePullToRefresh: function(height, activateCallback, deactivateCallback, startCallback) {
+
+			var self = this;
+
+			self.__refreshHeight = height;
+			self.__refreshActivate = activateCallback;
+			self.__refreshDeactivate = deactivateCallback;
+			self.__refreshStart = startCallback;
+
+		},
+
+
+		/**
+		 * Starts pull-to-refresh manually.
+		 */
+		triggerPullToRefresh: function() {
+			// Use publish instead of scrollTo to allow scrolling to out of boundary position
+			// We don't need to normalize scrollLeft, zoomLevel, etc. here because we only y-scrolling when pull-to-refresh is enabled
+			this.__publish(this.__scrollLeft, -this.__refreshHeight, this.__zoomLevel, true);
+
+			if (this.__refreshStart) {
+				this.__refreshStart();
+			}
+		},
+
+
+		/**
+		 * Signalizes that pull-to-refresh is finished.
+		 */
+		finishPullToRefresh: function() {
+
+			var self = this;
+
+			self.__refreshActive = false;
+			if (self.__refreshDeactivate) {
+				self.__refreshDeactivate();
+			}
+
+			self.scrollTo(self.__scrollLeft, self.__scrollTop, true);
+
+		},
+
+
+		/**
+		 * Returns the scroll position and zooming values
+		 *
+		 * @return {Map} `left` and `top` scroll position and `zoom` level
+		 */
+		getValues: function() {
+
+			var self = this;
+
+			return {
+				left: self.__scrollLeft,
+				top: self.__scrollTop,
+				zoom: self.__zoomLevel
+			};
+
+		},
+
+
+		/**
+		 * Returns the maximum scroll values
+		 *
+		 * @return {Map} `left` and `top` maximum scroll values
+		 */
+		getScrollMax: function() {
+
+			var self = this;
+
+			return {
+				left: self.__maxScrollLeft,
+				top: self.__maxScrollTop
+			};
+
+		},
+
+
+		/**
+		 * Zooms to the given level. Supports optional animation. Zooms
+		 * the center when no coordinates are given.
+		 *
+		 * @param level {Number} Level to zoom to
+		 * @param animate {Boolean ? false} Whether to use animation
+		 * @param originLeft {Number ? null} Zoom in at given left coordinate
+		 * @param originTop {Number ? null} Zoom in at given top coordinate
+		 * @param callback {Function ? null} A callback that gets fired when the zoom is complete.
+		 */
+		zoomTo: function(level, animate, originLeft, originTop, callback) {
+
+			var self = this;
+
+			if (!self.options.zooming) {
+				throw new Error("Zooming is not enabled!");
+			}
+
+			// Add callback if exists
+			if(callback) {
+				self.__zoomComplete = callback;
+			}
+
+			// Stop deceleration
+			if (self.__isDecelerating) {
+				core.effect.Animate.stop(self.__isDecelerating);
+				self.__isDecelerating = false;
+			}
+
+			var oldLevel = self.__zoomLevel;
+
+			// Normalize input origin to center of viewport if not defined
+			if (originLeft == null) {
+				originLeft = self.__clientWidth / 2;
+			}
+
+			if (originTop == null) {
+				originTop = self.__clientHeight / 2;
+			}
+
+			// Limit level according to configuration
+			level = Math.max(Math.min(level, self.options.maxZoom), self.options.minZoom);
+
+			// Recompute maximum values while temporary tweaking maximum scroll ranges
+			self.__computeScrollMax(level);
+
+			// Recompute left and top coordinates based on new zoom level
+			var left = ((originLeft + self.__scrollLeft) * level / oldLevel) - originLeft;
+			var top = ((originTop + self.__scrollTop) * level / oldLevel) - originTop;
+
+			// Limit x-axis
+			if (left > self.__maxScrollLeft) {
+				left = self.__maxScrollLeft;
+			} else if (left < 0) {
+				left = 0;
+			}
+
+			// Limit y-axis
+			if (top > self.__maxScrollTop) {
+				top = self.__maxScrollTop;
+			} else if (top < 0) {
+				top = 0;
+			}
+
+			// Push values out
+			self.__publish(left, top, level, animate);
+
+		},
+
+
+		/**
+		 * Zooms the content by the given factor.
+		 *
+		 * @param factor {Number} Zoom by given factor
+		 * @param animate {Boolean ? false} Whether to use animation
+		 * @param originLeft {Number ? 0} Zoom in at given left coordinate
+		 * @param originTop {Number ? 0} Zoom in at given top coordinate
+		 * @param callback {Function ? null} A callback that gets fired when the zoom is complete.
+		 */
+		zoomBy: function(factor, animate, originLeft, originTop, callback) {
+
+			var self = this;
+
+			self.zoomTo(self.__zoomLevel * factor, animate, originLeft, originTop, callback);
+
+		},
+
+
+		/**
+		 * Scrolls to the given position. Respect limitations and snapping automatically.
+		 *
+		 * @param left {Number?null} Horizontal scroll position, keeps current if value is <code>null</code>
+		 * @param top {Number?null} Vertical scroll position, keeps current if value is <code>null</code>
+		 * @param animate {Boolean?false} Whether the scrolling should happen using an animation
+		 * @param zoom {Number?null} Zoom level to go to
+		 */
+		scrollTo: function(left, top, animate, zoom) {
+
+			var self = this;
+
+			// Stop deceleration
+			if (self.__isDecelerating) {
+				core.effect.Animate.stop(self.__isDecelerating);
+				self.__isDecelerating = false;
+			}
+
+			// Correct coordinates based on new zoom level
+			if (zoom != null && zoom !== self.__zoomLevel) {
+
+				if (!self.options.zooming) {
+					throw new Error("Zooming is not enabled!");
+				}
+
+				left *= zoom;
+				top *= zoom;
+
+				// Recompute maximum values while temporary tweaking maximum scroll ranges
+				self.__computeScrollMax(zoom);
+
+			} else {
+
+				// Keep zoom when not defined
+				zoom = self.__zoomLevel;
+
+			}
+
+			if (!self.options.scrollingX) {
+
+				left = self.__scrollLeft;
+
+			} else {
+
+				if (self.options.paging) {
+					left = Math.round(left / self.__clientWidth) * self.__clientWidth;
+				} else if (self.options.snapping) {
+					left = Math.round(left / self.__snapWidth) * self.__snapWidth;
+				}
+
+			}
+
+			if (!self.options.scrollingY) {
+
+				top = self.__scrollTop;
+
+			} else {
+
+				if (self.options.paging) {
+					top = Math.round(top / self.__clientHeight) * self.__clientHeight;
+				} else if (self.options.snapping) {
+					top = Math.round(top / self.__snapHeight) * self.__snapHeight;
+				}
+
+			}
+
+			// Limit for allowed ranges
+			left = Math.max(Math.min(self.__maxScrollLeft, left), 0);
+			top = Math.max(Math.min(self.__maxScrollTop, top), 0);
+
+			// Don't animate when no change detected, still call publish to make sure
+			// that rendered position is really in-sync with internal data
+			if (left === self.__scrollLeft && top === self.__scrollTop) {
+				animate = false;
+			}
+
+			// Publish new values
+			self.__publish(left, top, zoom, animate);
+
+		},
+
+
+		/**
+		 * Scroll by the given offset
+		 *
+		 * @param left {Number ? 0} Scroll x-axis by given offset
+		 * @param top {Number ? 0} Scroll x-axis by given offset
+		 * @param animate {Boolean ? false} Whether to animate the given change
+		 */
+		scrollBy: function(left, top, animate) {
+
+			var self = this;
+
+			var startLeft = self.__isAnimating ? self.__scheduledLeft : self.__scrollLeft;
+			var startTop = self.__isAnimating ? self.__scheduledTop : self.__scrollTop;
+
+			self.scrollTo(startLeft + (left || 0), startTop + (top || 0), animate);
+
+		},
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			EVENT CALLBACKS
+		---------------------------------------------------------------------------
+		*/
+
+		/**
+		 * Mouse wheel handler for zooming support
+		 */
+		doMouseZoom: function(wheelDelta, timeStamp, pageX, pageY) {
+
+			var self = this;
+			var change = wheelDelta > 0 ? 0.97 : 1.03;
+
+			return self.zoomTo(self.__zoomLevel * change, false, pageX - self.__clientLeft, pageY - self.__clientTop);
+
+		},
+
+
+		/**
+		 * Touch start handler for scrolling support
+		 */
+		doTouchStart: function(touches, timeStamp) {
+
+			// Array-like check is enough here
+			if (touches.length == null) {
+				throw new Error("Invalid touch list: " + touches);
+			}
+
+			if (timeStamp instanceof Date) {
+				timeStamp = timeStamp.valueOf();
+			}
+			if (typeof timeStamp !== "number") {
+				throw new Error("Invalid timestamp value: " + timeStamp);
+			}
+
+			var self = this;
+
+			// Reset interruptedAnimation flag
+			self.__interruptedAnimation = true;
+
+			// Stop deceleration
+			if (self.__isDecelerating) {
+				core.effect.Animate.stop(self.__isDecelerating);
+				self.__isDecelerating = false;
+				self.__interruptedAnimation = true;
+			}
+
+			// Stop animation
+			if (self.__isAnimating) {
+				core.effect.Animate.stop(self.__isAnimating);
+				self.__isAnimating = false;
+				self.__interruptedAnimation = true;
+			}
+
+			// Use center point when dealing with two fingers
+			var currentTouchLeft, currentTouchTop;
+			var isSingleTouch = touches.length === 1;
+			if (isSingleTouch) {
+				currentTouchLeft = touches[0].pageX;
+				currentTouchTop = touches[0].pageY;
+			} else {
+				currentTouchLeft = Math.abs(touches[0].pageX + touches[1].pageX) / 2;
+				currentTouchTop = Math.abs(touches[0].pageY + touches[1].pageY) / 2;
+			}
+
+			// Store initial positions
+			self.__initialTouchLeft = currentTouchLeft;
+			self.__initialTouchTop = currentTouchTop;
+
+			// Store current zoom level
+			self.__zoomLevelStart = self.__zoomLevel;
+
+			// Store initial touch positions
+			self.__lastTouchLeft = currentTouchLeft;
+			self.__lastTouchTop = currentTouchTop;
+
+			// Store initial move time stamp
+			self.__lastTouchMove = timeStamp;
+
+			// Reset initial scale
+			self.__lastScale = 1;
+
+			// Reset locking flags
+			self.__enableScrollX = !isSingleTouch && self.options.scrollingX;
+			self.__enableScrollY = !isSingleTouch && self.options.scrollingY;
+
+			// Reset tracking flag
+			self.__isTracking = true;
+
+			// Reset deceleration complete flag
+			self.__didDecelerationComplete = false;
+
+			// Dragging starts directly with two fingers, otherwise lazy with an offset
+			self.__isDragging = !isSingleTouch;
+
+			// Some features are disabled in multi touch scenarios
+			self.__isSingleTouch = isSingleTouch;
+
+			// Clearing data structure
+			self.__positions = [];
+
+		},
+
+
+		/**
+		 * Touch move handler for scrolling support
+		 */
+		doTouchMove: function(touches, timeStamp, scale) {
+
+			// Array-like check is enough here
+			if (touches.length == null) {
+				throw new Error("Invalid touch list: " + touches);
+			}
+
+			if (timeStamp instanceof Date) {
+				timeStamp = timeStamp.valueOf();
+			}
+			if (typeof timeStamp !== "number") {
+				throw new Error("Invalid timestamp value: " + timeStamp);
+			}
+
+			var self = this;
+
+			// Ignore event when tracking is not enabled (event might be outside of element)
+			if (!self.__isTracking) {
+				return;
+			}
+
+
+			var currentTouchLeft, currentTouchTop;
+
+			// Compute move based around of center of fingers
+			if (touches.length === 2) {
+				currentTouchLeft = Math.abs(touches[0].pageX + touches[1].pageX) / 2;
+				currentTouchTop = Math.abs(touches[0].pageY + touches[1].pageY) / 2;
+			} else {
+				currentTouchLeft = touches[0].pageX;
+				currentTouchTop = touches[0].pageY;
+			}
+
+			var positions = self.__positions;
+
+			// Are we already is dragging mode?
+			if (self.__isDragging) {
+
+				// Compute move distance
+				var moveX = currentTouchLeft - self.__lastTouchLeft;
+				var moveY = currentTouchTop - self.__lastTouchTop;
+
+				// Read previous scroll position and zooming
+				var scrollLeft = self.__scrollLeft;
+				var scrollTop = self.__scrollTop;
+				var level = self.__zoomLevel;
+
+				// Work with scaling
+				if (scale != null && self.options.zooming) {
+
+					var oldLevel = level;
+
+					// Recompute level based on previous scale and new scale
+					level = level / self.__lastScale * scale;
+
+					// Limit level according to configuration
+					level = Math.max(Math.min(level, self.options.maxZoom), self.options.minZoom);
+
+					// Only do further compution when change happened
+					if (oldLevel !== level) {
+
+						// Compute relative event position to container
+						var currentTouchLeftRel = currentTouchLeft - self.__clientLeft;
+						var currentTouchTopRel = currentTouchTop - self.__clientTop;
+
+						// Recompute left and top coordinates based on new zoom level
+						scrollLeft = ((currentTouchLeftRel + scrollLeft) * level / oldLevel) - currentTouchLeftRel;
+						scrollTop = ((currentTouchTopRel + scrollTop) * level / oldLevel) - currentTouchTopRel;
+
+						// Recompute max scroll values
+						self.__computeScrollMax(level);
+
+					}
+				}
+
+				if (self.__enableScrollX) {
+
+					scrollLeft -= moveX * this.options.speedMultiplier;
+					var maxScrollLeft = self.__maxScrollLeft;
+
+					if (scrollLeft > maxScrollLeft || scrollLeft < 0) {
+
+						// Slow down on the edges
+						if (self.options.bouncing) {
+
+							scrollLeft += (moveX / 2  * this.options.speedMultiplier);
+
+						} else if (scrollLeft > maxScrollLeft) {
+
+							scrollLeft = maxScrollLeft;
+
+						} else {
+
+							scrollLeft = 0;
+
+						}
+					}
+				}
+
+				// Compute new vertical scroll position
+				if (self.__enableScrollY) {
+
+					scrollTop -= moveY * this.options.speedMultiplier;
+					var maxScrollTop = self.__maxScrollTop;
+
+					if (scrollTop > maxScrollTop || scrollTop < 0) {
+
+						// Slow down on the edges
+						if (self.options.bouncing) {
+
+							scrollTop += (moveY / 2 * this.options.speedMultiplier);
+
+							// Support pull-to-refresh (only when only y is scrollable)
+							if (!self.__enableScrollX && self.__refreshHeight != null) {
+
+								if (!self.__refreshActive && scrollTop <= -self.__refreshHeight) {
+
+									self.__refreshActive = true;
+									if (self.__refreshActivate) {
+										self.__refreshActivate();
+									}
+
+								} else if (self.__refreshActive && scrollTop > -self.__refreshHeight) {
+
+									self.__refreshActive = false;
+									if (self.__refreshDeactivate) {
+										self.__refreshDeactivate();
+									}
+
+								}
+							}
+
+						} else if (scrollTop > maxScrollTop) {
+
+							scrollTop = maxScrollTop;
+
+						} else {
+
+							scrollTop = 0;
+
+						}
+					}
+				}
+
+				// Keep list from growing infinitely (holding min 10, max 20 measure points)
+				if (positions.length > 60) {
+					positions.splice(0, 30);
+				}
+
+				// Track scroll movement for decleration
+				positions.push(scrollLeft, scrollTop, timeStamp);
+
+				// Sync scroll position
+				self.__publish(scrollLeft, scrollTop, level);
+
+			// Otherwise figure out whether we are switching into dragging mode now.
+			} else {
+
+				var minimumTrackingForScroll = self.options.locking ? 3 : 0;
+				var minimumTrackingForDrag = 5;
+
+				var distanceX = Math.abs(currentTouchLeft - self.__initialTouchLeft);
+				var distanceY = Math.abs(currentTouchTop - self.__initialTouchTop);
+
+				self.__enableScrollX = self.options.scrollingX && distanceX >= minimumTrackingForScroll;
+				self.__enableScrollY = self.options.scrollingY && distanceY >= minimumTrackingForScroll;
+
+				positions.push(self.__scrollLeft, self.__scrollTop, timeStamp);
+
+				self.__isDragging = (self.__enableScrollX || self.__enableScrollY) && (distanceX >= minimumTrackingForDrag || distanceY >= minimumTrackingForDrag);
+				if (self.__isDragging) {
+					self.__interruptedAnimation = false;
+				}
+
+			}
+
+			// Update last touch positions and time stamp for next event
+			self.__lastTouchLeft = currentTouchLeft;
+			self.__lastTouchTop = currentTouchTop;
+			self.__lastTouchMove = timeStamp;
+			self.__lastScale = scale;
+
+		},
+
+
+		/**
+		 * Touch end handler for scrolling support
+		 */
+		doTouchEnd: function(timeStamp) {
+
+			if (timeStamp instanceof Date) {
+				timeStamp = timeStamp.valueOf();
+			}
+			if (typeof timeStamp !== "number") {
+				throw new Error("Invalid timestamp value: " + timeStamp);
+			}
+
+			var self = this;
+
+			// Ignore event when tracking is not enabled (no touchstart event on element)
+			// This is required as this listener ('touchmove') sits on the document and not on the element itself.
+			if (!self.__isTracking) {
+				return;
+			}
+
+			// Not touching anymore (when two finger hit the screen there are two touch end events)
+			self.__isTracking = false;
+
+			// Be sure to reset the dragging flag now. Here we also detect whether
+			// the finger has moved fast enough to switch into a deceleration animation.
+			if (self.__isDragging) {
+
+				// Reset dragging flag
+				self.__isDragging = false;
+
+				// Start deceleration
+				// Verify that the last move detected was in some relevant time frame
+				if (self.__isSingleTouch && self.options.animating && (timeStamp - self.__lastTouchMove) <= 100) {
+
+					// Then figure out what the scroll position was about 100ms ago
+					var positions = self.__positions;
+					var endPos = positions.length - 1;
+					var startPos = endPos;
+
+					// Move pointer to position measured 100ms ago
+					for (var i = endPos; i > 0 && positions[i] > (self.__lastTouchMove - 100); i -= 3) {
+						startPos = i;
+					}
+
+					// If start and stop position is identical in a 100ms timeframe,
+					// we cannot compute any useful deceleration.
+					if (startPos !== endPos) {
+
+						// Compute relative movement between these two points
+						var timeOffset = positions[endPos] - positions[startPos];
+						var movedLeft = self.__scrollLeft - positions[startPos - 2];
+						var movedTop = self.__scrollTop - positions[startPos - 1];
+
+						// Based on 50ms compute the movement to apply for each render step
+						self.__decelerationVelocityX = movedLeft / timeOffset * (1000 / 60);
+						self.__decelerationVelocityY = movedTop / timeOffset * (1000 / 60);
+
+						// How much velocity is required to start the deceleration
+						var minVelocityToStartDeceleration = self.options.paging || self.options.snapping ? 4 : 1;
+
+						// Verify that we have enough velocity to start deceleration
+						if (Math.abs(self.__decelerationVelocityX) > minVelocityToStartDeceleration || Math.abs(self.__decelerationVelocityY) > minVelocityToStartDeceleration) {
+
+							// Deactivate pull-to-refresh when decelerating
+							if (!self.__refreshActive) {
+								self.__startDeceleration(timeStamp);
+							}
+						}
+					} else {
+						self.options.scrollingComplete();
+					}
+				} else if ((timeStamp - self.__lastTouchMove) > 100) {
+					self.options.scrollingComplete();
+	 			}
+			}
+
+			// If this was a slower move it is per default non decelerated, but this
+			// still means that we want snap back to the bounds which is done here.
+			// This is placed outside the condition above to improve edge case stability
+			// e.g. touchend fired without enabled dragging. This should normally do not
+			// have modified the scroll positions or even showed the scrollbars though.
+			if (!self.__isDecelerating) {
+
+				if (self.__refreshActive && self.__refreshStart) {
+
+					// Use publish instead of scrollTo to allow scrolling to out of boundary position
+					// We don't need to normalize scrollLeft, zoomLevel, etc. here because we only y-scrolling when pull-to-refresh is enabled
+					self.__publish(self.__scrollLeft, -self.__refreshHeight, self.__zoomLevel, true);
+
+					if (self.__refreshStart) {
+						self.__refreshStart();
+					}
+
+				} else {
+
+					if (self.__interruptedAnimation || self.__isDragging) {
+						self.options.scrollingComplete();
+					}
+					self.scrollTo(self.__scrollLeft, self.__scrollTop, true, self.__zoomLevel);
+
+					// Directly signalize deactivation (nothing todo on refresh?)
+					if (self.__refreshActive) {
+
+						self.__refreshActive = false;
+						if (self.__refreshDeactivate) {
+							self.__refreshDeactivate();
+						}
+
+					}
+				}
+			}
+
+			// Fully cleanup list
+			self.__positions.length = 0;
+
+		},
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			PRIVATE API
+		---------------------------------------------------------------------------
+		*/
+
+		/**
+		 * Applies the scroll position to the content element
+		 *
+		 * @param left {Number} Left scroll position
+		 * @param top {Number} Top scroll position
+		 * @param animate {Boolean?false} Whether animation should be used to move to the new coordinates
+		 */
+		__publish: function(left, top, zoom, animate) {
+
+			var self = this;
+
+			// Remember whether we had an animation, then we try to continue based on the current "drive" of the animation
+			var wasAnimating = self.__isAnimating;
+			if (wasAnimating) {
+				core.effect.Animate.stop(wasAnimating);
+				self.__isAnimating = false;
+			}
+
+			if (animate && self.options.animating) {
+
+				// Keep scheduled positions for scrollBy/zoomBy functionality
+				self.__scheduledLeft = left;
+				self.__scheduledTop = top;
+				self.__scheduledZoom = zoom;
+
+				var oldLeft = self.__scrollLeft;
+				var oldTop = self.__scrollTop;
+				var oldZoom = self.__zoomLevel;
+
+				var diffLeft = left - oldLeft;
+				var diffTop = top - oldTop;
+				var diffZoom = zoom - oldZoom;
+
+				var step = function(percent, now, render) {
+
+					if (render) {
+
+						self.__scrollLeft = oldLeft + (diffLeft * percent);
+						self.__scrollTop = oldTop + (diffTop * percent);
+						self.__zoomLevel = oldZoom + (diffZoom * percent);
+
+						// Push values out
+						if (self.__callback) {
+							self.__callback(self.__scrollLeft, self.__scrollTop, self.__zoomLevel);
+						}
+
+					}
+				};
+
+				var verify = function(id) {
+					return self.__isAnimating === id;
+				};
+
+				var completed = function(renderedFramesPerSecond, animationId, wasFinished) {
+					if (animationId === self.__isAnimating) {
+						self.__isAnimating = false;
+					}
+					if (self.__didDecelerationComplete || wasFinished) {
+						self.options.scrollingComplete();
+					}
+
+					if (self.options.zooming) {
+						self.__computeScrollMax();
+						if(self.__zoomComplete) {
+							self.__zoomComplete();
+							self.__zoomComplete = null;
+						}
+					}
+				};
+
+				// When continuing based on previous animation we choose an ease-out animation instead of ease-in-out
+				self.__isAnimating = core.effect.Animate.start(step, verify, completed, self.options.animationDuration, wasAnimating ? easeOutCubic : easeInOutCubic);
+
+			} else {
+
+				self.__scheduledLeft = self.__scrollLeft = left;
+				self.__scheduledTop = self.__scrollTop = top;
+				self.__scheduledZoom = self.__zoomLevel = zoom;
+
+				// Push values out
+				if (self.__callback) {
+					self.__callback(left, top, zoom);
+				}
+
+				// Fix max scroll ranges
+				if (self.options.zooming) {
+					self.__computeScrollMax();
+					if(self.__zoomComplete) {
+						self.__zoomComplete();
+						self.__zoomComplete = null;
+					}
+				}
+			}
+		},
+
+
+		/**
+		 * Recomputes scroll minimum values based on client dimensions and content dimensions.
+		 */
+		__computeScrollMax: function(zoomLevel) {
+
+			var self = this;
+
+			if (zoomLevel == null) {
+				zoomLevel = self.__zoomLevel;
+			}
+
+			self.__maxScrollLeft = Math.max((self.__contentWidth * zoomLevel) - self.__clientWidth, 0);
+			self.__maxScrollTop = Math.max((self.__contentHeight * zoomLevel) - self.__clientHeight, 0);
+
+		},
+
+
+
+		/*
+		---------------------------------------------------------------------------
+			ANIMATION (DECELERATION) SUPPORT
+		---------------------------------------------------------------------------
+		*/
+
+		/**
+		 * Called when a touch sequence end and the speed of the finger was high enough
+		 * to switch into deceleration mode.
+		 */
+		__startDeceleration: function(timeStamp) {
+
+			var self = this;
+
+			if (self.options.paging) {
+
+				var scrollLeft = Math.max(Math.min(self.__scrollLeft, self.__maxScrollLeft), 0);
+				var scrollTop = Math.max(Math.min(self.__scrollTop, self.__maxScrollTop), 0);
+				var clientWidth = self.__clientWidth;
+				var clientHeight = self.__clientHeight;
+
+				// We limit deceleration not to the min/max values of the allowed range, but to the size of the visible client area.
+				// Each page should have exactly the size of the client area.
+				self.__minDecelerationScrollLeft = Math.floor(scrollLeft / clientWidth) * clientWidth;
+				self.__minDecelerationScrollTop = Math.floor(scrollTop / clientHeight) * clientHeight;
+				self.__maxDecelerationScrollLeft = Math.ceil(scrollLeft / clientWidth) * clientWidth;
+				self.__maxDecelerationScrollTop = Math.ceil(scrollTop / clientHeight) * clientHeight;
+
+			} else {
+
+				self.__minDecelerationScrollLeft = 0;
+				self.__minDecelerationScrollTop = 0;
+				self.__maxDecelerationScrollLeft = self.__maxScrollLeft;
+				self.__maxDecelerationScrollTop = self.__maxScrollTop;
+
+			}
+
+			// Wrap class method
+			var step = function(percent, now, render) {
+				self.__stepThroughDeceleration(render);
+			};
+
+			// How much velocity is required to keep the deceleration running
+			var minVelocityToKeepDecelerating = self.options.snapping ? 4 : 0.1;
+
+			// Detect whether it's still worth to continue animating steps
+			// If we are already slow enough to not being user perceivable anymore, we stop the whole process here.
+			var verify = function() {
+				var shouldContinue = Math.abs(self.__decelerationVelocityX) >= minVelocityToKeepDecelerating || Math.abs(self.__decelerationVelocityY) >= minVelocityToKeepDecelerating;
+				if (!shouldContinue) {
+					self.__didDecelerationComplete = true;
+				}
+				return shouldContinue;
+			};
+
+			var completed = function(renderedFramesPerSecond, animationId, wasFinished) {
+				self.__isDecelerating = false;
+				if (self.__didDecelerationComplete) {
+					self.options.scrollingComplete();
+				}
+
+				// Animate to grid when snapping is active, otherwise just fix out-of-boundary positions
+				self.scrollTo(self.__scrollLeft, self.__scrollTop, self.options.snapping);
+			};
+
+			// Start animation and switch on flag
+			self.__isDecelerating = core.effect.Animate.start(step, verify, completed);
+
+		},
+
+
+		/**
+		 * Called on every step of the animation
+		 *
+		 * @param inMemory {Boolean?false} Whether to not render the current step, but keep it in memory only. Used internally only!
+		 */
+		__stepThroughDeceleration: function(render) {
+
+			var self = this;
+
+
+			//
+			// COMPUTE NEXT SCROLL POSITION
+			//
+
+			// Add deceleration to scroll position
+			var scrollLeft = self.__scrollLeft + self.__decelerationVelocityX;
+			var scrollTop = self.__scrollTop + self.__decelerationVelocityY;
+
+
+			//
+			// HARD LIMIT SCROLL POSITION FOR NON BOUNCING MODE
+			//
+
+			if (!self.options.bouncing) {
+
+				var scrollLeftFixed = Math.max(Math.min(self.__maxDecelerationScrollLeft, scrollLeft), self.__minDecelerationScrollLeft);
+				if (scrollLeftFixed !== scrollLeft) {
+					scrollLeft = scrollLeftFixed;
+					self.__decelerationVelocityX = 0;
+				}
+
+				var scrollTopFixed = Math.max(Math.min(self.__maxDecelerationScrollTop, scrollTop), self.__minDecelerationScrollTop);
+				if (scrollTopFixed !== scrollTop) {
+					scrollTop = scrollTopFixed;
+					self.__decelerationVelocityY = 0;
+				}
+
+			}
+
+
+			//
+			// UPDATE SCROLL POSITION
+			//
+
+			if (render) {
+
+				self.__publish(scrollLeft, scrollTop, self.__zoomLevel);
+
+			} else {
+
+				self.__scrollLeft = scrollLeft;
+				self.__scrollTop = scrollTop;
+
+			}
+
+
+			//
+			// SLOW DOWN
+			//
+
+			// Slow down velocity on every iteration
+			if (!self.options.paging) {
+
+				// This is the factor applied to every iteration of the animation
+				// to slow down the process. This should emulate natural behavior where
+				// objects slow down when the initiator of the movement is removed
+				var frictionFactor = 0.95;
+
+				self.__decelerationVelocityX *= frictionFactor;
+				self.__decelerationVelocityY *= frictionFactor;
+
+			}
+
+
+			//
+			// BOUNCING SUPPORT
+			//
+
+			if (self.options.bouncing) {
+
+				var scrollOutsideX = 0;
+				var scrollOutsideY = 0;
+
+				// This configures the amount of change applied to deceleration/acceleration when reaching boundaries
+				var penetrationDeceleration = self.options.penetrationDeceleration; 
+				var penetrationAcceleration = self.options.penetrationAcceleration; 
+
+				// Check limits
+				if (scrollLeft < self.__minDecelerationScrollLeft) {
+					scrollOutsideX = self.__minDecelerationScrollLeft - scrollLeft;
+				} else if (scrollLeft > self.__maxDecelerationScrollLeft) {
+					scrollOutsideX = self.__maxDecelerationScrollLeft - scrollLeft;
+				}
+
+				if (scrollTop < self.__minDecelerationScrollTop) {
+					scrollOutsideY = self.__minDecelerationScrollTop - scrollTop;
+				} else if (scrollTop > self.__maxDecelerationScrollTop) {
+					scrollOutsideY = self.__maxDecelerationScrollTop - scrollTop;
+				}
+
+				// Slow down until slow enough, then flip back to snap position
+				if (scrollOutsideX !== 0) {
+					if (scrollOutsideX * self.__decelerationVelocityX <= 0) {
+						self.__decelerationVelocityX += scrollOutsideX * penetrationDeceleration;
+					} else {
+						self.__decelerationVelocityX = scrollOutsideX * penetrationAcceleration;
+					}
+				}
+
+				if (scrollOutsideY !== 0) {
+					if (scrollOutsideY * self.__decelerationVelocityY <= 0) {
+						self.__decelerationVelocityY += scrollOutsideY * penetrationDeceleration;
+					} else {
+						self.__decelerationVelocityY = scrollOutsideY * penetrationAcceleration;
+					}
+				}
+			}
+		}
+	};
+
+	// Copy over members to prototype
+	for (var key in members) {
+		Scroller.prototype[key] = members[key];
+	}
+
+})();
+
+;/*
+ * Scroller
+ * http://github.com/zynga/scroller
+ *
+ * Copyright 2011, Zynga Inc.
+ * Licensed under the MIT License.
+ * https://raw.github.com/zynga/scroller/master/MIT-LICENSE.txt
+ *
+ * Based on the work of: Unify Project (unify-project.org)
+ * http://unify-project.org
+ * Copyright 2011, Deutsche Telekom AG
+ * License: MIT + Apache (V2)
+ */
+
+/**
+ * Generic animation class with support for dropped frames both optional easing and duration.
+ *
+ * Optional duration is useful when the lifetime is defined by another condition than time
+ * e.g. speed of an animating object, etc.
+ *
+ * Dropped frame logic allows to keep using the same updater logic independent from the actual
+ * rendering. This eases a lot of cases where it might be pretty complex to break down a state
+ * based on the pure time difference.
+ */
+(function(global) {
+	var time = Date.now || function() {
+		return +new Date();
+	};
+	var desiredFrames = 60;
+	var millisecondsPerSecond = 1000;
+	var running = {};
+	var counter = 1;
+
+	// Create namespaces
+	if (!global.core) {
+		global.core = { effect : {} };
+
+	} else if (!core.effect) {
+		core.effect = {};
+	}
+
+	core.effect.Animate = {
+
+		/**
+		 * A requestAnimationFrame wrapper / polyfill.
+		 *
+		 * @param callback {Function} The callback to be invoked before the next repaint.
+		 * @param root {HTMLElement} The root element for the repaint
+		 */
+		requestAnimationFrame: (function() {
+
+			// Check for request animation Frame support
+			var requestFrame = global.requestAnimationFrame || global.webkitRequestAnimationFrame || global.mozRequestAnimationFrame || global.oRequestAnimationFrame;
+			var isNative = !!requestFrame;
+
+			if (requestFrame && !/requestAnimationFrame\(\)\s*\{\s*\[native code\]\s*\}/i.test(requestFrame.toString())) {
+				isNative = false;
+			}
+
+			if (isNative) {
+				return function(callback, root) {
+					requestFrame(callback, root)
+				};
+			}
+
+			var TARGET_FPS = 60;
+			var requests = {};
+			var requestCount = 0;
+			var rafHandle = 1;
+			var intervalHandle = null;
+			var lastActive = +new Date();
+
+			return function(callback, root) {
+				var callbackHandle = rafHandle++;
+
+				// Store callback
+				requests[callbackHandle] = callback;
+				requestCount++;
+
+				// Create timeout at first request
+				if (intervalHandle === null) {
+
+					intervalHandle = setInterval(function() {
+
+						var time = +new Date();
+						var currentRequests = requests;
+
+						// Reset data structure before executing callbacks
+						requests = {};
+						requestCount = 0;
+
+						for(var key in currentRequests) {
+							if (currentRequests.hasOwnProperty(key)) {
+								currentRequests[key](time);
+								lastActive = time;
+							}
+						}
+
+						// Disable the timeout when nothing happens for a certain
+						// period of time
+						if (time - lastActive > 2500) {
+							clearInterval(intervalHandle);
+							intervalHandle = null;
+						}
+
+					}, 1000 / TARGET_FPS);
+				}
+
+				return callbackHandle;
+			};
+
+		})(),
+
+
+		/**
+		 * Stops the given animation.
+		 *
+		 * @param id {Integer} Unique animation ID
+		 * @return {Boolean} Whether the animation was stopped (aka, was running before)
+		 */
+		stop: function(id) {
+			var cleared = running[id] != null;
+			if (cleared) {
+				running[id] = null;
+			}
+
+			return cleared;
+		},
+
+
+		/**
+		 * Whether the given animation is still running.
+		 *
+		 * @param id {Integer} Unique animation ID
+		 * @return {Boolean} Whether the animation is still running
+		 */
+		isRunning: function(id) {
+			return running[id] != null;
+		},
+
+
+		/**
+		 * Start the animation.
+		 *
+		 * @param stepCallback {Function} Pointer to function which is executed on every step.
+		 *   Signature of the method should be `function(percent, now, virtual) { return continueWithAnimation; }`
+		 * @param verifyCallback {Function} Executed before every animation step.
+		 *   Signature of the method should be `function() { return continueWithAnimation; }`
+		 * @param completedCallback {Function}
+		 *   Signature of the method should be `function(droppedFrames, finishedAnimation) {}`
+		 * @param duration {Integer} Milliseconds to run the animation
+		 * @param easingMethod {Function} Pointer to easing function
+		 *   Signature of the method should be `function(percent) { return modifiedValue; }`
+		 * @param root {Element ? document.body} Render root, when available. Used for internal
+		 *   usage of requestAnimationFrame.
+		 * @return {Integer} Identifier of animation. Can be used to stop it any time.
+		 */
+		start: function(stepCallback, verifyCallback, completedCallback, duration, easingMethod, root) {
+
+			var start = time();
+			var lastFrame = start;
+			var percent = 0;
+			var dropCounter = 0;
+			var id = counter++;
+
+			if (!root) {
+				root = document.body;
+			}
+
+			// Compacting running db automatically every few new animations
+			if (id % 20 === 0) {
+				var newRunning = {};
+				for (var usedId in running) {
+					newRunning[usedId] = true;
+				}
+				running = newRunning;
+			}
+
+			// This is the internal step method which is called every few milliseconds
+			var step = function(virtual) {
+
+				// Normalize virtual value
+				var render = virtual !== true;
+
+				// Get current time
+				var now = time();
+
+				// Verification is executed before next animation step
+				if (!running[id] || (verifyCallback && !verifyCallback(id))) {
+
+					running[id] = null;
+					completedCallback && completedCallback(desiredFrames - (dropCounter / ((now - start) / millisecondsPerSecond)), id, false);
+					return;
+
+				}
+
+				// For the current rendering to apply let's update omitted steps in memory.
+				// This is important to bring internal state variables up-to-date with progress in time.
+				if (render) {
+
+					var droppedFrames = Math.round((now - lastFrame) / (millisecondsPerSecond / desiredFrames)) - 1;
+					for (var j = 0; j < Math.min(droppedFrames, 4); j++) {
+						step(true);
+						dropCounter++;
+					}
+
+				}
+
+				// Compute percent value
+				if (duration) {
+					percent = (now - start) / duration;
+					if (percent > 1) {
+						percent = 1;
+					}
+				}
+
+				// Execute step callback, then...
+				var value = easingMethod ? easingMethod(percent) : percent;
+				if ((stepCallback(value, now, render) === false || percent === 1) && render) {
+					running[id] = null;
+					completedCallback && completedCallback(desiredFrames - (dropCounter / ((now - start) / millisecondsPerSecond)), id, percent === 1 || duration == null);
+				} else if (render) {
+					lastFrame = now;
+					core.effect.Animate.requestAnimationFrame(step, root);
+				}
+			};
+
+			// Mark as running
+			running[id] = true;
+
+			// Init first step
+			core.effect.Animate.requestAnimationFrame(step, root);
+
+			// Return unique animation ID
+			return id;
+		}
+	};
+})(this);
+
+
 ;define("ember-cli-dates/helpers/date-and-time", 
   ["ember","ember-cli-dates/helpers/time-format","exports"],
   function(__dependency1__, __dependency2__, __exports__) {
@@ -79794,6 +83772,1258 @@ define("ember-cli-dates/utils/valid-args",
     }
   });
 define("ember-cli-dates", ["ember-cli-dates/index","exports"], function(__index__, __exports__) {
+  "use strict";
+  Object.keys(__index__).forEach(function(key){
+    __exports__[key] = __index__[key];
+  });
+});
+
+define("ember-cli-filter-by-query/index", 
+  ["ember","ember-cli-filter-by-query/util/filter","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var filterByQuery = __dependency2__["default"];
+
+    var computedFilterByQuery = function(dependentKey, propertyKeys, queryKey, options) {
+      propertyKeys = Ember.makeArray(propertyKeys);
+
+      return Ember.computed( queryKey, '' + dependentKey + '.@each.{' + propertyKeys.join(',') + '}', function() {
+
+        var array = Ember.makeArray(this.get(dependentKey));
+        var query = this.get(queryKey) || '';
+
+        return filterByQuery(array, propertyKeys, query, options);
+
+      });
+    };
+
+    __exports__["default"] = computedFilterByQuery;
+  });
+define("ember-cli-filter-by-query/util/filter", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    /*global Sifter*/
+
+    var filterByQuery = function(array, propertyKeys, query, options) {
+      options = Ember.typeOf(options) === 'undefined' ? {} : options;
+      propertyKeys = Ember.makeArray(propertyKeys);
+      var input, sifter, result;
+
+      input = array.map(function(item) {
+        var hash = {};
+        propertyKeys.forEach(function(key) {
+          hash[key] = Ember.get(item, key);
+        });
+        return hash;
+      });
+
+      options.fields = options.fields || propertyKeys;
+      options.limit = options.limit || array.length;
+      options.sort = propertyKeys.map(function(key) {
+        return {field: key, direction: 'asc'};
+      });
+
+      sifter = new Sifter(input);
+      result = sifter.search(query, options);
+
+      return result.items.map( function(item) {
+        return array[item.id];
+      });
+
+    };
+
+    __exports__["default"] = filterByQuery;
+  });
+define("ember-cli-filter-by-query", ["ember-cli-filter-by-query/index","exports"], function(__index__, __exports__) {
+  "use strict";
+  Object.keys(__index__).forEach(function(key){
+    __exports__[key] = __index__[key];
+  });
+});
+
+define("ember-cli-pagination/computed/paged-array", 
+  ["ember","ember-cli-pagination/local/paged-array","ember-cli-pagination/infinite/paged-infinite-array","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var PagedArray = __dependency2__["default"];
+    var PagedInfiniteArray = __dependency3__["default"];
+
+    function makeLocal(contentProperty,ops) {
+      return Ember.computed("",function() {
+        var pagedOps = {}; //{content: this.get(contentProperty)};
+        pagedOps.parent = this;
+
+        var getVal = function(key,val) {
+          if (key.match(/Binding$/)) {
+            return "parent."+val;
+            //return Ember.Binding.oneWay("parent."+val);
+          }
+          else {
+            return val;
+          }
+        };
+
+        for (var key in ops) {
+          pagedOps[key] = getVal(key,ops[key]);
+        }
+
+        var paged = PagedArray.extend({
+          contentBinding: "parent."+contentProperty
+        }).create(pagedOps);
+        // paged.lockToRange();
+        return paged;
+      });
+    }
+
+    function makeInfiniteWithPagedSource(contentProperty /*, ops */) {
+      return Ember.computed(function() {
+        return PagedInfiniteArray.create({all: this.get(contentProperty)});
+      });
+    }
+
+    function makeInfiniteWithUnpagedSource(contentProperty,ops) {
+      return Ember.computed(function() {
+        ops.all = this.get(contentProperty);
+        return PagedInfiniteArray.createFromUnpaged(ops);
+      });
+    }
+
+    __exports__["default"] = function(contentProperty,ops) {
+      ops = ops || {};
+
+      if (ops.infinite === true) {
+        return makeInfiniteWithPagedSource(contentProperty,ops);
+      }
+      else if (ops.infinite) {
+        return makeInfiniteWithUnpagedSource(contentProperty,ops);
+      }
+      else {
+        return makeLocal(contentProperty,ops);
+      }
+    }
+  });
+define("ember-cli-pagination/divide-into-pages", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Object.extend({
+      objsForPage: function(page) {
+        var range = this.range(page);
+        return this.get('all').slice(range.start,range.end+1);
+      },
+
+      totalPages: function() {
+        var allLength = parseInt(this.get('all.length'));
+        var perPage = parseInt(this.get('perPage'));
+        return Math.ceil(allLength/perPage);
+      },
+
+      range: function(page) {
+        var perPage = parseInt(this.get('perPage'));
+        var s = (parseInt(page) - 1) * perPage;
+        var e = s + perPage - 1;
+
+        return {start: s, end: e};
+      }
+    });
+  });
+define("ember-cli-pagination/factory", 
+  ["ember","ember-cli-pagination/remote/controller-mixin","ember-cli-pagination/local/controller-local-mixin","ember-cli-pagination/remote/route-mixin","ember-cli-pagination/local/route-local-mixin","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var PageControllerMixin = __dependency2__["default"];
+    var PageControllerLocalMixin = __dependency3__["default"];
+    var PageRouteMixin = __dependency4__["default"];
+    var PageRouteLocalMixin = __dependency5__["default"];
+
+    var Factory = Ember.Object.extend({
+      paginationTypeInner: function() {
+        var res = this.get('config').paginationType;
+        if (res) {
+          return res;
+        }
+        var ops = this.get('config').pagination;
+        if (ops) {
+          return ops.type;
+        }
+        return null;
+      },
+
+      paginationType: function() {
+        var res = this.paginationTypeInner();
+        if (!(res === "local" || res === "remote")) {
+          throw "unknown pagination type";
+        }
+        return res;
+      },
+
+      controllerMixin: function() {
+        return {
+          local: PageControllerLocalMixin,
+          remote: PageControllerMixin
+        }[this.paginationType()];
+      },
+
+      routeMixin: function() {
+        return {
+          local: PageRouteLocalMixin,
+          remote: PageRouteMixin
+        }[this.paginationType()];
+      }
+    });
+
+    Factory.reopenClass({
+      controllerMixin: function(config) {
+        return Factory.create({config: config}).controllerMixin();
+      },
+      routeMixin: function(config) {
+        return Factory.create({config: config}).routeMixin();
+      }
+    });
+
+    __exports__["default"] = Factory;
+  });
+define("ember-cli-pagination/infinite/paged-infinite-array", 
+  ["ember","ember-cli-pagination/local/paged-array","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var PagedArray = __dependency2__["default"];
+    // import PagedRemoteArray from 'ember-cli-pagination/remote/paged-remote-array';
+
+    var toArray = function(a) {
+      var res = [];
+      if (a.forEach) {
+        a.forEach(function(obj) {
+          res.push(obj);
+        });
+      }
+      else {
+        res = a;
+      }
+      return res;
+    };
+
+    var pushPromiseObjects = function(base,promise) {
+      if (!base) {
+        throw "pushPromiseObjects no base";
+      }
+      if (!promise) {
+        throw "pushPromiseObjects no promise";
+      }
+
+      if (!promise.then) {
+        throw "pushPromiseObjects no promise.then";
+      }
+
+      if (!base.pushObjects) {
+        throw "pushPromiseObjects no base.pushObjects";
+      }
+
+      promise.then(function(r) {
+        base.pushObjects(toArray(r));
+      });
+      return promise;
+    };
+
+    var InfiniteBase = Ember.ArrayProxy.extend({
+      page: 1,
+
+      arrangedContent: function() {
+        return this.get('content');
+      }.property('content.@each'),
+
+      init: function() {
+        this.set('content',[]);
+        this.addRecordsForPage(1);
+      },
+
+      loadNextPage: function() {
+        this.incrementProperty('page');
+        var page = this.get('page');
+        return this.addRecordsForPage(page);
+      },
+
+      addRecordsForPage: function(page) {
+        var arr = this.getRecordsForPage(page);
+        return pushPromiseObjects(this.get('content'),arr);
+      },
+
+      getRecordsForPage: function(/* page */) {
+        throw "Not Implemented";
+      }
+    });
+
+    var c = InfiniteBase.extend({
+      getRecordsForPage: function(page) {
+        var c = this.get('all');
+        c.set('page',page);
+        return c;
+      },
+
+      then: function(f,f2) {
+        this.get('all').then(f,f2);
+      }
+    });
+
+    c.reopenClass({
+      createFromUnpaged: function(ops) {
+        var unpaged = ops.all;
+        var perPage = ops.perPage || 10;
+        var paged = PagedArray.create({perPage: perPage, content: unpaged});
+        return this.create({all: paged});
+      }
+    });
+
+    __exports__["default"] = c;
+  });
+define("ember-cli-pagination/lib/page-items", 
+  ["ember","ember-cli-pagination/util","ember-cli-pagination/lib/truncate-pages","ember-cli-pagination/util/safe-get","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var Util = __dependency2__["default"];
+    var TruncatePages = __dependency3__["default"];
+    var SafeGet = __dependency4__["default"];
+
+    __exports__["default"] = Ember.Object.extend(SafeGet, {
+      pageItemsAll: function() {
+        var currentPage = this.getInt("currentPage");
+        var totalPages = this.getInt("totalPages");
+        Util.log("PageNumbers#pageItems, currentPage " + currentPage + ", totalPages " + totalPages);
+
+        var res = [];
+        for(var i=1; i<=totalPages; i++) {
+          res.push({
+            page: i,
+            current: currentPage === i
+          });
+        }
+        return res;
+      }.property("currentPage", "totalPages"),
+
+      pageItemsTruncated: function() {
+        var currentPage = this.getInt('currentPage');
+        var totalPages = this.getInt("totalPages");
+        var toShow = this.getInt('numPagesToShow');
+        var showFL = this.get('showFL');
+
+        var t = TruncatePages.create({currentPage: currentPage, totalPages: totalPages, 
+                                      numPagesToShow: toShow,
+                                      showFL: showFL});
+        var pages = t.get('pagesToShow');
+
+        return pages.map(function(page) {
+          return {
+            page: page,
+            current: (currentPage === page)
+          };
+        });
+      }.property('currentPage','totalPages','numPagesToShow'),
+
+      pageItems: function() {
+        if (this.get('truncatePages')) {
+          return this.get('pageItemsTruncated');
+        }
+        else {
+          return this.get('pageItemsAll');
+        }
+      }.property('currentPage','totalPages','truncatePages','numPagesToShow')
+    });
+  });
+define("ember-cli-pagination/lib/truncate-pages", 
+  ["ember","ember-cli-pagination/util/safe-get","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var SafeGet = __dependency2__["default"];
+
+    __exports__["default"] = Ember.Object.extend(SafeGet, {
+      numPagesToShow: 10,
+      showFL: false,
+      currentPage: null,
+      totalPages: null,
+
+      isValidPage: function(page) {
+        page = parseInt(page);
+        var totalPages = this.getInt('totalPages');
+
+        return page > 0 && page <= totalPages;
+      },
+
+      pagesToShow: function() {
+        var res = [];
+
+        var numPages = this.getInt('numPagesToShow');
+        var currentPage = this.getInt('currentPage');
+        var totalPages = this.getInt('totalPages');
+        var showFL = this.get('showFL');
+        
+        var before = parseInt(numPages / 2);    
+        if ((currentPage - before) < 1 ) {
+          before = currentPage - 1;
+        }
+        var after = numPages - before - 1;
+        if ((totalPages - currentPage) < after) {
+          after = totalPages - currentPage;
+          before = numPages - after - 1;
+        }
+
+        // add one page if no first or last is added
+        if (showFL) {
+          if ((currentPage - before) < 2 ) {
+            after++;
+          }
+          if ((totalPages - currentPage - 1) < after) {
+            before++;
+          }      
+        }
+        
+        // add each prior page
+        for(var i=before;i>0;i--) {
+          var possiblePage = currentPage-i;
+          if (this.isValidPage(possiblePage)) {
+            res.push(possiblePage);
+          }
+        }
+
+        res.push(currentPage);
+
+        // add each following page
+        for(i=1;i<=after;i++) {
+          var possiblePage2 = currentPage+i;
+          if (this.isValidPage(possiblePage2)) {
+            res.push(possiblePage2);
+          }
+        }
+
+        // add first and last page
+        if (showFL) {
+          if (res.length > 0) {
+
+            // add first page if not already there
+            if (res[0] !== 1) {
+              res = [1].concat(res);
+            }
+
+            // add last page if not already there
+            if (res[res.length-1] !== totalPages) {
+              res.push(totalPages);
+            }
+          }
+        }
+        
+        return res;
+
+      }.property("numPagesToShow","currentPage","totalPages")
+    });
+  });
+define("ember-cli-pagination/local/controller-local-mixin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Mixin.create({
+
+    });
+  });
+define("ember-cli-pagination/local/paged-array", 
+  ["ember","ember-cli-pagination/util","ember-cli-pagination/divide-into-pages","ember-cli-pagination/watch/lock-to-range","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var Util = __dependency2__["default"];
+    var DivideIntoPages = __dependency3__["default"];
+    var LockToRange = __dependency4__["default"];
+
+    __exports__["default"] = Ember.ArrayProxy.extend(Ember.Evented, {
+      page: 1,
+      perPage: 10,
+
+      divideObj: function() {
+        return DivideIntoPages.create({
+          perPage: this.get('perPage'),
+          all: this.get('content')
+        });
+      },
+
+      arrangedContent: function() {
+        return this.divideObj().objsForPage(this.get('page'));
+      }.property("content.@each", "page", "perPage"),
+
+      totalPages: function() {
+        return this.divideObj().totalPages();
+      }.property("content.@each", "perPage"),
+      
+      setPage: function(page) {
+        Util.log("setPage " + page);
+        return this.set('page', page);
+      },
+
+      watchPage: function() {
+        var page = this.get('page');
+        var totalPages = this.get('totalPages');
+
+        this.trigger('pageChanged',page);
+
+        if (page < 1 || page > totalPages) {
+          this.trigger('invalidPage',{page: page, totalPages: totalPages, array: this});
+        }
+      }.observes('page','totalPages'),
+
+      then: function(success,failure) {
+        var content = this.get('content');
+        var me = this;
+
+        if (content.then) {
+          content.then(function() {
+            success(me);
+          },failure);
+        }
+        else {
+          success(this);
+        }
+      },
+
+      lockToRange: function() {
+        LockToRange.watch(this);
+      }
+    });
+  });
+define("ember-cli-pagination/local/route-local-mixin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Mixin.create({
+      findPaged: function(name) {
+        return this.store.find(name);
+      }
+    });
+  });
+define("ember-cli-pagination/page-mixin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    __exports__["default"] = Ember.Mixin.create({
+      getPage: function() {
+        return parseInt(this.get('page') || 1);
+      },
+
+      getPerPage: function() {
+        return parseInt(this.get('perPage'));
+      }
+    });
+  });
+define("ember-cli-pagination/remote/controller-mixin", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+
+    __exports__["default"] = Ember.Mixin.create({
+      queryParams: ["page", "perPage"],
+      
+      pageBinding: "content.page",
+
+      totalPagesBinding: "content.totalPages",
+
+      pagedContentBinding: "content"
+    });
+  });
+define("ember-cli-pagination/remote/mapping", 
+  ["ember","ember-cli-pagination/validate","ember-cli-pagination/util","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var Validate = __dependency2__["default"];
+    var Util = __dependency3__["default"];
+
+    var QueryParamsForBackend = Ember.Object.extend({
+      defaultKeyFor: function(key) {
+        if (key === 'perPage') {
+          return 'per_page';
+        }
+        return null;
+      },
+
+      paramKeyFor: function(key) {
+        return this.getSuppliedParamMapping(key) || this.defaultKeyFor(key) || key;
+      },
+
+      getSuppliedParamMapping: function(key) {
+        var h = this.get('paramMapping') || {};
+        return h[key];
+      },
+
+      accumParams: function(key,accum) {
+        var val = this.get(key);
+        var mappedKey = this.paramKeyFor(key);
+
+        if (Array.isArray(mappedKey)) {
+          this.accumParamsComplex(key,mappedKey,accum);
+        }
+        else {
+          accum[mappedKey] = val;
+        }
+      },
+
+      accumParamsComplex: function(key,mapArr,accum) {
+        var mappedKey = mapArr[0];
+        var mapFunc = mapArr[1];
+
+        var val = mapFunc({page: this.get('page'), perPage: this.get('perPage')});
+        accum[mappedKey] = val;
+      },
+
+      make: function() {
+        var res = {};
+
+        this.accumParams('page',res);
+        this.accumParams('perPage',res);
+
+        return res;
+      }
+    });
+    __exports__.QueryParamsForBackend = QueryParamsForBackend;
+    var ChangeMeta = Ember.Object.extend({
+      getSuppliedParamMapping: function(targetVal) {
+        var h = this.get('paramMapping') || {};
+
+        // have to do this gross thing because mapping looks like this:
+        // {total_pages: ['num_pages',function() ...]}
+        //
+        // but the way the code works, we need to check for an entry where val[0] == num_pages
+        // and then return ['total_pages',function() ...]
+        //
+        // Gross, but that's how it's working for now
+        for (var key in h) {
+          var val = h[key];
+          if (targetVal === val) {
+            return key;
+          }
+          else if (Array.isArray(val) && val[0] === targetVal) {
+            return [key,val[1]];
+          }
+        }
+
+        return null;
+      },
+
+      finalKeyFor: function(key) {
+        return this.getSuppliedParamMapping(key) || key;
+      },
+
+      makeSingleComplex: function(key,mapArr,rawVal,accum) {
+        var mappedKey = mapArr[0];
+        var mapFunc = mapArr[1];
+
+        var ops = {rawVal: rawVal, page: this.get('page'), perPage: this.get('perPage')};
+        var mappedVal = mapFunc(ops);
+        accum[mappedKey] = mappedVal;
+      },
+
+      make: function() {
+        var res = {};
+        var meta = this.get('meta');
+
+        for (var key in meta) {
+          var mappedKey = this.finalKeyFor(key);
+          var val = meta[key];
+
+          if (Array.isArray(mappedKey)) {
+            this.makeSingleComplex(key,mappedKey,val,res);
+          }
+          else {
+            res[mappedKey] = val;
+          }
+        }
+
+        this.validate(res);
+
+        return res;
+      },
+
+      validate: function(meta) {
+        if (Util.isBlank(meta.total_pages)) {
+          Validate.internalError("no total_pages in meta response",meta);
+        }
+      }
+    });
+    __exports__.ChangeMeta = ChangeMeta;
+  });
+define("ember-cli-pagination/remote/paged-remote-array", 
+  ["ember","ember-cli-pagination/util","ember-cli-pagination/watch/lock-to-range","ember-cli-pagination/remote/mapping","ember-cli-pagination/page-mixin","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var Util = __dependency2__["default"];
+    var LockToRange = __dependency3__["default"];
+    var QueryParamsForBackend = __dependency4__.QueryParamsForBackend;
+    var ChangeMeta = __dependency4__.ChangeMeta;
+    var PageMixin = __dependency5__["default"];
+
+    var ArrayProxyPromiseMixin = Ember.Mixin.create(Ember.PromiseProxyMixin, {
+      then: function(success,failure) {
+        var promise = this.get('promise');
+        var me = this;
+
+        promise.then(function() {
+          success(me);
+        }, failure);
+      }
+    });
+
+    __exports__["default"] = Ember.ArrayProxy.extend(PageMixin, Ember.Evented, ArrayProxyPromiseMixin, {
+      page: 1,
+      paramMapping: function() {
+        return {};
+      }.property(''),
+
+      init: function() {
+        var initCallback = this.get('initCallback');
+        if (initCallback) {
+          initCallback(this);
+        }
+
+        try {
+          this.get('promise');
+        }
+        catch (e) {
+          this.set('promise', this.fetchContent());
+        }
+      },
+
+      addParamMapping: function(key,mappedKey,mappingFunc) {
+        var paramMapping = this.get('paramMapping') || {};
+        if (mappingFunc) {
+          paramMapping[key] = [mappedKey,mappingFunc];
+        }
+        else {
+          paramMapping[key] = mappedKey;
+        }
+        this.set('paramMapping',paramMapping);
+        this.incrementProperty('paramsForBackendCounter');
+        //this.pageChanged();
+      },
+
+      addQueryParamMapping: function(key,mappedKey,mappingFunc) {
+        return this.addParamMapping(key,mappedKey,mappingFunc);
+      },
+
+      addMetaResponseMapping: function(key,mappedKey,mappingFunc) {
+        return this.addParamMapping(key,mappedKey,mappingFunc);
+      },
+
+      paramsForBackend: function() {
+        var paramsObj = QueryParamsForBackend.create({page: this.getPage(), 
+                                                      perPage: this.getPerPage(), 
+                                                      paramMapping: this.get('paramMapping')});
+        var ops = paramsObj.make();
+
+        // take the otherParams hash and add the values at the same level as page/perPage
+        ops = Util.mergeHashes(ops,this.get('otherParams')||{});
+
+        return ops;
+      }.property('page','perPage','paramMapping','paramsForBackendCounter'),
+
+      rawFindFromStore: function() {
+        var store = this.get('store');
+        var modelName = this.get('modelName');
+
+        var ops = this.get('paramsForBackend');
+        var res = store.find(modelName, ops);
+
+        return res;
+      },
+
+      fetchContent: function() {
+        var res = this.rawFindFromStore();
+        this.incrementProperty("numRemoteCalls");
+        var me = this;
+
+        res.then(function(rows) {
+          var metaObj = ChangeMeta.create({paramMapping: me.get('paramMapping'),
+                                           meta: rows.meta,
+                                           page: me.getPage(),
+                                           perPage: me.getPerPage()});
+
+          return me.set("meta", metaObj.make());
+          
+        }, function(error) {
+          Util.log("PagedRemoteArray#fetchContent error " + error);
+        });
+
+        return res;
+      },  
+
+      totalPagesBinding: "meta.total_pages",
+
+      pageChanged: function() {
+        this.set("promise", this.fetchContent());
+      }.observes("page", "perPage"),
+
+      lockToRange: function() {
+        LockToRange.watch(this);
+      },
+
+      watchPage: function() {
+        var page = this.get('page');
+        var totalPages = this.get('totalPages');
+        if (parseInt(totalPages) <= 0) {
+          return;
+        }
+
+        this.trigger('pageChanged',page);
+
+        if (page < 1 || page > totalPages) {
+          this.trigger('invalidPage',{page: page, totalPages: totalPages, array: this});
+        }
+      }.observes('page','totalPages')
+    });
+  });
+define("ember-cli-pagination/remote/route-mixin", 
+  ["ember","ember-cli-pagination/remote/paged-remote-array","ember-cli-pagination/util","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var PagedRemoteArray = __dependency2__["default"];
+    var Util = __dependency3__["default"];
+
+    __exports__["default"] = Ember.Mixin.create({
+      perPage: 10,
+      startingPage: 1,
+
+      model: function(params) {
+        return this.findPaged(this._findModelName(this.get('routeName')), params);
+      },
+
+      _findModelName: function(routeName) {
+          return Ember.String.singularize(
+            Ember.String.camelize(routeName)
+          );
+      },
+
+      findPaged: function(name, params, callback) {
+        var mainOps = {
+          page: params.page || this.get('startingPage'),
+          perPage: params.perPage || this.get('perPage'),
+          modelName: name,
+          store: this.store
+        };
+
+        if (params.paramMapping) {
+          mainOps.paramMapping = params.paramMapping;
+        }
+
+        var otherOps = Util.paramsOtherThan(params,["page","perPage","paramMapping"]);
+        mainOps.otherParams = otherOps;
+
+        mainOps.initCallback = callback;
+
+        return PagedRemoteArray.create(mainOps);
+      }
+    });
+  });
+define("ember-cli-pagination/test-helpers", 
+  ["ember","ember-cli-pagination/divide-into-pages","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var DivideIntoPages = __dependency2__["default"];
+
+    var TestHelpers = Ember.Object.extend({
+      responseHash: function() {
+        var page = this.pageFromRequest(this.request);
+        var k = "" + this.name + "s";
+
+        var res = {};
+        res[k] = this.objsForPage(page);
+        res.meta = {total_pages: this.totalPages()};
+
+        return res;
+      },
+
+      divideObj: function() {
+        var perPage = this.perPageFromRequest(this.request);
+        return DivideIntoPages.create({perPage: perPage, all: this.all});
+      },
+
+      objsForPage: function(page) {
+        return this.divideObj().objsForPage(page);
+      },
+
+      pageFromRequest: function(request) {
+        var res = request.queryParams.page;
+        return parseInt(res);
+      },
+
+      perPageFromRequest: function(request) {
+        var res = request.queryParams.per_page;
+        return parseInt(res);
+      },
+
+      totalPages: function() {
+        return this.divideObj().totalPages();
+      }
+    });
+
+    TestHelpers.reopenClass({
+      responseHash: function(request, all, name) {
+        return this.create({
+          request: request,
+          all: all,
+          name: name
+        }).responseHash();
+      }
+    });
+
+    __exports__["default"] = TestHelpers;
+  });
+define("ember-cli-pagination/util", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    var Util = Ember.Object.extend();
+
+    Util.reopenClass({
+      log: function() {},
+
+      isBlank: function(obj) {
+        if (obj === 0) {
+          return false;
+        }
+        return !obj || (obj === "");
+      },
+
+      keysOtherThan: function(params,excludeKeys) {
+        var res = [];
+        for (var key in params) {
+          if (!excludeKeys.contains(key)) {
+            res.push(key);
+          }
+        }
+        return res;
+      },
+
+      paramsOtherThan: function(params,excludeKeys) {
+        var res = {};
+        var keys = this.keysOtherThan(params,excludeKeys);
+        for(var i=0;i<keys.length;i++) {
+          var key = keys[i];
+          var val = params[key];
+          res[key] = val;
+        }
+        return res;
+      },
+
+      mergeHashes: function(a,b) {
+        var res = {};
+        var val;
+        var key;
+
+        for (key in a) {
+          val = a[key];
+          res[key] = val;
+        }
+
+        for (key in b) {
+          val = b[key];
+          res[key] = val;
+        }
+
+        return res;
+      },
+
+      isFunction: function(obj) {
+        return (typeof obj === 'function');
+      },
+
+      getHashKeyForValue: function(hash,targetVal) {
+        for (var k in hash) {
+          var val = hash[k];
+          if (val === targetVal) {
+            return k;
+          }
+          else if (Util.isFunction(targetVal) && targetVal(val)) {
+            return k;
+          }
+        }
+        return undefined;
+      }
+    });
+
+    __exports__["default"] = Util;
+  });
+define("ember-cli-pagination/util/safe-get", 
+  ["ember","ember-cli-pagination/validate","ember-cli-pagination/util","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var Validate = __dependency2__["default"];
+    var Util = __dependency3__["default"];
+
+    __exports__["default"] = Ember.Mixin.create({
+      getInt: function(prop) {
+        var raw = this.get(prop);
+        if (raw === 0 || raw === "0") {
+          // do nothing
+        }
+        else if (Util.isBlank(raw)) {
+          Validate.internalError("no int for "+prop+" val is "+raw);
+        }
+        return parseInt(raw);
+      }
+    });
+  });
+define("ember-cli-pagination/validate", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+
+    var Validate = Ember.Object.extend();
+
+    Validate.reopenClass({
+      internalErrors: [],
+
+      internalError: function(str,obj) {
+        this.internalErrors.push(str);
+        Ember.Logger.warn(str);
+        if (obj) {
+          Ember.Logger.warn(obj);
+        }
+      },
+
+      getLastInternalError: function() {
+        return this.internalErrors[this.internalErrors.length-1];
+      }
+    });
+
+    __exports__["default"] = Validate;
+  });
+define("ember-cli-pagination/watch/lock-to-range", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    __exports__["default"] = {
+      watch: function(paged) {
+        paged.on('invalidPage',function(event) {
+          if (event.page < 1) {
+            paged.set('page',1);
+          }
+          else if (event.page > event.totalPages) {
+            paged.set('page',event.totalPages);
+          }
+        });
+      }
+    };
+  });
+define("ember-cli-pagination", ["ember-cli-pagination/index","exports"], function(__index__, __exports__) {
+  "use strict";
+  Object.keys(__index__).forEach(function(key){
+    __exports__[key] = __index__[key];
+  });
+});
+
+define("ember-infinite-scroll/components/infinite-scroll", 
+  ["ember","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Em = __dependency1__["default"];
+
+    var $window = Em.$(window),
+        $document = Em.$(document),
+        bind = Em.run.bind;
+
+    var EPSILON = 150;
+
+    __exports__["default"] = Em.Component.extend({
+      action: 'fetchMore',
+      epsilon: EPSILON,
+      isFetching: false,
+      hasMore: null,
+      content: null,
+
+      setup: function() {
+        $window.on('scroll.' + this.elementId, bind(this, this.didScroll));
+      }.on('didInsertElement'),
+
+      teardown: function() {
+        $window.off('scroll.' + this.elementId);
+      }.on('willDestroyElement'),
+
+      didScroll: function() {
+        if (!this.get('isFetching') && this.get('hasMore') && this.isNearBottom()) {
+          this.safeSet('isFetching', true);
+          this.sendAction('action', bind(this, this.handleFetch));
+        }
+      },
+
+      handleFetch: function(promise) {
+        var success = bind(this, this.fetchDidSucceed),
+            failure = bind(this, this.fetchDidFail);
+
+        promise.then(success, failure);
+      },
+
+      fetchDidSucceed: function(response) {
+        var content = this.get('content'),
+            newContent = Em.getWithDefault(response, 'content', response);
+
+        this.safeSet('isFetching', false);
+        if (content) { content.pushObjects(newContent); }
+      },
+
+      fetchDidFail: function() {
+        this.safeSet('isFetching', false);
+      },
+
+      isNearBottom: function() {
+        var viewPortTop = $document.scrollTop(),
+            bottomTop = ($document.height() - $window.height());
+
+        return viewPortTop && (bottomTop - viewPortTop) < this.get('epsilon');
+      },
+
+      safeSet: function(key, value) {
+        if (!this.isDestroyed && !this.isDestroying) { this.set(key, value); }
+      }
+    });
+  });
+define("ember-infinite-scroll", ["ember-infinite-scroll/index","exports"], function(__index__, __exports__) {
+  "use strict";
+  Object.keys(__index__).forEach(function(key){
+    __exports__[key] = __index__[key];
+  });
+});
+
+define("rails-csrf/config", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var __config__ = {
+      url: '/api/csrf'
+    };
+
+    function set(key, value) {
+      __config__[key] = value;
+    }
+
+    __exports__.set = set;
+    function get(key) {
+      return __config__[key];
+    }
+
+    __exports__.get = get;
+    function setCsrfUrl(csrfURL) {
+      set('url', csrfURL);
+    }
+
+    __exports__.setCsrfUrl = setCsrfUrl;
+  });
+define("rails-csrf/index", 
+  ["rails-csrf/service","rails-csrf/config","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var Service = __dependency1__["default"];
+    var Config = __dependency2__["default"];
+
+    function setCsrfUrl(csrfURL) {
+      Config.set('url', csrfURL);
+    }
+
+    __exports__.Service = Service;
+    __exports__.setCsrfUrl = setCsrfUrl;
+  });
+define("rails-csrf/initializers/csrf", 
+  ["rails-csrf/service","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var Service = __dependency1__["default"];
+
+    __exports__["default"] = {
+      name: 'csrf',
+      initialize: function(container, app) {
+        app.register('service:rails-csrf', Service);
+        app.inject('route', 'csrf', 'service:rails-csrf');
+        app.inject('controller', 'csrf', 'service:rails-csrf');
+      }
+    };
+  });
+define("rails-csrf/service", 
+  ["ember","ic-ajax","rails-csrf/config","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+    "use strict";
+    var Ember = __dependency1__["default"];
+    var request = __dependency2__.request;
+    var readFromConfig = __dependency3__.get;
+
+    __exports__["default"] = Ember.Object.extend({
+      onAjaxComplete: function() {
+        var _this = this;
+        Ember.$(document).on("ajaxComplete", function(event, xhr, settings) {
+          var csrf_param = xhr.getResponseHeader('X-CSRF-Param'),
+          csrf_token = xhr.getResponseHeader('X-CSRF-Token');
+
+          if (csrf_param && csrf_token) {
+            _this.setData({csrf_param: csrf_token});
+          }
+        });
+      }.on('init'),
+      setPrefilter: function() {
+        var token = this.get('data').token;
+        var preFilter = function(options, originalOptions, jqXHR) {
+          return jqXHR.setRequestHeader('X-CSRF-Token', token );
+        };
+        $.ajaxPrefilter(preFilter);
+      },
+      setData: function(data) {
+        var param = Ember.keys(data)[0];
+        this.set('data', { param: param, token: data[param] });
+        this.setPrefilter();
+
+        return this.get('data');
+      },
+      fetchToken: function() {
+        var promise;
+        var _this = this;
+
+        if (this.get('data')) {
+          promise = Ember.RSVP.resolve(this.get('data'));
+        } else {
+          var token = Ember.$('meta[name="csrf-token"]').attr('content');
+
+          if (!Ember.isEmpty(token)) {
+            promise = Ember.RSVP.resolve({'authenticity_token': token });
+          } else {
+            promise = request(readFromConfig('url'));
+          }
+
+          promise = promise.then(function(data) {
+            return _this.setData(data);
+          });
+        }
+
+        return promise;
+      }
+    });
+  });
+define("rails-csrf", ["rails-csrf/index","exports"], function(__index__, __exports__) {
   "use strict";
   Object.keys(__index__).forEach(function(key){
     __exports__[key] = __index__[key];

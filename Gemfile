@@ -1,12 +1,12 @@
 source 'https://rubygems.org'
-ruby "2.1.5"
+# ruby "2.1.5"
 
 gem 'pry'
 gem 'pg'
 gem 'foundation-rails'
 gem 'haml-rails', '~> 0.8'
 gem 'jsonpath'
-gem 'ember-cli-rails'
+# gem 'ember-cli-rails'
 gem 'rails', '4.2.0'
 gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
@@ -21,7 +21,7 @@ gem 'unshorten'
 gem 'feedisco'
 gem 'gravtastic'
 gem 'jquery-rails'
-
+gem 'rack-cors'
 
 group :test do
   gem 'rspec-rails', '~> 3.0'
