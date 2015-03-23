@@ -1,8 +1,8 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-  beforeModel: function(posts, transition) {
-    this.transitionTo('stories.all');
+  beforeModel: function() {
+    // this.transitionTo('stories.all');
   },
   model: function() {
     return Ember.RSVP.hash({

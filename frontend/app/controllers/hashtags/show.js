@@ -6,13 +6,6 @@ export default Ember.ObjectController.extend({
 
   currentPathChanged: function () {
     window.scrollTo(0, 0);
-    this.set('showAllStories', false);
-    var storyCount = this.get('stories.length');
-    if(storyCount < 16) {
-      this.set('showMoreButton', false);
-    } else {
-      this.set('showMoreButton', true);
-    }
   }.observes('currentPath'),
 
   sortProperties: ['likes:desc', 'published_at:desc'],
