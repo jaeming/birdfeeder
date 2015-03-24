@@ -5,6 +5,7 @@ RSpec.describe SubscriptionsController, :type => :controller do
 
   it "subscribes a user to a hashtag" do
     user = create(:user)
+    user.reload
     sign_in user
     hashtag1 = create(:hashtag, title: "Ruby")
     hashtag2 = create(:hashtag, title: "Cobol")
@@ -17,9 +18,12 @@ RSpec.describe SubscriptionsController, :type => :controller do
 
   it "unsubscribes a user to a hashtag" do
     user = create(:user)
+    user.reload
     sign_in user
-    hashtag1 = create(:hashtag, title: "Ruby", users: [user])
-    hashtag2 = create(:hashtag, title: "Cobol", users: [user])
+    hashtag1 = create(:hashtag, title: "Ruby")
+    hashtag2 = create(:hashtag, title: "Cobol")
+    hashtag1.users << user
+    hashtag2.users << user
 
     delete :destroy, hashtag_id: hashtag2.id
     hashtag1.reload

@@ -19,8 +19,10 @@ RSpec.describe FavoritesController, type: :controller do
     it "allows a user to unfavorite a story" do
       user = create(:user)
       sign_in user
-      story1 = create(:story, title: "awesome story", users: [user])
-      story2 = create(:story, title: "lame story", users: [user])
+      story1 = create(:story, title: "awesome story")
+      story2 = create(:story, title: "lame story")
+      story1.users << user
+      story2.users << user
 
       delete :destroy, story_id: story2.id
       story1.reload

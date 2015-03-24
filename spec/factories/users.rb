@@ -1,6 +1,7 @@
+require 'faker'
 FactoryGirl.define do
   factory :user do
-    name "Wesley Snipes"
+    name Faker::Name.name
     sequence(:email, 100) { |n| "person#{n}@example.com" }
     password "secretpassword"
     password_confirmation "secretpassword"
