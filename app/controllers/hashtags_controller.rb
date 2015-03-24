@@ -15,6 +15,12 @@ class HashtagsController < ApplicationController
     render json: @hashtag
   end
 
+  def subscribed_hashtags
+    @user = current_user || guest_user
+    @hashtags = @user.hashtags
+    render json: @hashtags
+  end
+
   def search
     @hashtags = Hashtag.search(params[:title])
     render json: @hashtags

@@ -13,8 +13,6 @@ test: &TEST
   database: birdfeeder_test
   host: localhost
   pool: 5
-  username:
-  password:
 
 production:
   adapter: postgresql

@@ -1,0 +1,6 @@
+{{#link-to 'stories.subscribed' class="tag-link" activeClass="tag-active" tagName="div"}}All{{/link-to}}
+{{#each hashtags}}
+  {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
+    {{title}}
+  {{/link-to}}
+{{/each}}

@@ -2,25 +2,25 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   beforeModel: function() {
-    // this.transitionTo('stories.all');
+    this.transitionTo('stories.subscribed');
   },
   model: function() {
     return Ember.RSVP.hash({
-      user: this.store.find('user', 'default_user'),
+      hashtags: this.store.find('hashtag', { subscribed: true }),
       stories: this.store.find('story', { subscribed: true })
     });
   },
   setupController: function(controller, modelHash) {
     controller.set('stories', modelHash.stories);
-    controller.set('defaultUser', modelHash.user);
+    controller.set('hashtags', modelHash.hashtags);
   },
   renderTemplate: function(){
     this.render(); // render application template
-    this.render('stories.all',{
+    this.render('stories.subscribed',{
      into: 'application',
      outlet: 'body'
      });
-    this.render('users.subscribed',{
+    this.render('hashtags.subscribed',{
      into: 'application',
      outlet: 'sidebar'
      });
