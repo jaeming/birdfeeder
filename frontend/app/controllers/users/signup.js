@@ -25,7 +25,8 @@ export default Ember.Controller.extend({
           authenticated: true,
         });
           _this.set('errors', false);
-          _this.transitionToRoute('/');
+          // _this.transitionToRoute('/');
+          window.location.href = '/';
         },
         error: function(data) {
           var errors = data.responseJSON.errors;

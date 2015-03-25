@@ -58,6 +58,7 @@ export default Ember.Controller.extend({
         success: function(result) {
           console.log(result);
           _this.get('controllers.session').set('currentUser', false);
+          window.location.href = '/';
         }
       });
     }

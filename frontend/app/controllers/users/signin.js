@@ -23,6 +23,7 @@ export default Ember.Controller.extend({
           authenticated: true
         });
           _this.transitionToRoute('/');
+          window.location.href = '/';          
         },
         error: function(data) {
           var message = data.responseJSON.error;
