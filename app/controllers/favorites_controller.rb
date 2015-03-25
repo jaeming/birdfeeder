@@ -10,7 +10,7 @@ class FavoritesController < ApplicationController
     @story = Story.find(params[:story_id])
     @favorite = current_user.favorites.find_by(story: @story)
     @favorite.destroy!
-    head :no_content
+    render json: @story
   end
 
 end

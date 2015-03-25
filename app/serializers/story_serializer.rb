@@ -1,5 +1,5 @@
 class StorySerializer < ActiveModel::Serializer
-  attributes :id, :title, :body, :hashtag, :published_at, :users, :favorited, :created_at, :favorites_count
+  attributes :id, :title, :body, :hashtag, :published_at, :users, :favorited, :created_at, :favorites_count, :editable
   delegate :current_user, to: :scope
 
   def hashtag
@@ -22,4 +22,7 @@ class StorySerializer < ActiveModel::Serializer
     object.favorites.count
   end
 
+  def editable
+    true if current_user
+  end
 end

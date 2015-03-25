@@ -7,5 +7,8 @@ export default DS.Model.extend({
   created_at: DS.attr('string'),
   favorites_count: DS.attr('string'),
   subscribed: DS.attr('boolean'),
-  hashtag: DS.belongsTo('hashtag', { async: true })
+  hashtag: DS.belongsTo('hashtag', { async: true }),
+  users: DS.hasMany('user', { async: true }),
+  favorited: DS.attr('boolean'),
+  editable: DS.attr('boolean')
 });

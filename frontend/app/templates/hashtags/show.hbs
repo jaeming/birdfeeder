@@ -12,6 +12,13 @@
 
 {{#each topStories}}
   <div class='article'>
+    {{#if editable}}
+      {{#if favorited}}
+        <a href="#" {{action 'unfavorite' id}}>{{fa-icon "star"}}</a>
+      {{else}}
+        <a href="#" {{action 'favorite' id}}>{{fa-icon "star-o"}}</a>
+      {{/if}}
+    {{/if}}
     <h2>{{title}}</h2>
     <p>{{{body}}}</p>
     <small>published {{date-and-time published_at}}</small>
@@ -22,6 +29,13 @@
 {{#if showAllStories}}
   {{#each allStories}}
     <div class='article'>
+      {{#if editable}}
+        {{#if favorited}}
+          <a href="#" {{action 'unfavorite' id}}>{{fa-icon "star"}}</a>
+        {{else}}
+          <a href="#" {{action 'favorite' id}}>{{fa-icon "star-o"}}</a>
+        {{/if}}
+      {{/if}}
       <h2>{{title}}</h2>
       <p>{{{body}}}</p>
       <small>published {{date-and-time published_at}}</small>
