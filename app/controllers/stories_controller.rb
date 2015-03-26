@@ -10,6 +10,11 @@ class StoriesController < ApplicationController
     render json: @story
   end
 
+  def favorite
+    @favorites = current_user.stories
+    render json: @favorites
+  end
+
   def subscribed_stories
     @subscriptions = Subscription.where(user: current_user || guest_user)
     @stories = []

@@ -14,9 +14,9 @@
   <div class='article'>
     {{#if editable}}
       {{#if favorited}}
-        <a href="#" {{action 'unfavorite' id}}>{{fa-icon "star"}}</a>
+        <a href="#" {{action 'unfavorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star"}}</a>
       {{else}}
-        <a href="#" {{action 'favorite' id}}>{{fa-icon "star-o"}}</a>
+        <a href="#" {{action 'favorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star-o"}}</a>
       {{/if}}
     {{/if}}
     <h2>{{title}}</h2>
@@ -31,9 +31,9 @@
     <div class='article'>
       {{#if editable}}
         {{#if favorited}}
-          <a href="#" {{action 'unfavorite' id}}>{{fa-icon "star"}}</a>
+          <a href="#" {{action 'unfavorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star"}}</a>
         {{else}}
-          <a href="#" {{action 'favorite' id}}>{{fa-icon "star-o"}}</a>
+          <a href="#" {{action 'favorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star-o"}}</a>
         {{/if}}
       {{/if}}
       <h2>{{title}}</h2>
