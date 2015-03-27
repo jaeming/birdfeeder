@@ -4,7 +4,6 @@
   has_many :feeds
   has_many :subscriptions
   has_many :users, through: :subscriptions
-  after_create :titleize
 
   def self.search(title)
     search = "%#{title.downcase}%"
@@ -21,10 +20,6 @@
     client.search("#{self.title} -rt", filter: "links", lang: "en").take(10).collect { |tweet| tweet.urls.select { |url| urls << url} }
     urls
   end
-
-def titleize
-  self.update!(title: self.title.split(' ').map(&:capitalize).join(' '))
-end
 
   def unshortened(url)
     Unshorten["#{url.expanded_url}"]
