@@ -11,7 +11,7 @@ class HashtagsController < ApplicationController
   end
 
   def create
-    @hashtag = Hashtag.find_or_create_by!(hashtag_params[:title].capitalize!)
+    @hashtag = Hashtag.find_or_create_by!(title: hashtag_params[:title].capitalize!)
     render json: @hashtag
   end
 
