@@ -1,7 +1,7 @@
 class StoriesController < ApplicationController
 
   def index
-    @stories = Story.includes(:hashtag, :users).all
+    @stories = Story.includes(:users).all
     render json: @stories
   end
 
@@ -11,14 +11,14 @@ class StoriesController < ApplicationController
   end
 
   def favorite
-    @favorites = current_user.stories
+    @favorites = current_user.stories.includes(:users)
     render json: @favorites
   end
 
   def subscribed_stories
-    @subscriptions = Subscription.where(user: current_user || guest_user)
+    @subscriptions = Subscription.includes(:hashtag).where(user: current_user || guest_user)
     @stories = []
-    @subscriptions.each { |s| @stories |= s.hashtag.stories }
+    @subscriptions.find_each { |s| @stories |= s.hashtag.stories.includes(:users) }
     render json: @stories
   end
 
