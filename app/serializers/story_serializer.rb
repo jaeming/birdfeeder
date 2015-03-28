@@ -18,10 +18,6 @@ class StorySerializer < ActiveModel::Serializer
     object.users.include?(current_user)
   end
 
-  def favorites_count
-    object.favorites.count
-  end
-
   def editable
     true if current_user
   end

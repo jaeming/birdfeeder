@@ -14,8 +14,4 @@ class HashtagSerializer < ActiveModel::Serializer
     object.users.include?(current_user)
   end
 
-  def subscriptions_count
-    object.subscriptions.count
-  end
-
 end
