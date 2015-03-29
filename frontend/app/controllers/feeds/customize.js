@@ -19,6 +19,7 @@ export default Ember.ArrayController.extend({
           _this.store.find('story');
           _this.store.find('hashtag');
           _this.transitionToRoute('hashtags.show', data);
+          _this.get('target.router').refresh();
         },
         error: function() {
           console.log('that went badly');

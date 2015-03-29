@@ -56,7 +56,7 @@ export default Ember.ObjectController.extend({
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function(data) {
-          _this.set('subscribed', data.hashtag.subscribed);
+          _this.get('target.router').refresh();
         },
         error: function() {
           _this.set('controllers.application.errors', 'Subscription failed, try again later.');
@@ -75,7 +75,7 @@ export default Ember.ObjectController.extend({
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function() {
-          _this.set('subscribed', false);
+          _this.get('target.router').refresh();
         },
         error: function() {
           _this.set('controllers.application.errors', 'Unsubscribe failed, try again later.');
