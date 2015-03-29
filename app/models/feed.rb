@@ -13,23 +13,22 @@ class Feed < ActiveRecord::Base
   end
 
   def parse_feed
-    feed_url = self.rss
     begin
-      feed = Feedjira::Feed.fetch_and_parse feed_url
-      entries = feed.entries
+      feed = Feedjira::Feed.fetch_and_parse(self.rss)
     rescue
       puts "couldn't parse feed"
     end
-    create_stories_with(entries) unless feed.blank?
+    create_stories_with(feed.entries) unless feed.blank?
   end
 
   def create_stories_with(entries)
-    entries.each do |feed|
-      @story = Story.find_or_create_by!(title: feed.title)
-      unless @story.content
+    entries.each do |entry|
+      @story = Story.find_or_create_by!(title: entry.title)
+      unless @story.url
         @story.feed = self
-        @story.content = (feed.content || feed.summary).sanitize
-        @story.published = feed.published
+        @story.url = entry.url
+        @story.content = (entry.content || entry.summary).sanitize
+        @story.published = entry.published
         @story.hashtag = self.hashtag
         @story.save!
       end

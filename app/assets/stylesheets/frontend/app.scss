@@ -318,35 +318,61 @@ main {
 
 	//UI
 
-  .subscribe {
-    display: inline;
-    font-size: .8rem;
-    vertical-align: super;
-    color: #fff;
-    padding: .3rem .5rem;
-    background: #89c2d0;
-    border-radius: 3px;
-    transition: all 350ms ease-in;
-    &:hover {
-      background: #546e72;
-      color: #cff7ff;
-    }
+.subscribe {
+  display: inline;
+  font-size: .8rem;
+  vertical-align: super;
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
   }
+}
 
-  .unsubscribe {
-    display: inline;
-    font-size: .8rem;
-    vertical-align: super;
-    color: #fff;
-    padding: .3rem .5rem;
-    background: #d38b8b;
-    border-radius: 3px;
-    transition: all 350ms ease-in;
-    &:hover {
-      background: #735656;
-      color: #ffd2d2;
-    }
+.unsubscribe {
+  display: inline;
+  font-size: .8rem;
+  vertical-align: super;
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #d38b8b;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #735656;
+    color: #ffd2d2;
   }
+}
+
+.refresh-button {
+  display: inline;
+  font-size: .8rem;
+  vertical-align: super;
+  color: #fff;
+  margin-right: .3rem;
+  padding: .3rem .4rem .3rem .6rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
+  }
+}
+
+.updated-text {
+  font-size: 0em;
+  transition: all 350ms ease-in;
+  color: #fff;
+}
+
+.updated-visible {
+  font-size: .8rem;
+}
 
 button, .button {
   background: #7AB1C3;

@@ -7,6 +7,7 @@ scope '/api' do
   get 'sessions/current' => 'sessions#show'
   get 'users/default_user' => 'users#default_user'
   post 'hashtags/twitter' => 'hashtags#search_twitter'
+  post 'feeds/update' => 'feeds#update_feed'
   delete '/subscriptions/:hashtag_id' => 'subscriptions#destroy'
   delete '/favorites/:story_id' => 'favorites#destroy'
 

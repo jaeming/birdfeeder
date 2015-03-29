@@ -16,11 +16,36 @@ export default Ember.ObjectController.extend({
     var last = this.get('filteredStories.length');
     return this.get('filteredStories').slice(15, last);
   }.property('filteredStories.[]'),
+  updatedVisible: false,
 
   actions: {
     loadAll: function() {
       this.set('showAllStories', true);
       this.set('showMoreButton', false);
+    },
+    updateStories: function(id) {
+      var _this = this;
+      var token = this.get('controllers.session.currentUser.token');
+      Ember.$.ajax({
+        url: '/api/feeds/update',
+        type: 'POST',
+        dataType: 'json',
+        data: {'authenticity_token': token, 'hashtag_id': id},
+        success: function(data) {
+          console.log(data);
+          _this.store.pushPayload('story', data);
+          _this.set('updatedVisible', true);
+          Ember.run.later( function() {
+            _this.set('updatedVisible', false);
+          }, 3000);
+        },
+        error: function() {
+          _this.set('controllers.application.errors', 'update failed, try again later.');
+          Ember.run.later( function() {
+            _this.set('controllers.application.errors', false);
+          }, 3000);
+        }
+      });
     },
     subscribe: function(id) {
       var _this = this;

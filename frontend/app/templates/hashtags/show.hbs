@@ -1,5 +1,8 @@
 <div class='row'>
   <h2 class='category-header'>{{title}}</h2>
+  <a href="#" class='refresh-button' {{action 'updateStories' id}}>{{fa-icon "refresh"}}
+    <span {{bind-attr class=":updated-text updatedVisible"}}> &nbsp; Updated! </span>
+  </a>
 {{#if controllers.session.currentUser.authenticated}}
   {{#if subscribed}}
     <a href="#" class="unsubscribe" {{action 'unsubscribe' id}}>Unsubscribe</a>
