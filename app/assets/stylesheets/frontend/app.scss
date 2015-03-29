@@ -374,6 +374,17 @@ main {
   font-size: .8rem;
 }
 
+.stories-count {
+  font-size: .6rem;
+  margin-left: .2rem;
+  border-radius: 50%;
+  color: #cae6e5;
+  padding: .2rem .3rem;
+  background: #2c4044;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
 button, .button {
   background: #7AB1C3;
   box-shadow: inset -1px -1px 15px 1px rgba(0,0,0,0.1);
