@@ -3,6 +3,7 @@ export default Ember.ArrayController.extend({
   needs: ['session'],
   actions: {
     addFeed: function() {
+      this.set('loadingVisible', true);
       var _this = this;
       var url = this.get('url');
       var category = this.get('category');
@@ -13,7 +14,6 @@ export default Ember.ArrayController.extend({
         dataType: "json",
         data: {"authenticity_token": token, "feed":{"url": url, "hashtag": category}},
         success: function(data) {
-          console.log(data);
           _this.set('url', '');
           _this.set('category', '');
           _this.store.find('story');
@@ -23,6 +23,7 @@ export default Ember.ArrayController.extend({
         },
         error: function() {
           console.log('that went badly');
+          _this.set('loadingVisible', false);
         }
       });
     },
