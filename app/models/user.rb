@@ -7,6 +7,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :confirmable
   has_many :subscriptions
   has_many :favorites
+  has_many :views
   has_many :hashtags, through: :subscriptions
   has_many :stories, through: :favorites
   validates :name, uniqueness: { case_sensitive: false }, presence: true

@@ -10,12 +10,6 @@ class StoriesController < ApplicationController
     render json: @story
   end
 
-  def update
-    @story = Story.find(params[:id])
-    @story.update viewed: params[:story][:viewed]
-    render json: {viewed: true, id: @story.id}
-  end
-
   def favorite
     @favorites = current_user.stories.includes(:users)
     render json: @favorites

@@ -15,7 +15,19 @@ class StorySerializer < ActiveModel::Serializer
   end
 
   def favorited
-    object.users.include?(current_user)
+    if current_user
+      true if current_user.favorites.find_by(story: object)
+    else
+      false
+    end
+  end
+
+  def viewed
+    if current_user
+      true if current_user.views.find_by(story_id: object.id)
+    else
+      false
+    end
   end
 
   def editable

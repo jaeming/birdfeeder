@@ -27,8 +27,9 @@ scope '/api' do
   resources :stories
   resources :feeds
   resources :users, except: :destroy
-  resources :subscriptions, only: [:create, :destroy]
-  resources :favorites, only: [:create]
+  resources :subscriptions, only: :create
+  resources :favorites, only: :create
+  resources :views, only: :create
 end
 
   root 'ember#loader'

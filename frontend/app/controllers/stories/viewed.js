@@ -8,10 +8,10 @@ export default Ember.ArrayController.extend({
       var story = this.store.find('story', id);
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
-        url: '/api/stories/' + id,
-        type: 'PATCH',
+        url: '/api/views/',
+        type: 'POST',
         dataType: 'json',
-        data: {'authenticity_token': token, 'story_id': id, 'story': {'viewed': true}},
+        data: {'authenticity_token': token, 'story_id': id},
         success: function(data) {
           console.log(data);
           story.set('viewed', data.viewed);
