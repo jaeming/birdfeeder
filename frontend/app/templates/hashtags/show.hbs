@@ -14,7 +14,7 @@
 </div>
 
 {{#each topStories}}
-  <div class='article'>
+  <div class='article' {{bind-attr id="id"}}>
     {{#if editable}}
       {{#if favorited}}
         <a href="#" {{action 'unfavorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star"}}</a>
@@ -22,6 +22,13 @@
         <a href="#" {{action 'favorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star-o"}}</a>
       {{/if}}
     {{/if}}
+
+    <br>
+    <a href="#" {{action 'markViewed' id target="controller.controllers.stories/viewed"}}>TESTING: mark as viewed?</a>
+    {{#if viewed}}
+      <h2 class='panel'>{{viewed}}</h2>
+    {{/if}}
+
     <h2>{{title}}</h2>
     <p>{{{body}}}</p>
     <small>published {{date-and-time published_at}}</small>

@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.ObjectController.extend({
-  needs: ['session', 'application', 'stories/favorites'],
+  needs: ['session', 'application', 'stories/favorites', 'stories/viewed'],
 
   currentPathChanged: function () {
     window.scrollTo(0, 0);
@@ -55,7 +55,7 @@ export default Ember.ObjectController.extend({
         type: 'POST',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
-        success: function(data) {
+        success: function() {
           _this.get('target.router').refresh();
         },
         error: function() {

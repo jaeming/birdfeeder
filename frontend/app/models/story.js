@@ -10,5 +10,6 @@ export default DS.Model.extend({
   hashtag: DS.belongsTo('hashtag', { async: true }),
   users: DS.hasMany('user', { async: true }),
   favorited: DS.attr('boolean'),
-  editable: DS.attr('boolean')
+  editable: DS.attr('boolean'),
+  viewed: DS.attr('boolean')
 });
