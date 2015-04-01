@@ -23,32 +23,27 @@
       {{/if}}
     {{/if}}
 
-
-    {{#if viewed}}
-      <h2 class='panel'>{{viewed}}</h2>
+    {{#if marked}}
+      <span class='story-read' {{action 'unmarkViewed' id}}>
+        {{fa-icon "fa-check-circle-o"}}
+        <small class='story-read-text'>mark as unread</small>
+      </span>
     {{/if}}
 
     <h2>{{title}}</h2>
     <p>{{{body}}}</p>
     <small>published {{date-and-time published_at}}</small>
 
-    {{#if viewed}}
-    {{else}}
-      {{#waypoint on-down="markViewed" id=id}}
+    {{#waypoint on-down="markViewed" id=id}}
+    {{/waypoint}}
 
-      {{/waypoint}}
-    {{/if}}
   </div>
   <br>
-
-
-
-
-
 {{/each}}
 
 {{#if showAllStories}}
   {{#each allStories}}
+
     <div class='article'>
       {{#if editable}}
         {{#if favorited}}
@@ -57,9 +52,21 @@
           <a href="#" {{action 'favorite' id target="controller.controllers.stories/favorites"}}>{{fa-icon "star-o"}}</a>
         {{/if}}
       {{/if}}
+
+      {{#if marked}}
+        <span class='story-read' {{action 'unmarkViewed' id}}>
+          {{fa-icon "fa-check-circle-o"}}
+          <small class='story-read-text'>mark as unread</small>
+        </span>
+      {{/if}}
+
       <h2>{{title}}</h2>
       <p>{{{body}}}</p>
       <small>published {{date-and-time published_at}}</small>
+
+      {{#waypoint on-down="markViewed" id=id}}
+      {{/waypoint}}
+
     </div>
     <br>
   {{/each}}

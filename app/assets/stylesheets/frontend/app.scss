@@ -208,9 +208,6 @@ span.prefix {
 
 
 
-
-
-
 	//SIDE-BAR
 
 .side-bar {
@@ -313,7 +310,9 @@ main {
 	height: 100%;
 }
 
-
+a {
+  color: #749fa8;
+}
 
 
 	//UI
@@ -493,6 +492,20 @@ z-index: 1000;
   }
 }
 
+.story-read-text {
+  font-size: 0rem;
+  transition: all 220ms ease-in;
+}
+
+.story-read {
+  float: right;
+  color: #9fd3d3;
+  cursor: pointer;
+  &:hover
+    .story-read-text {
+      font-size: .7rem;
+    }
+}
 
 .loading-visible {
   span {

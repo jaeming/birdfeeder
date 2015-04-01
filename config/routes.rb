@@ -3,13 +3,13 @@ Rails.application.routes.draw do
 scope '/api' do
   devise_for :users
 
-
   get 'sessions/current' => 'sessions#show'
   get 'users/default_user' => 'users#default_user'
   post 'hashtags/twitter' => 'hashtags#search_twitter'
   post 'feeds/update' => 'feeds#update_feed'
   delete '/subscriptions/:hashtag_id' => 'subscriptions#destroy'
   delete '/favorites/:story_id' => 'favorites#destroy'
+  delete '/views/:story_id' => 'views#destroy'
 
   get "hashtags" => "hashtags#search",
     :constraints => lambda { |request| request.params[:title] }
