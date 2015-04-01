@@ -23,6 +23,27 @@ export default Ember.ObjectController.extend({
       this.set('showAllStories', true);
       this.set('showMoreButton', false);
     },
+    markViewed: function(obj) {
+
+      var story = this.store.find('story', obj.id);
+      var token = this.get('controllers.session.currentUser.token');
+      var request = new Ember.RSVP.Promise(function(resolve) {
+        Ember.$.ajax({
+          url: '/api/views/',
+          type: 'POST',
+          dataType: 'json',
+          data: {'authenticity_token': token, 'story_id': obj.id},
+          success: function(response) {
+            resolve(response);
+          }
+        });
+      });
+
+      request.then(function(response) {
+        console.log(response);
+        story.set('viewed', response.viewed);
+      });
+    },
     updateStories: function(id) {
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
