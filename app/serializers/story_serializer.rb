@@ -23,7 +23,7 @@ class StorySerializer < ActiveModel::Serializer
   end
 
   def editable
-    false unless current_user
+    true if current_user
   end
 
 end
