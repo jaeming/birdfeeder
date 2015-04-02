@@ -1,14 +1,16 @@
 class ViewsController < ApplicationController
 
   def create
+    @user = current_user || guest_user
     @story = Story.find(params[:story_id])
-    @view = current_user.views.create! story_id: @story.id
+    @view = @user.views.create! story_id: @story.id
     render json: {viewed: true, id: @story.id}
   end
 
   def destroy
+    @user = current_user || guest_user
     @story = Story.find(params[:story_id])
-    @view = current_user.views.find_by(story: @story)
+    @view = @user.views.find_by(story: @story)
     @view.destroy!
     render json: {viewed: false, id: @story.id}
   end
