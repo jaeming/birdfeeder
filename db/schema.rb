@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150331140258) do
+ActiveRecord::Schema.define(version: 20150403042823) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 20150331140258) do
     t.datetime "updated_at",          null: false
     t.boolean  "featured"
     t.integer  "subscriptions_count"
+    t.integer  "stories_count"
   end
 
   create_table "stories", force: :cascade do |t|
@@ -92,8 +93,10 @@ ActiveRecord::Schema.define(version: 20150331140258) do
     t.integer  "story_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "hashtag_id"
   end
 
+  add_index "views", ["hashtag_id"], name: "index_views_on_hashtag_id", using: :btree
   add_index "views", ["story_id"], name: "index_views_on_story_id", using: :btree
   add_index "views", ["user_id"], name: "index_views_on_user_id", using: :btree
 

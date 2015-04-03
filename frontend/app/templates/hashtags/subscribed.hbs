@@ -5,6 +5,6 @@
 {{#link-to 'stories.subscribed' class="tag-link" activeClass="tag-active" tagName="div"}}All{{/link-to}}
 {{#each hashtags}}
   {{#link-to 'hashtags.show' this class="tag-link" activeClass="tag-active" tagName="div"}}
-    {{title}} <span class='stories-count'>{{stories.length}}</span>
+    {{title}} <span class='stories-count'>{{stories_count}}</span>
   {{/link-to}}
 {{/each}}

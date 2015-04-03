@@ -4,7 +4,7 @@ import pagedArray from 'ember-cli-pagination/computed/paged-array';
 export default Ember.Controller.extend({
   needs: ['session', 'stories/favorites'],
   errors: null,
-  sortProperties: ['favorites_count:desc', 'published_at:desc'],
+  sortProperties: ['viewed:asc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('stories', 'sortProperties'),
   pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
   actionsVisible: false,
@@ -47,6 +47,49 @@ export default Ember.Controller.extend({
 			else {
 				console.log('slide panel not active yet');
 			}
+    },
+    markViewed: function(obj) {
+      var story = this.store.find('story', obj.id);
+      var hashtag = this.store.find('hashtag', obj.hashtag_id);
+      var token = this.get('controllers.session.currentUser.token');
+      var request = new Ember.RSVP.Promise(function(resolve) {
+        Ember.$.ajax({
+          url: '/api/views/',
+          type: 'POST',
+          dataType: 'json',
+          data: {'authenticity_token': token, 'story_id': obj.id, 'hashtag_id': hashtag.id},
+          success: function(response) {
+            resolve(response);
+          }
+        });
+      });
+
+      request.then(function() {
+        story.set('marked', true);
+        var storyCountDeduct = hashtag.get('stories_count') - 1;
+        hashtag.set('stories_count', storyCountDeduct);
+      });
+    },
+    unmarkViewed: function(id, hashtag) {
+      var story = this.store.find('story', id);
+      var token = this.get('controllers.session.currentUser.token');
+      var request = new Ember.RSVP.Promise(function(resolve) {
+        Ember.$.ajax({
+          url: '/api/views/'+id,
+          type: 'DELETE',
+          dataType: 'json',
+          data: {'authenticity_token': token, 'story_id': id},
+          success: function(response) {
+            resolve(response);
+          }
+        });
+      });
+
+      request.then(function() {
+        story.set('marked', false);
+        var storyCountAdd = hashtag.get('stories_count') + 1;
+        hashtag.set('stories_count', storyCountAdd);
+      });
     },
     signOut: function() {
       var _this = this;

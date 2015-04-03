@@ -1,12 +1,12 @@
 import Ember from 'ember';
 
 export default Ember.ObjectController.extend({
-  needs: ['session', 'application', 'stories/favorites', 'stories/viewed'],
+  needs: ['session', 'application', 'stories/favorites'],
 
   currentPathChanged: function () {
     window.scrollTo(0, 0);
   }.observes('currentPath'),
-  sortProperties: ['viewed: asc'],
+  sortProperties: ['viewed:asc', 'published_at:desc'],
   filteredStories: Ember.computed.sort('stories', 'sortProperties'),
   topStories: function() {
     return this.get('filteredStories').slice(0, 15);
@@ -23,14 +23,16 @@ export default Ember.ObjectController.extend({
       this.set('showMoreButton', false);
     },
     markViewed: function(obj) {
+      var _this = this;
       var story = this.store.find('story', obj.id);
+      var hashtag_id = this.get('id');
       var token = this.get('controllers.session.currentUser.token');
       var request = new Ember.RSVP.Promise(function(resolve) {
         Ember.$.ajax({
           url: '/api/views/',
           type: 'POST',
           dataType: 'json',
-          data: {'authenticity_token': token, 'story_id': obj.id},
+          data: {'authenticity_token': token, 'story_id': obj.id, 'hashtag_id': hashtag_id},
           success: function(response) {
             resolve(response);
           }
@@ -40,10 +42,13 @@ export default Ember.ObjectController.extend({
       request.then(function(response) {
         console.log(response);
         story.set('marked', true);
+        var storyCountDeduct = _this.get('stories_count') - 1;
+        _this.set('stories_count', storyCountDeduct);
         // story.set('viewed', response.viewed);
       });
     },
     unmarkViewed: function(id) {
+      var _this = this;
       var story = this.store.find('story', id);
       var token = this.get('controllers.session.currentUser.token');
       var request = new Ember.RSVP.Promise(function(resolve) {
@@ -62,6 +67,8 @@ export default Ember.ObjectController.extend({
         console.log(response);
         // story.set('viewed', response.viewed);
         story.set('marked', false);
+        var storyCountAdd = _this.get('stories_count') + 1;
+        _this.set('stories_count', storyCountAdd);
       });
     },
     updateStories: function(id) {
@@ -96,7 +103,9 @@ export default Ember.ObjectController.extend({
         type: 'POST',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
-        success: function() {
+        success: function(data) {
+          console.log(data);
+          _this.set('subscribed', data.hashtag.subscribed);
           _this.get('target.router').refresh();
         },
         error: function() {
@@ -115,7 +124,9 @@ export default Ember.ObjectController.extend({
         type: 'DELETE',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
-        success: function() {
+        success: function(data) {
+          console.log(data);
+          _this.set('subscribed', false);
           _this.get('target.router').refresh();
         },
         error: function() {

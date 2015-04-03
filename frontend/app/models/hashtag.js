@@ -5,5 +5,6 @@ export default DS.Model.extend({
   stories: DS.hasMany('story' , { async: true }),
   users: DS.hasMany('user' , { async: true }),
   subscribed: DS.attr('boolean'),
-  subscriptions_count: DS.attr('string')
+  subscriptions_count: DS.attr('string'),
+  stories_count: DS.attr('string')
 });

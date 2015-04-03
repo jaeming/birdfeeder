@@ -3,6 +3,7 @@
   has_many :stories
   has_many :feeds
   has_many :subscriptions
+  has_many :views
   has_many :users, through: :subscriptions
 
   def self.search(title)

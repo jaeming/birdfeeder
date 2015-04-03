@@ -1,5 +1,5 @@
 class Story < ActiveRecord::Base
-  belongs_to :hashtag
+  belongs_to :hashtag, counter_cache: true
   belongs_to :feed
   has_many :favorites
   has_many :views
