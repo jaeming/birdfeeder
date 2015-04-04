@@ -15,6 +15,7 @@ Router.map(function() {
     this.route("subscribed");
   });
   this.resource("users", function() {
+    this.route("edit");
     this.route("signin");
     this.route("signup");
   });

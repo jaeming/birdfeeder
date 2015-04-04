@@ -1,0 +1,69 @@
+<div class="row">
+  <div class="columns medium-8">
+    <h2>Edit Account</h2>
+    <form {{action "update" on="submit"}}>
+
+      <div class="field">
+        <label for="user_email">Email:</label>
+        {{#if errors.email}}
+          <small class='errors'>Email {{errors.email}}.</small>
+        {{/if}}
+        {{input value=email }}
+      </div>
+
+      <div class="field">
+        <label for="user_name">Name:</label>
+        {{#if errors.name}}
+          <small class='errors'>Name {{errors.name}}.</small>
+        {{/if}}
+        {{input value=name}}
+      </div>
+
+      {{#if changePassword}}
+        <a href="" {{action 'hidePasswordOptions'}} class='toggle-option-off'>
+          {{fa-icon "minus"}} &nbsp;
+          hide password options
+        </a>
+      {{else}}
+        <a href="" {{action 'showPasswordOptions'}} class='toggle-option-on'>
+          {{fa-icon "plus"}} &nbsp;
+          show password options
+        </a>
+      {{/if}}
+
+      {{#if changePassword}}
+        <div class="password-options">
+          <h5>Change your password:</h5>
+          <div class="field">
+            <label for="user_password">New Password <small> 8 characters minimum</small> </label>
+            {{#if errors.password}}
+            <small class='errors'> Password {{errors.password}}.</small>
+            {{/if}}
+            {{input value=newPassword type='password'}}
+          </div>
+
+          <div class="field">
+            <label for="user_password_confirmation">New Password Confirmation</label>
+            {{input value=newPasswordConfirmation type='password'}}
+          </div>
+        </div>
+      {{/if}}
+      <br>
+      <br>
+      <div class="actions">
+        <input type="submit" class="tiny button" value="Update Account" />
+      </div>
+    </form>
+    <hr>
+    <img {{bind-attr src="controllers.session.currentUser.avatar"}} alt="avatar" class='avatar'>
+    <small class='profile-edit'>
+      Avatars are provided courtesy of gravatar. <a href="https://en.gravatar.com/">Create or edit your global avatar.</a>
+    </small>
+    <hr>
+    <br>
+    <small>Had enough?
+      <a href="#">delete account</a>.
+    </small>
+    <br>
+  </div>
+</div>

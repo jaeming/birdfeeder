@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 
 scope '/api' do
-  devise_for :users
+  devise_for :users, :controllers => {:registrations => "registrations"}
 
   get 'sessions/current' => 'sessions#show'
   get 'users/default_user' => 'users#default_user'
