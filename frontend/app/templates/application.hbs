@@ -6,8 +6,8 @@
 	</div>
 {{/if}}
 
-<div {{bind-attr class=":app-bar accountVisible"}}>
-	<div {{bind-attr class=":account-box accountVisible"}} {{action "optionsShow" on="mouseEnter"}}>
+<div {{bind-attr class=":app-bar accountVisible appBarHide"}}>
+	<div {{bind-attr class=":account-box accountVisible accountBoxHide"}} {{action "optionsShow" on="mouseEnter"}}>
 
 		{{#if controllers.session.currentUser.authenticated}}
 
@@ -54,7 +54,7 @@
 
 	</div>
 	<div class='logo-bar'>
-		<div class='menu-icon' {{action "showSidePanel"}}>
+		<div {{bind-attr class=":menu-icon menuIconShow"}} {{action "showSidePanel"}}>
 			{{fa-icon "fa-bars" size="2"}}
 		</div>
 		<h1 class='logo' {{bind-attr class=":logo smallLogo"}}>Bluebird Feeder</h1>
@@ -65,7 +65,10 @@
 <div class='topbar-spacer'>
 	<main>
 		<div {{action "closeSidePanel"}}>
-		  <div {{bind-attr class=":side-bar scrollVisible sideVisible"}} {{action "showScrollbar" on="mouseEnter"}}>
+		  <div {{bind-attr class=":side-bar scrollVisible sideVisible hideSideBar"}} {{action "showScrollbar" on="mouseEnter"}}>
+
+				<a href="#" class='close-side-icon' {{action 'showFullView'}}>{{fa-icon "fa-times-circle"}}</a>
+				<br><br>
 
 				{{#if controllers.session.currentUser.authenticated}}
 					{{#link-to 'feeds.customize' class='outlined button tiny round'}}
@@ -78,7 +81,7 @@
 			</div>
 	  </div>
 
-	  <section {{bind-attr class=":main-pane slidePanel"}}>
+	  <section {{bind-attr class=":main-pane slidePanel fullMainPane"}}>
 	    <div class="row">
 
 	      {{outlet 'body'}}

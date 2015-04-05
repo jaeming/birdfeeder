@@ -13,6 +13,7 @@ export default Ember.Controller.extend({
 	scrollVisible: false,
   sideVisible: false,
   slidePanel: false,
+  hideSideBar: false,
 	actions: {
     loadNext: function() {
       this.get('pagedContent').loadNextPage();
@@ -47,6 +48,13 @@ export default Ember.Controller.extend({
 			else {
 				console.log('slide panel not active yet');
 			}
+    },
+    showFullView: function() {
+      this.set('hideSideBar', true);
+      this.set('fullMainPane', true);
+      this.set('menuIconShow', true);
+      this.set('accountBoxHide', true);
+      this.set('appBarHide', true);
     },
     markViewed: function(obj) {
       var story = this.store.find('story', obj.id);
