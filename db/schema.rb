@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150403042823) do
+ActiveRecord::Schema.define(version: 20150406131640) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,9 +36,9 @@ ActiveRecord::Schema.define(version: 20150403042823) do
 
   create_table "hashtags", force: :cascade do |t|
     t.string   "title"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
-    t.boolean  "featured"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.boolean  "featured",            default: false
     t.integer  "subscriptions_count"
     t.integer  "stories_count"
   end

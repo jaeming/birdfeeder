@@ -4,6 +4,7 @@ $font-serif: 'Arvo', serif;
 @import url(http://fonts.googleapis.com/css?family=Arvo:400,700|Source+Sans+Pro);
 
 
+
 $light: #7fc7e3;
 $dark: #3FABCF;
 $highlight: #ff8787;
@@ -537,6 +538,7 @@ z-index: 1000;
 }
 
 .close-side-icon {
+  color: #304246;
   margin-left: 1.2rem;
   font-size: 1.4rem;
 }
