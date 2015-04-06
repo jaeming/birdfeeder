@@ -7,9 +7,17 @@ set :repo_url, 'git@github.com:jaeming/birdfeeder.git'
 set :deploy_to, '/home/deploy/birdfeeder'
 
 set :linked_files, %w{config/database.yml}
-set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 namespace :deploy do
+
+  desc "Open the rails console on primary app server"
+  task :console do
+    on roles(:app), primary: true do
+      rails_env = fetch(:stage)
+      execute_interactively "#{bundle_cmd} #{current_path}/script/rails console #{rails_env}"
+    end
+  end
 
   desc 'Restart application'
   task :restart do
