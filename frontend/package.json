@@ -42,7 +42,7 @@
     "ember-infinite-scroll": "^0.1.4",
     "ember-waypoints": "0.0.5",
     "express": "^4.8.5",
-    "glob": "^4.4.0",
+    "glob": "^4.5.3",
     "underscore": "^1.8.2"
   },
   "dependencies": {
