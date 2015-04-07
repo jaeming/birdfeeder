@@ -36,8 +36,9 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
-  config.action_mailer.default_url_options = { host: 'localhost:3000' }
   config.action_mailer.delivery_method = :smtp
+  config.action_mailer.default_url_options = { host: 'bluebird.space' }
+  config.action_mailer.mailgun_settings = { domain: 'bluebird.space' }
   config.action_mailer.perform_deliveries = true
 
   config.after_initialize do
