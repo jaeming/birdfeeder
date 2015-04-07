@@ -305,6 +305,7 @@ main {
 	width: auto;
 	overflow: auto;
 	margin-left: 20rem;
+  transition: all 260ms ease-in;
 }
 
 .article {
@@ -537,8 +538,34 @@ z-index: 1000;
 
 .close-side-icon {
   color: #304246;
-  margin-left: 1.2rem;
+  float: right;
+  margin-right: 1.2rem;
   font-size: 1.4rem;
+  transition: all 250ms ease;
+
+  span {
+    font-size: 0rem;
+    color: #95C8D0;
+    padding: .1rem .4rem;
+    border-radius: 4px;
+    transition: all 250ms ease;
+  }
+  &:hover {
+    span {
+      font-size: .8rem;
+      background: #3F514F;
+    }
+  }
+}
+
+.close-arrow {
+  width: 1.6rem;
+  opacity: .6;
+  text-size: .8rem;
+  transition: all 250ms ease;
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .table {
@@ -570,6 +597,7 @@ z-index: 1000;
       font-size: .7rem;
     }
 }
+
 
 .loading-visible {
   span {
@@ -696,7 +724,7 @@ z-index: 1000;
 }
 
 .hide-side-bar {
-  left: -100%;
+  margin-left: -16rem;
   transition: all 260ms ease-in;
 }
 
@@ -711,12 +739,12 @@ z-index: 1000;
 }
 
 .account-box-hide {
-  left: -100%;
+  margin-left: -100%;
   transition: all 450ms ease;
 }
 
 .app-bar-hide {
-  left: -20rem;
+  margin-left: 0;
   width: 160%;
   transition: all 260ms ease-in;
 }
@@ -739,9 +767,23 @@ filter: blur(15px); */
 
 /////////MEDIA QUERIES
 
+@media (max-width: 1200px) {
+
+  .main-pane-small {
+    min-height: 100%;
+    margin-left: 4rem;
+    transition: all 260ms ease-in;
+  }
+
+}
+
 @media (max-width: 1000px) {
 
 	//NAV-SLIDER
+
+  .close-side-icon {
+    display: none;
+  }
 
 	.menu-icon {
 		cursor: pointer;
@@ -764,12 +806,14 @@ filter: blur(15px); */
 	}
 
 	.small-logo {
+    margin-left: 0;
 		font-size: 2rem;
 		line-height: 2;
 	}
 
 	.side-bar {
 		left: -100%;
+    transition: all 260ms ease-in;
 	}
 
 	.side-visible {
@@ -780,11 +824,10 @@ filter: blur(15px); */
     min-height: 100%;
 		margin-left: 0rem;
 		transition: all 260ms ease-in;
-
 	}
 
 	.account-box {
-		left: -100%;
+		margin-left: 0rem;
 		transition: all 450ms ease;
 	}
 
@@ -808,6 +851,10 @@ filter: blur(15px); */
 }
 
 @media (max-width: 650px) {
+
+  .close-side-icon {
+    display: none;
+  }
 
 	.menu-icon {
 		cursor: pointer;
@@ -835,6 +882,7 @@ filter: blur(15px); */
 
 	.side-bar {
 		left: -100%;
+    transition: all 260ms ease-in;
 	}
 
 	.side-visible {

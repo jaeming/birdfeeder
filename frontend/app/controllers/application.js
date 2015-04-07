@@ -10,9 +10,11 @@ export default Ember.Controller.extend({
   actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,
+  sideHovered: false,
   sideVisible: false,
   slidePanel: false,
   hideSideBar: false,
+  sideCollapsed: false,
 	actions: {
     loadNext: function() {
       this.get('pagedContent').loadNextPage();
@@ -29,6 +31,13 @@ export default Ember.Controller.extend({
 			this.toggleProperty('slidePanel');
 			this.toggleProperty('accountVisible');
 			this.toggleProperty('smallLogo');
+      this.set('mainPaneSmall', false);
+      this.set('sideCollapsed', false);
+      this.set('sideHovered', false);
+      this.set('accountBoxHide', false);
+      this.set('appBarHide', false);
+      this.set('hideSideBar', false);
+      this.set('fullMainPane', false);
 		},
     closeSidePanel: function() {
     	if(this.get('slidePanel', true)) {
@@ -36,17 +45,48 @@ export default Ember.Controller.extend({
 	      this.set('slidePanel', false);
 	      this.set('accountVisible', false);
 	      this.set('smallLogo', false);
-			}
-			else {
-				console.log('slide panel not active yet');
+        this.set('sideHovered', false);
+        this.set('mainPaneSmall', true);
 			}
     },
     showFullView: function() {
       this.set('hideSideBar', true);
       this.set('fullMainPane', true);
-      this.set('menuIconShow', true);
       this.set('accountBoxHide', true);
       this.set('appBarHide', true);
+      this.set('sideCollapsed', true);
+      this.set('mainPaneSmall', true);
+    },
+    pinSideBar: function() {
+      this.set('hideSideBar', false);
+      this.set('fullMainPane', false);
+      this.set('accountBoxHide', false);
+      this.set('appBarHide', false);
+      this.set('sideCollapsed', false);
+      this.set('sideHovered', false);
+      this.set('mainPaneSmall', false);
+    },
+    hoverSidebar: function() {
+      var _this = this;
+      if(this.get('hideSideBar', false)) {
+        this.set('hideSideBar', false);
+        this.set('fullMainPane', false);
+        this.set('accountBoxHide', false);
+        this.set('appBarHide', false);
+        this.set('sideCollapsed', true);
+        this.set('sideHovered', true);
+        this.set('mainPaneSmall', false);
+      }
+      Ember.$('.side-bar').mouseleave(function() {
+        if(_this.get('sideHovered', true)) {
+        _this.set('hideSideBar', true);
+        _this.set('fullMainPane', true);
+        _this.set('accountBoxHide', true);
+        _this.set('appBarHide', true);
+        _this.set('sideHovered', false);
+        _this.set('mainPaneSmall', true);
+        }
+      });
     },
     markViewed: function(obj) {
       var story = this.store.find('story', obj.id);

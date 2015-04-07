@@ -65,9 +65,20 @@
 <div class='topbar-spacer'>
 	<main>
 		<div {{action "closeSidePanel"}}>
-		  <div class='side-bar'>
+		  <div {{bind-attr class=":side-bar sideVisible hideSideBar"}} {{action "hoverSidebar" on="mouseEnter"}}>
 
-				<a href="#" class='close-side-icon' {{action 'showFullView'}}>{{fa-icon "fa-times-circle"}}</a>
+				{{#if sideCollapsed}}
+					{{#if sideHovered}}
+					<a href="#" class='close-side-icon' {{action 'pinSideBar'}}>
+						<span>pin side-bar</span> <img src="/images/pin.png" alt="close sidebar" class='close-arrow'>
+					</a>
+					{{/if}}
+				{{else}}
+					<a href="#" class='close-side-icon' {{action 'showFullView'}}>
+						<span>hide side-bar</span> <img src="/images/close.png" alt="close sidebar" class='close-arrow'>
+					</a>
+				{{/if}}
+
 				<br><br>
 
 				{{#if controllers.session.currentUser.authenticated}}
@@ -81,7 +92,7 @@
 			</div>
 	  </div>
 
-	  <section {{bind-attr class=":main-pane slidePanel fullMainPane"}}>
+	  <section {{bind-attr class=":main-pane slidePanel fullMainPane mainPaneSmall"}}>
 	    <div class="row">
 
 	      {{outlet 'body'}}
