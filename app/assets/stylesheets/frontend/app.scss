@@ -30,7 +30,7 @@ h1 {
 
 h2 {
   font-family: $font-serif;
-	font-size: 1.8rem;
+	font-size: 1.6rem;
   color: #656565;
 	text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
@@ -67,7 +67,9 @@ span.prefix {
 }
 
 .hashtag-subtitle {
+  font-size: .8rem;
   color: #7fc7e3;
+  vertical-align: middle;
 }
 
 .profile-edit {
@@ -365,6 +367,28 @@ a {
   &:hover {
     background: #546e72;
     color: #cff7ff;
+  }
+}
+
+.external-link {
+  font-size: 1rem;
+  color: #749fa8;
+  vertical-align: super;
+
+  span {
+    white-space: nowrap;
+    font-size: 0rem;
+    padding: .2rem .4rem;
+    transition: all 240ms ease;
+  }
+  &:hover {
+    span {
+      font-size: .9rem;
+      color: #fff;
+      background: rgb(134, 173, 181);
+      padding: .2rem .4rem;
+      border-radius: 4px;
+    }
   }
 }
 

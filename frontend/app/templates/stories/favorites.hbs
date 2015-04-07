@@ -8,9 +8,11 @@
             <a href="#" {{action 'favorite' id}}>{{fa-icon "star-o"}}</a>
           {{/if}}
         {{/if}}
+
         <h2>
           {{title}}
-          {{#link-to 'hashtags.show' hashtag.id}}<small class='hashtag-subtitle'>{{hashtag.title}}</small>{{/link-to}}
+          <a target="_blank" {{bind-attr href="url"}} class='external-link'> {{fa-icon "fa-external-link"}} <span>visit article link</span></a>
+          {{#link-to 'hashtags.show' hashtag.id}}<small class='hashtag-subtitle'>[{{hashtag.title}}]</small>{{/link-to}}
         </h2>
         {{{body}}}
         <small>published {{date-and-time published_at}}</small>

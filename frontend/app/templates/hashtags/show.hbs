@@ -32,7 +32,10 @@
       </span>
     {{/if}}
 
-    <h2>{{title}}</h2>
+    <h2>
+      {{title}}
+      <a target="_blank" {{bind-attr href="url"}} class='external-link'> {{fa-icon "fa-external-link"}} <span>visit article link</span></a>
+    </h2>
     {{{body}}}
     <small>published {{date-and-time published_at}}</small>
 
@@ -64,7 +67,10 @@
         </span>
       {{/if}}
 
-      <h2>{{title}}</h2>
+      <h2>
+        {{title}}
+        <a target="_blank" {{bind-attr href="url"}} class='external-link'> {{fa-icon "fa-external-link"}} <span>visit article link</span></a>
+      </h2>
       {{{body}}}
       <small>published {{date-and-time published_at}}</small>
 
