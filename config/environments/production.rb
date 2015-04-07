@@ -1,4 +1,11 @@
 Rails.application.configure do
+
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.default_url_options = { host: 'bluebird.space' }
+  config.action_mailer.mailgun_settings = { domain: 'bluebird.space' }
+  config.action_mailer.perform_deliveries = true
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
