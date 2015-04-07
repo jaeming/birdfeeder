@@ -33,7 +33,7 @@
     {{/if}}
 
     <h2>{{title}}</h2>
-    <p>{{{body}}}</p>
+    {{{body}}}
     <small>published {{date-and-time published_at}}</small>
 
   {{#if editable}}
@@ -65,7 +65,7 @@
       {{/if}}
 
       <h2>{{title}}</h2>
-      <p>{{{body}}}</p>
+      {{{body}}}
       <small>published {{date-and-time published_at}}</small>
 
       {{#waypoint on-down="markViewed" id=id}}
