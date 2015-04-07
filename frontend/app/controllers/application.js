@@ -10,7 +10,6 @@ export default Ember.Controller.extend({
   actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,
-	scrollVisible: false,
   sideVisible: false,
   slidePanel: false,
   hideSideBar: false,
@@ -31,13 +30,6 @@ export default Ember.Controller.extend({
 			this.toggleProperty('accountVisible');
 			this.toggleProperty('smallLogo');
 		},
-		showScrollbar: function() {
-    var _this = this;
-    this.set('scrollVisible', true);
-    Ember.$('.side-bar').mouseleave(function() {
-      _this.set('scrollVisible', false);
-    });
-    },
     closeSidePanel: function() {
     	if(this.get('slidePanel', true)) {
 				this.set('sideVisible', false);

@@ -17,7 +17,7 @@
 				<p>{{controllers.session.currentUser.name}}</p>
 			</div>
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
-				<div class='user-options-wrap'>
+				<div class='user-options-wrap' {{action "closeSidePanel"}}>
 					{{#link-to 'users.edit' class='user-link'}}
 						<img src="/images/edit.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; edit account</small>
@@ -37,7 +37,7 @@
 				<p>Guest</p>
 			</div>
 			<div {{bind-attr class=":account-actions actionsVisible"}}>
-				<div class='user-options-wrap'>
+				<div class='user-options-wrap' {{action "closeSidePanel"}}>
 					{{#link-to 'users.signin' class='user-link'}}
 						<img src="/images/sign-in.png" alt="edit profile" class='user-option-icons'>
 						<small class='user-option-text'>&nbsp; sign in</small>
@@ -65,7 +65,7 @@
 <div class='topbar-spacer'>
 	<main>
 		<div {{action "closeSidePanel"}}>
-		  <div {{bind-attr class=":side-bar scrollVisible sideVisible hideSideBar"}} {{action "showScrollbar" on="mouseEnter"}}>
+		  <div class='side-bar'>
 
 				<a href="#" class='close-side-icon' {{action 'showFullView'}}>{{fa-icon "fa-times-circle"}}</a>
 				<br><br>

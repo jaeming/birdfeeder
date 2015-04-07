@@ -226,12 +226,8 @@ span.prefix {
 	z-index: 1;
 	top: 0;
 	bottom: 0;
-	overflow: hidden;
-  transition: all 360ms ease;
-}
-
-.scroll-visible {
 	overflow: auto;
+  transition: all 360ms ease;
 }
 
 .tag-link {
@@ -272,12 +268,14 @@ span.prefix {
 
 
 
-
-
-	//SCROLLBAR
+//SCROLLBAR
 
 ::-webkit-scrollbar {
     width: 10px;
+}
+
+.side-bar::-webkit-scrollbar {
+    width: 0px !important;
 }
 
 /* Track */
@@ -803,8 +801,9 @@ filter: blur(15px); */
 	.slide-panel {
 		margin-right: -52rem;
 		overflow: hidden;
-		-webkit-filter: blur(15px);
-		filter: blur(15px);
+    opacity: .5;
+/* 		-webkit-filter: blur(15px);
+filter: blur(15px); */
 	}
 }
 
@@ -865,8 +864,9 @@ filter: blur(15px); */
 	.slide-panel {
 		margin-right: -52rem;
 		overflow: hidden;
-		-webkit-filter: blur(15px);
-		filter: blur(15px);
+    opacity: .5;
+/* 		-webkit-filter: blur(15px);
+filter: blur(15px); */
 	}
 }
 
