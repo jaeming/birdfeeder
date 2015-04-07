@@ -1,9 +1,9 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-  beforeModel: function() {
-    this.transitionTo('stories.subscribed');
-  },
+  // beforeModel: function() {
+  //   this.transitionTo('stories.subscribed');
+  // },
   model: function() {
     return Ember.RSVP.hash({
       hashtags: this.store.find('hashtag', { subscribed: true }),
