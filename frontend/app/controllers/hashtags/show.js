@@ -124,8 +124,7 @@ export default Ember.ObjectController.extend({
         type: 'DELETE',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
-        success: function(data) {
-          console.log(data);
+        success: function() {
           _this.set('subscribed', false);
           _this.get('target.router').refresh();
         },
