@@ -26,7 +26,7 @@ scope '/api' do
   resources :hashtags
   resources :stories
   resources :feeds
-  resources :users, except: :destroy
+  resources :users
   resources :subscriptions, only: :create
   resources :favorites, only: :create
   resources :views, only: :create

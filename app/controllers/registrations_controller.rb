@@ -1,4 +1,5 @@
 class RegistrationsController < Devise::RegistrationsController
+  before_action :authenticate_user!, except: [:show, :create]
 
   def update
     @user = current_user

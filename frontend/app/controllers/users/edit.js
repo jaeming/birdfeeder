@@ -3,6 +3,7 @@ import Ember from 'ember';
 export default Ember.Controller.extend({
   needs: ['session'],
   changePassword: false,
+  deleteConfirm: false,
   email: function() {
     var currentEmail = this.get('controllers.session.currentUser.email');
     return currentEmail;
@@ -20,6 +21,20 @@ export default Ember.Controller.extend({
     },
     dismissError: function() {
       this.set('errors', false);
+    },
+    deletePrompt: function () {
+      this.set('deleteConfirm', true);
+    },
+    deleteCancel: function () {
+      this.set('deleteConfirm', false);
+    },
+    deleteAccount: function() {
+      var currentUserId = this.get('controllers.session.currentUser.id');
+      this.store.find('user', currentUserId).then(function (user) {
+        user.destroyRecord();
+        // window.location.href = '/';
+      });
+
     },
     update: function() {
       var _this = this;

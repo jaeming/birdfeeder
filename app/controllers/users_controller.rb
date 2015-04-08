@@ -12,6 +12,16 @@ class UsersController < ApplicationController
     render json: @user
   end
 
+  def destroy
+    @user = User.find(params[:id])
+    if current_user == @user
+      @user.destroy!
+      head :no_content
+    else
+      render json: {error: "could not delete account."}
+    end
+  end
+
   def default_user
     @user = current_user || guest_user
     render json: @user

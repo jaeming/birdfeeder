@@ -62,8 +62,18 @@
     <hr>
     <br>
     <small>Had enough?
-      <a href="#">delete account</a>.
+      <a href="#" {{action 'deletePrompt'}}>delete account</a>.
     </small>
+    {{#if deleteConfirm}}
+      <div id='flash-wrapper'>
+        <div class='flash-message'>
+          <p class='flash-text delete-text'>This is pretty irrevocable. Are you sure you want to permanently delete your account?
+          <br><br>
+          <button class='button tiny alert' {{action 'deleteAccount'}}>Delete</button> &nbsp; &nbsp; &nbsp; &nbsp;<button class='button tiny' {{action 'deleteCancel'}}>Cancel</button>
+          </p>
+        </div>
+      </div>
+    {{/if}}
     <br>
   </div>
 </div>

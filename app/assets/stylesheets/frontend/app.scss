@@ -634,6 +634,21 @@ z-index: 1000;
   }
 }
 
+.delete-text {
+  background: #2F2F2F;
+  border: solid 5px #B8B8B8;
+
+  button.alert {
+    background: #F5595A;
+    border: 0;
+  }
+
+  button {
+    border: 0;
+  }
+}
+
+
 .close-side-icon {
   color: #304246;
   float: right;
