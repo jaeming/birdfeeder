@@ -12,7 +12,7 @@ export default Ember.Route.extend(resetScrollMixin, {
     this._super(controller, model);
     controller.set('showAllStories', false);
     var storyCount = controller.get('stories.length');
-    if(storyCount < 16) {
+    if(storyCount < 13) {
       controller.set('showMoreButton', false);
     } else {
       controller.set('showMoreButton', true);

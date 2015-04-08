@@ -17,23 +17,63 @@
     <form {{action "searchCategories" on="submit"}}>
       <div class="row collapse postfix-radius">
         <div class="small-10 columns">
-          {{input value=search placeholder="Search Categories"}}
+          {{input value=search placeholder="Category"}}
         </div>
         <div class="small-2 columns">
           <input type="submit" value="go!" class="button postfix" />
         </div>
       </div>
     </form>
-    {{#each results}}
-      <p>
-        {{#link-to 'hashtags.show' this}}
-          {{title}}
-        {{/link-to}}
-      </p>
-    {{/each}}
-  <hr>
+      {{#each result in results}}
+          <p>
+            {{#link-to 'hashtags.show' this}}{{result.title}}{{/link-to}}
 
-  <h2>or add a feed</h2>
+            {{#if searched}}
+              {{#if result.subscribed}}
+                <a href="#" class="unsubscribe-small" {{action 'unsubscribe' id}}>Unsubscribe</a>
+              {{else}}
+                <a href="#" class="subscribe-small" {{action 'subscribe' id}}>Subscribe</a>
+              {{/if}}
+            {{/if}}
+
+          </p>
+          {{else}}
+            <p>Sorry, no results for that search...</p>
+      {{/each}}
+
+
+    {{#if browseAll}}
+      <a href="#" {{action 'hideCategories'}} class='toggle-option-off'>
+        {{fa-icon "minus"}} &nbsp;
+        hide all
+      </a>
+      <br>
+      <div class='categories-list'>
+        {{#each categories}}
+            <p class='category-collection-text'>
+              {{#link-to 'hashtags.show' this}}
+                {{title}}
+              {{/link-to}}
+              {{#if subscribed}}
+                <a href="#" class="unsubscribe-small" {{action 'unsubscribe' id}}>Unsubscribe</a>
+              {{else}}
+                <a href="#" class="subscribe-small" {{action 'subscribe' id}}>Subscribe</a>
+              {{/if}}
+            </p>
+        {{/each}}
+      </div>
+    {{else}}
+      <a href="#" {{action 'fetchCategories'}} class='list-category-on'>
+        {{fa-icon "plus"}} &nbsp;
+        Browse all
+      </a>
+    {{/if}}
+
+
+
+    <hr>
+
+  <h2>or add your own feed</h2>
   <p>paste in a url and we'll try to find a feed for you:</p>
   <form {{action "addFeed" on="submit"}}>
     <div class="row collapse prefix-radius">

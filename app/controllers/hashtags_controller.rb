@@ -7,7 +7,7 @@ class HashtagsController < ApplicationController
 
   def show
     @hashtag = Hashtag.friendly.find(params[:id])
-    render json: @hashtag
+    render json: @hashtag, root: :hashtag
   end
 
   def create

@@ -9,11 +9,11 @@ export default Ember.ObjectController.extend({
   sortProperties: ['viewed:asc', 'published_at:desc'],
   filteredStories: Ember.computed.sort('stories', 'sortProperties'),
   topStories: function() {
-    return this.get('filteredStories').slice(0, 15);
+    return this.get('filteredStories').slice(0, 12);
   }.property('filteredStories.[]'),
   allStories: function() {
     var last = this.get('filteredStories.length');
-    return this.get('filteredStories').slice(15, last);
+    return this.get('filteredStories').slice(12, last);
   }.property('filteredStories.[]'),
   updatedVisible: false,
 

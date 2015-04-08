@@ -92,7 +92,7 @@ span.prefix {
 .app-bar {
 	width: 100%;
 	position: fixed;
-	z-index: 2;
+	z-index: 4;
   transition: all 250ms ease-in;
 }
 
@@ -354,6 +354,36 @@ a {
   }
 }
 
+.subscribe-small {
+  display: inline;
+  font-size: .6rem;
+  vertical-align: middle;
+  color: #fff;
+  padding: .2rem .4rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
+  }
+}
+
+.unsubscribe-small {
+  display: inline;
+  font-size: .6rem;
+  vertical-align: middle;
+  color: #fff;
+  padding: .2rem .4rem;
+  background: #d38b8b;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #735656;
+    color: #ffd2d2;
+  }
+}
+
 .refresh-button {
   display: inline;
   font-size: .8rem;
@@ -472,6 +502,49 @@ button, .button {
   }
 }
 
+.list-category-on {
+  display: inline;
+  font-size: .8rem;
+  vertical-align: super;
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #89c2d0;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #546e72;
+    color: #cff7ff;
+  }
+}
+
+.list-category-off {
+  display: inline;
+  font-size: .8rem;
+  vertical-align: super;
+  color: #fff;
+  padding: .3rem .5rem;
+  background: #d38b8b;
+  border-radius: 3px;
+  transition: all 350ms ease-in;
+  &:hover {
+    background: #735656;
+    color: #ffd2d2;
+  }
+}
+
+.categories-list {
+  display: inline-block;
+  width: 23rem;
+  border: solid 6px #fafafa;
+  border-radius: 1rem;
+  padding: 1rem .5rem;
+  margin-top: .4rem;
+}
+
+.category-collection-text {
+  font-size: 1.3rem;
+}
+
 .outlined {
   background: transparent;
   text-shadow: 0 0 0px rgba(255,255,255,0);
@@ -553,6 +626,7 @@ z-index: 1000;
 }
 
 .loading-stories {
+  margin-top: -7rem;
   text-align: center;
   span {
     font-size: 0rem;
@@ -622,8 +696,8 @@ z-index: 1000;
     }
 }
 
-
 .loading-visible {
+  margin-top: 0;
   span {
     color: #f6f6f6;
     background: #457d8e;
@@ -781,8 +855,6 @@ z-index: 1000;
 .slide-panel {
   margin-left: 20rem;
   overflow: hidden;
-/*   -webkit-filter: blur(15px);
-filter: blur(15px); */
   transition: all 260ms ease-in;
 }
 
@@ -972,8 +1044,7 @@ filter: blur(15px); */
 	}
 
 	.slide-panel {
-		-webkit-filter: blur(15px);
-		filter: blur(15px);
+    opacity: .5;
 		overflow: hidden;
 	}
 

@@ -1,6 +1,9 @@
 import Ember from 'ember';
 export default Ember.ArrayController.extend({
-  needs: ['session'],
+  needs: ['session', 'hashtags/show'],
+  results: [''],
+  browseAll: false,
+  searched: false,
   actions: {
     addFeed: function() {
       this.set('loadingVisible', true);
@@ -31,6 +34,56 @@ export default Ember.ArrayController.extend({
       var searchTerm = this.get('search');
       var results = this.store.find('hashtag', { title: searchTerm });
       this.set('results', results);
+      this.set('searched', true);
+    },
+    fetchCategories: function() {
+      var categories = this.store.find('hashtag');
+      this.set('categories', categories);
+      this.set('browseAll', true);
+    },
+    hideCategories: function() {
+      this.set('browseAll', false);
+    },
+    subscribe: function(id) {
+      var _this = this;
+      var token = this.get('controllers.session.currentUser.token');
+      Ember.$.ajax({
+        url: '/api/subscriptions',
+        type: 'POST',
+        dataType: 'json',
+        data: {'authenticity_token': token, 'hashtag_id': id},
+        success: function(data) {
+          console.log(data);
+          _this.set('subscribed', data.hashtag.subscribed);
+          _this.get('target.router').refresh();
+        },
+        error: function() {
+          _this.set('controllers.application.errors', 'Subscription failed, try again later.');
+          Ember.run.later( function() {
+            _this.set('controllers.application.errors', false);
+          }, 3000);
+        }
+      });
+    },
+    unsubscribe: function(id) {
+      var _this = this;
+      var token = this.get('controllers.session.currentUser.token');
+      Ember.$.ajax({
+        url: '/api/subscriptions/'+id,
+        type: 'DELETE',
+        dataType: 'json',
+        data: {'authenticity_token': token, 'hashtag_id': id},
+        success: function() {
+          _this.set('subscribed', false);
+          _this.get('target.router').refresh();
+        },
+        error: function() {
+          _this.set('controllers.application.errors', 'Unsubscribe failed, try again later.');
+          Ember.run.later( function() {
+            _this.set('controllers.application.errors', false);
+          }, 3000);
+        }
+      });
     }
   }
 });
