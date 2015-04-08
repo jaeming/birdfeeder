@@ -1,0 +1,23 @@
+<div class="row">
+
+  <div class="columns medium-7">  <h1>Something bad happened...</h1>
+    <%= image_tag("errorbird.png") %>
+
+
+    <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
+      <div class='panel alert'>  <%= devise_error_messages! %> </div>
+      <p>Request a new confirmation code:</p>
+      <div class="field">
+        <%= f.label :email %><br />
+        <%= f.email_field :email, autofocus: true %>
+      </div>
+
+      <div class="actions">
+        <%= f.submit "Resend", :class => "button tiny"%>
+      </div>
+    <% end %>
+    <hr>
+    <%= render "devise/shared/links" %>
+    <br>
+  </div>
+</div>
