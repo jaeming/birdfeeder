@@ -32,7 +32,7 @@ export default Ember.Controller.extend({
       var currentUserId = this.get('controllers.session.currentUser.id');
       this.store.find('user', currentUserId).then(function (user) {
         user.destroyRecord();
-        // window.location.href = '/';
+        window.location.href = '/';
       });
 
     },
