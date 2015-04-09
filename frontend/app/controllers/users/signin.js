@@ -22,8 +22,8 @@ export default Ember.Controller.extend({
           avatar: data.user['avatar'],
           authenticated: true
         });
+          _this.get('target.router').refresh();
           _this.transitionToRoute('/');
-          window.location.href = '/';          
         },
         error: function(data) {
           var message = data.responseJSON.error;
