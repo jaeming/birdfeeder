@@ -1,21 +1,10 @@
 ##Bluebird Feeder
-Bluebird feeder is an RSS reader with emphasis on social features and categorization by topic, which provides an easier method of content discovery by the user.
 
-Feeds are organized into a collection signified by a hashtag which the user can subscribe to. Each hashtag is comprised of multiple feeds with multiple stories that update periodically. Users can submit urls for rss discovery and parsing and define a hashtag for it.
+See it live here:
+http://bluebird.space
 
-####TODO FEATURES
+Bluebird feeder is an RSS reader, which provides an easier method of content discovery with default subscriptions, favorites, and a public index of topics.
 
-- favoriting stories
+[![Bluebird Feeder](https://github.com/jaeming/raw/master/bluebirdfeeder.png?raw=true)
 
-- updating feeds
-
-- profile editing
-
-- Detect and hide 'already viewed' stories
-
-- hashtag browse
-
-- some ui tweaks
-  - hide sidebar for 'full reader' mode
-  - logins and hashtag list customize as modals instead of seperate pages
-  - move search to sidebar
+Feeds are organized into a collection signified by a categorey, which the user can subscribe to. Each categorey is comprised of multiple feeds with multiple stories that update periodically. Users can submit urls for rss discovery and parsing, while defining a categorey for it.
