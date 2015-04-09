@@ -1,5 +1,6 @@
 class UserSerializer < ActiveModel::Serializer
   attributes :id, :name, :avatar, :hashtags, :stories
+  delegate :current_user, to: :scope
 
   def avatar
     object.gravatar_url

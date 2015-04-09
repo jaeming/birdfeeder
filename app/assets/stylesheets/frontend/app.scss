@@ -630,6 +630,8 @@ z-index: 1000;
 .loading-stories {
   margin-top: -7rem;
   text-align: center;
+  position: relative;
+  z-index: 5;
   span {
     font-size: 0rem;
     transition: all 300ms ease-in;

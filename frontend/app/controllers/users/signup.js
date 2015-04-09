@@ -2,8 +2,10 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
   needs: ['session'],
+  loadingVisible: false,
   actions: {
     signup: function() {
+      this.set('loadingVisible', true);
       var _this = this;
       var email = this.get('email');
       var name = this.get('name');
@@ -22,13 +24,15 @@ export default Ember.Controller.extend({
           name: data.user['name'],
           id: data.user['id'],
           avatar: data.user['avatar'],
+          token: data.user['token'],
           authenticated: true,
         });
           _this.set('errors', false);
-          // _this.transitionToRoute('/');
-          window.location.href = '/';
+          _this.get('target.router').refresh();
+          _this.transitionToRoute('/');
         },
         error: function(data) {
+          this.set('loadingVisible', false);
           var errors = data.responseJSON.errors;
           _this.set('errors', {
             email: errors['email'],

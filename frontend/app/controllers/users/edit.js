@@ -63,7 +63,7 @@ export default Ember.Controller.extend({
             id: data.user['id'],
             avatar: data.user['avatar'],
             token: data.user['token'],
-            authenticated: true,
+            authenticated: true
           });
             _this.set('errors', false);
             _this.set('newPassword', '');
