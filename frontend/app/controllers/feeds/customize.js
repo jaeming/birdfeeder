@@ -45,6 +45,7 @@ export default Ember.ArrayController.extend({
       this.set('browseAll', false);
     },
     subscribe: function(id) {
+      this.set('subscribed', true);
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
@@ -52,12 +53,11 @@ export default Ember.ArrayController.extend({
         type: 'POST',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
-        success: function(data) {
-          console.log(data);
-          _this.set('subscribed', data.hashtag.subscribed);
+        success: function() {
           _this.get('target.router').refresh();
         },
         error: function() {
+          _this.set('subscribed', false);
           _this.set('controllers.application.errors', 'Subscription failed, try again later.');
           Ember.run.later( function() {
             _this.set('controllers.application.errors', false);
@@ -66,6 +66,7 @@ export default Ember.ArrayController.extend({
       });
     },
     unsubscribe: function(id) {
+      this.set('subscribed', false);
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
@@ -74,10 +75,10 @@ export default Ember.ArrayController.extend({
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function() {
-          _this.set('subscribed', false);
           _this.get('target.router').refresh();
         },
         error: function() {
+          _this.set('subscribed', true);
           _this.set('controllers.application.errors', 'Unsubscribe failed, try again later.');
           Ember.run.later( function() {
             _this.set('controllers.application.errors', false);

@@ -19,6 +19,11 @@ export default Ember.ObjectController.extend({
 
   actions: {
     loadAll: function() {
+      var _this = this;
+      this.set('controllers.application.loadBar', true);
+      Ember.run.later( function() {
+        _this.set('loadBar', false);
+      }, 1200);
       this.set('showAllStories', true);
       this.set('showMoreButton', false);
     },
@@ -72,6 +77,7 @@ export default Ember.ObjectController.extend({
       });
     },
     updateStories: function(id) {
+      this.set('loadingVisible', true);
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
@@ -80,14 +86,17 @@ export default Ember.ObjectController.extend({
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function(data) {
-          console.log(data);
           _this.store.pushPayload('story', data);
           _this.set('updatedVisible', true);
+          Ember.run.later( function() {
+            _this.set('loadingVisible', false);
+          }, 1300);
           Ember.run.later( function() {
             _this.set('updatedVisible', false);
           }, 3000);
         },
         error: function() {
+          _this.set('loadingVisible', false);
           _this.set('controllers.application.errors', 'update failed, try again later.');
           Ember.run.later( function() {
             _this.set('controllers.application.errors', false);
@@ -119,16 +128,18 @@ export default Ember.ObjectController.extend({
     unsubscribe: function(id) {
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
+      this.set('subscribed', false);
       Ember.$.ajax({
         url: '/api/subscriptions/'+id,
         type: 'DELETE',
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function() {
-          _this.set('subscribed', false);
           _this.get('target.router').refresh();
+          _this.transitionToRoute('/stories/subscribed');
         },
         error: function() {
+          _this.set('subscribed', true);
           _this.set('controllers.application.errors', 'Unsubscribe failed, try again later.');
           Ember.run.later( function() {
             _this.set('controllers.application.errors', false);

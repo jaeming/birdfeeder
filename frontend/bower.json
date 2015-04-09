@@ -19,6 +19,7 @@
     "sifter": "~0.4.1",
     "ember-cli-list-view": ">=0.0.3",
     "zynga-scroller": "https://raw.github.com/zynga/scroller/master/src/Scroller.js",
-    "zynga-scroller-animate": "https://raw.github.com/zynga/scroller/master/src/Animate.js"
+    "zynga-scroller-animate": "https://raw.github.com/zynga/scroller/master/src/Animate.js",
+    "spin.js": "~2.0.2"
   }
 }

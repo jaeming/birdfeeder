@@ -104,6 +104,7 @@ span.prefix {
 	padding-left: 2rem;
 	width: auto;
 	overflow: hidden;
+  transition: all 350ms ease-in;
 }
 
 .account-box {
@@ -225,7 +226,7 @@ span.prefix {
 	padding-top: 5.2rem;
 	background: #232F34;
 	position: fixed;
-	z-index: 1;
+	z-index: 3;
 	top: 0;
 	bottom: 0;
 	overflow: auto;
@@ -430,6 +431,7 @@ a {
 
 .updated-visible {
   font-size: .8rem;
+  transition: all 350ms ease-in;
 }
 
 .stories-count {
@@ -722,6 +724,7 @@ z-index: 1000;
     border-top-left-radius: 0;
     border-bottom-right-radius: 13px;
     border-bottom-left-radius: 13px;
+    transition: all 350ms ease-in;
   }
   .table {
     transform: scale(1);
@@ -729,10 +732,12 @@ z-index: 1000;
     width: 100%;
     height: 100%;
     text-align: center;
+    transition: all 350ms ease-in;
     .cell {
       transform: scale(1);
       display: table-cell;
       vertical-align: middle;
+      transition: all 350ms ease-in;
     }
   }
 }
@@ -743,6 +748,7 @@ z-index: 1000;
   position: relative;
   height: 120px;
   width: 120px;
+  transition: all 350ms ease-in;
 }
 .gmb-loader div {
   background: #7AB1C3;
@@ -750,18 +756,21 @@ z-index: 1000;
   height: 30px;
   border-radius: 30px;
   position: absolute;
+  transition: all 350ms ease-in;
   -webkit-animation: gmb-bounce 1.75s infinite;
           animation: gmb-bounce 1.75s infinite;
   top: 50%;
   margin-top: -15px;
 }
 .gmb-loader div:nth-child(2) {
+  transition: all 350ms ease-in;
   -webkit-animation-delay: 0.25s;
           animation-delay: 0.25s;
   left: 50%;
   margin-left: -15px;
 }
 .gmb-loader div:nth-child(3) {
+  transition: all 350ms ease-in;
   -webkit-animation-delay: 0.5s;
           animation-delay: 0.5s;
   right: 0;
@@ -872,103 +881,112 @@ z-index: 1000;
   transition: all 260ms ease-in;
 }
 
+////LOADING BAR
 
-
-///////////SPINNER
-@-webkit-keyframes spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-
-  100% {
-    -webkit-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+.loader-container {
+  position: relative;
+  top: 0;
+  width: 100%;
+  transition: all 260ms ease-in;
 }
 
-@-moz-keyframes spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-
-  100% {
-    -webkit-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+.loader {
+ opacity: 0;
+ transition: all 260ms ease-in;
 }
 
-@-o-keyframes spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-
+@-webkit-keyframes load-bar-grow {
   100% {
-    -webkit-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
+    -webkit-transform: scaleX(1.1);
+            transform: scaleX(1.1);
   }
 }
-
-@keyframes spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-
+@keyframes load-bar-grow {
   100% {
-    -webkit-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
+    -webkit-transform: scaleX(1.1);
+            transform: scaleX(1.1);
   }
 }
+@-webkit-keyframes load-bar-background {
+  0% {
+    opacity: 1;
+    background-color: #8adcff;
+  }
+  100% {
+    opacity: 0;
+    background-color: rgba(227, 249, 255, 0);
+  }
+}
+@keyframes load-bar-background {
+  0% {
+    opacity: 1;
+    background-color: #8adcff;
+  }
+  100% {
+    opacity: 0;
+    background-color: rgba(236, 252, 255, 0);
+  }
 
-/* :not(:required) hides this rule from IE9 and below */
-.spinner:not(:required) {
-  -webkit-animation: spinner 1500ms infinite linear;
-  -moz-animation: spinner 1500ms infinite linear;
-  -ms-animation: spinner 1500ms infinite linear;
-  -o-animation: spinner 1500ms infinite linear;
-  animation: spinner 1500ms infinite linear;
-  -webkit-border-radius: 0.5em;
-  -moz-border-radius: 0.5em;
-  -ms-border-radius: 0.5em;
-  -o-border-radius: 0.5em;
-  border-radius: 0.5em;
-  -webkit-box-shadow: rgba(0, 0, 51, 0.3) 1.5em 0 0 0, rgba(0, 0, 51, 0.3) 1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) 0 1.5em 0 0, rgba(0, 0, 51, 0.3) -1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) -1.5em 0 0 0, rgba(0, 0, 51, 0.3) -1.1em -1.1em 0 0, rgba(0, 0, 51, 0.3) 0 -1.5em 0 0, rgba(0, 0, 51, 0.3) 1.1em -1.1em 0 0;
-  -moz-box-shadow: rgba(0, 0, 51, 0.3) 1.5em 0 0 0, rgba(0, 0, 51, 0.3) 1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) 0 1.5em 0 0, rgba(0, 0, 51, 0.3) -1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) -1.5em 0 0 0, rgba(0, 0, 51, 0.3) -1.1em -1.1em 0 0, rgba(0, 0, 51, 0.3) 0 -1.5em 0 0, rgba(0, 0, 51, 0.3) 1.1em -1.1em 0 0;
-  box-shadow: rgba(0, 0, 51, 0.3) 1.5em 0 0 0, rgba(0, 0, 51, 0.3) 1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) 0 1.5em 0 0, rgba(0, 0, 51, 0.3) -1.1em 1.1em 0 0, rgba(0, 0, 51, 0.3) -1.5em 0 0 0, rgba(0, 0, 51, 0.3) -1.1em -1.1em 0 0, rgba(0, 0, 51, 0.3) 0 -1.5em 0 0, rgba(0, 0, 51, 0.3) 1.1em -1.1em 0 0;
-  display: inline-block;
-  font-size: 10px;
-  width: 1em;
-  height: 1em;
-  margin: 1.5em;
+}
+.load-bar {
+  opacity: 1;
+  -webkit-animation: load-bar-background;
+          animation: load-bar-background;
+  -webkit-animation-delay: 1000ms;
+          animation-delay: 1000ms;
+  -webkit-animation-duration: 1000ms;
+          animation-duration: 1000ms;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: 1;
+          animation-iteration-count: 1;
+  -webkit-animation-timing-function: steps(1);
+          animation-timing-function: steps(1);
+  top: 10px;
+  height: 5px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 2;
   overflow: hidden;
-  text-indent: 100%;
+  transition: all 260ms ease-in;
+}
+
+
+.load-bar::after, .load-bar::before {
+  -webkit-animation-name: load-bar-grow, load-bar-background;
+          animation-name: load-bar-grow, load-bar-background;
+  -webkit-animation-duration: 1000ms, 1000ms;
+          animation-duration: 1000ms, 1000ms;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: 1;
+          animation-iteration-count: 1;
+  -webkit-animation-timing-function: ease-in, steps(1);
+          animation-timing-function: ease-in, steps(1);
+  bottom: 0;
+  content: '';
+  position: absolute;
+  top: 0;
+  -webkit-transform: scaleX(0);
+      -ms-transform: scaleX(0);
+          transform: scaleX(0);
+          transition: all 260ms ease-in;
+  width: 50%;
+}
+.load-bar::after {
+  right: 0;
+  -webkit-transform-origin: left center;
+      -ms-transform-origin: left center;
+          transform-origin: left center;
+          transition: all 260ms ease-in;
+}
+.load-bar::before {
+  left: 0;
+  -webkit-transform-origin: right center;
+      -ms-transform-origin: right center;
+          transform-origin: right center;
+          transition: all 260ms ease-in;
 }
 
 
@@ -1152,6 +1170,7 @@ z-index: 1000;
 		padding-left: .5rem;
 		width: auto;
 		overflow: hidden;
+    transition: all 350ms ease-in;
 	}
 
 	.slide-panel {

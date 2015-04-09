@@ -1,4 +1,17 @@
 <div class='row'>
+  <div {{bind-attr class=":loading-stories loadingVisible"}}>
+    <span>Fetching New Stories</span>
+    <div class="table">
+      <div class="cell">
+        <div class="gmb-loader">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <h2 class='category-header'>{{title}}</h2>
   {{#if controllers.session.currentUser.authenticated}}
 
@@ -87,4 +100,3 @@
     <a href="#" {{action 'loadAll'}} class='load-button'>More Stories</a>
   </div>
 {{/if}}
-

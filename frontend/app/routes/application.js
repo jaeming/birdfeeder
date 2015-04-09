@@ -14,12 +14,23 @@ export default Ember.Route.extend({
   renderTemplate: function(){
     this.render(); // render application template
     this.render('stories.subscribed',{
-     into: 'application',
-     outlet: 'body'
-     });
+      into: 'application',
+      outlet: 'body'
+    });
     this.render('hashtags.subscribed',{
-     into: 'application',
-     outlet: 'sidebar'
-     });
+      into: 'application',
+      outlet: 'sidebar'
+    });
+  },
+  actions: {
+    loading: function() {
+      var self = this;
+      this.controllerFor('application').set('loadBar', true);
+      Ember.run.later( function() {
+        self.controllerFor('application').set('loadBar', false);
+      }, 1200);
+
+      return true;
+    }
   }
 });
