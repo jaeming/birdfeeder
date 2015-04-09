@@ -6,7 +6,6 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-  this.route("loading");
   this.resource("hashtags", function() {
     this.route("show", { path: ":title" });
   });

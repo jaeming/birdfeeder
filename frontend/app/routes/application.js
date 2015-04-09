@@ -21,12 +21,5 @@ export default Ember.Route.extend({
      into: 'application',
      outlet: 'sidebar'
      });
-  },
-  // actions: {
-  // loading: function(transition, originRoute) {
-    //displayLoadingSpinner();
-    // Return true to bubble this event to `FooRoute`
-    // or `ApplicationRoute`.
-  //   return true;
-  // }
+  }
 });
