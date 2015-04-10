@@ -23,18 +23,6 @@ class StoriesController < ApplicationController
     render json: @stories
   end
 
-  # def subscribed_stories
-  #   page = params[:page].try(:to_i) || 1
-  #   story_index = page - 1
-  #   @user = current_user || guest_user
-  #   @subscriptions = @user.subscriptions.includes(:hashtag)
-  #   related_stories = []
-  #   @subscriptions.find_each { |s| related_stories |= s.hashtag.stories.includes(:users) }
-  #   @stories = related_stories.limit(25).offset(story_index * 25)
-  #   puts @stories.to_sql
-  #   render json: @stories
-  # end
-
   private
     def story_params
       params.require(:story).permit(:feed_url, :category)
