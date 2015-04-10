@@ -1,17 +1,12 @@
 class StorySerializer < ActiveModel::Serializer
-  attributes :id, :title, :body, :hashtag, :published_at, :users, :favorited, :created_at, :favorites_count, :editable, :viewed, :url
-  delegate :current_user, to: :scope
+  embed :ids, include: true
 
-  def hashtag
-    object.hashtag_id
-  end
+  attributes :id, :title, :body, :published_at, :favorited, :created_at, :favorites_count, :editable, :viewed, :url, :hashtag_id, :user_ids
+
+  delegate :current_user, to: :scope
 
   def body
     object.content
-  end
-
-  def users
-    object.user_ids
   end
 
   def favorited

@@ -113,7 +113,6 @@ export default Ember.ObjectController.extend({
         dataType: 'json',
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function(data) {
-          console.log(data);
           _this.set('subscribed', data.hashtag.subscribed);
           _this.get('target.router').refresh();
         },

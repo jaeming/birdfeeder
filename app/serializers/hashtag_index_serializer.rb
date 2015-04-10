@@ -1,10 +1,5 @@
-class HashtagSerializer < ActiveModel::Serializer
-  embed :ids, include: true
-
-  attributes :id, :title, :subscribed, :subscriptions_count, :stories_count
-  has_many :stories
-  has_many :users
-
+class HashtagIndexSerializer < ActiveModel::Serializer
+  attributes :id, :title, :story_ids, :user_ids, :subscribed, :subscriptions_count, :stories_count
   delegate :current_user, to: :scope
 
   def subscribed

@@ -26,7 +26,7 @@
     </form>
       {{#each result in results}}
           <p>
-            {{#link-to 'hashtags.show' this.result}}{{result.title}}{{/link-to}}
+            {{#link-to 'hashtags.show' result.title}}{{result.title}}{{/link-to}}
 
             {{#if searched}}
               {{#if result.subscribed}}
@@ -51,13 +51,15 @@
       <div class='categories-list'>
         {{#each categories}}
             <p class='category-collection-text'>
-              {{#link-to 'hashtags.show' this}}
+              {{#link-to 'hashtags.show' title}}
                 {{title}}
               {{/link-to}}
               {{#if subscribed}}
                 <a href="#" class="unsubscribe-small" {{action 'unsubscribe' id}}>Unsubscribe</a>
               {{else}}
-                <a href="#" class="subscribe-small" {{action 'subscribe' id}}>Subscribe</a>
+                {{#if title}}
+                  <a href="#" class="subscribe-small" {{action 'subscribe' id}}>Subscribe</a>
+                {{/if}}
               {{/if}}
             </p>
         {{/each}}
