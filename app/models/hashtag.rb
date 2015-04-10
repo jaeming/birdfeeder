@@ -5,6 +5,8 @@
   has_many :subscriptions
   has_many :views
   has_many :users, through: :subscriptions
+  validates :title, uniqueness: { case_sensitive: true }, presence: true
+
   extend FriendlyId
   friendly_id :title, use: :slugged
   after_create :title_safe_slugs
