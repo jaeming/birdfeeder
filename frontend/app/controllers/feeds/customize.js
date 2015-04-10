@@ -4,8 +4,16 @@ export default Ember.ArrayController.extend({
   results: [''],
   browseAll: false,
   searched: false,
+  error: false,
   actions: {
+    dismissError: function() {
+      this.set('error', false);
+    },
     addFeed: function() {
+      this.set('results', ['']);
+      this.set('searched', false);
+      this.set('browseAll', false);
+      window.scrollTo(0, 0);
       this.set('loadingVisible', true);
       var _this = this;
       var url = this.get('url');
@@ -21,11 +29,11 @@ export default Ember.ArrayController.extend({
           _this.set('category', '');
           _this.store.find('story');
           _this.store.find('hashtag');
-          _this.transitionToRoute('hashtags.show', data);
+          _this.transitionToRoute('hashtags.show', data.title);
           _this.get('target.router').refresh();
         },
-        error: function() {
-          console.log('that went badly');
+        error: function(data) {
+          _this.set('error', data.responseJSON.error)
           _this.set('loadingVisible', false);
         }
       });
