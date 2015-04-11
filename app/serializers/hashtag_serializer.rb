@@ -14,9 +14,9 @@ class HashtagSerializer < ActiveModel::Serializer
   def stories_count
     if current_user
       user_viewed = object.views.includes(:user).where(user: current_user)
-      (object.stories_count || 0) - (user_viewed.count)
+      (object.stories.count || 0) - (user_viewed.count)
     else
-      object.stories_count || 0
+      object.stories.count || 0
     end
   end
 
