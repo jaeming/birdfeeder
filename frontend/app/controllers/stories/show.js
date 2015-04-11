@@ -5,7 +5,6 @@ export default Ember.ObjectController.extend({
   actions: {
     markViewed: function(obj) {
       console.log(obj.hashtag_id);
-      var _this = this;
       var story = this.store.find('story', obj.id);
       var hashtag = this.get('hashtag');
       var token = this.get('controllers.session.currentUser.token');
@@ -29,9 +28,8 @@ export default Ember.ObjectController.extend({
       });
     },
     unmarkViewed: function(id, hashtag) {
-      var _this = this;
       var story = this.store.find('story', id);
-      var hashtag = this.get('hashtag');
+      var _hashtag = this.get('hashtag');
       var token = this.get('controllers.session.currentUser.token');
       var request = new Ember.RSVP.Promise(function(resolve) {
         Ember.$.ajax({
@@ -46,10 +44,11 @@ export default Ember.ObjectController.extend({
       });
 
       request.then(function(response) {
+        console.log(response);
         story.set('marked', false);
         story.set('viewed', false);
         var storyCount = hashtag.get('stories_count');
-        hashtag.set('stories_count', ++storyCount);
+        _hashtag.set('stories_count', ++storyCount);
       });
     }
   }

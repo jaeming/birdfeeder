@@ -33,7 +33,7 @@ export default Ember.ArrayController.extend({
           _this.get('target.router').refresh();
         },
         error: function(data) {
-          _this.set('error', data.responseJSON.error)
+          _this.set('error', data.responseJSON.error);
           _this.set('loadingVisible', false);
         }
       });
