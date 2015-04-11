@@ -12,8 +12,8 @@ class User < ActiveRecord::Base
   after_create :subscribe_to_defaults
 
   def subscribe_to_defaults
-    self.hashtags = Hashtag.where(:featured => true)
-    self.save!
+    @hashtags = Hashtag.where(:featured => true)
+    @hashtags.each { |tag| self.subscriptions.create! hashtag: tag }
   end
 
 end
