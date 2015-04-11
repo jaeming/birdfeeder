@@ -48,7 +48,9 @@ export default Ember.ObjectController.extend({
         console.log(response);
         story.set('marked', true);
         var storyCount = _this.get('stories_count');
-        _this.set('stories_count', --storyCount);
+        if(storyCount > 0) {
+          _this.set('stories_count', --storyCount);
+        }
       });
     },
     unmarkViewed: function(id) {

@@ -20,12 +20,13 @@
         {{fa-icon "fa-check-circle-o"}}
         <small class='story-read-text'>mark as unread</small>
       </span>
-    {{/if}}
-    {{#if viewed}}
-      <span class='story-read' {{action 'unmarkViewed' id hashtag}}>
-        {{fa-icon "fa-check-circle-o"}}
-        <small class='story-read-text'>mark as unread</small>
-      </span>
+    {{else}}
+      {{#if viewed}}
+        <span class='story-read' {{action 'unmarkViewed' id hashtag}}>
+          {{fa-icon "fa-check-circle-o"}}
+          <small class='story-read-text'>mark as unread</small>
+        </span>
+      {{/if}}
     {{/if}}
 
     <h2>

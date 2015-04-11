@@ -41,13 +41,15 @@
         {{fa-icon "fa-check-circle-o"}}
         <small class='story-read-text'>mark as unread</small>
       </span>
-    {{/if}}
-    {{#if story.viewed}}
-      <span class='story-read' {{action 'unmarkViewed' story.id}}>
+    {{else}}
+      {{#if story.viewed}}
+        <span class='story-read' {{action 'unmarkViewed' story.id}}>
         {{fa-icon "fa-check-circle-o"}}
         <small class='story-read-text'>mark as unread</small>
         </span>
+      {{/if}}
     {{/if}}
+
 
     <h2>
       {{story.title}}
@@ -88,12 +90,13 @@
           {{fa-icon "fa-check-circle-o"}}
           <small class='story-read-text'>mark as unread</small>
         </span>
-      {{/if}}
-      {{#if viewed}}
-        <span class='story-read' {{action 'unmarkViewed' id}}>
-          {{fa-icon "fa-check-circle-o"}}
-          <small class='story-read-text'>mark as unread</small>
-        </span>
+      {{else}}
+        {{#if viewed}}
+          <span class='story-read' {{action 'unmarkViewed' id}}>
+            {{fa-icon "fa-check-circle-o"}}
+            <small class='story-read-text'>mark as unread</small>
+          </span>
+        {{/if}}
       {{/if}}
 
       <h2>
@@ -106,6 +109,23 @@
       {{/if}}
       <br>
       <small>published {{date-and-time published_at}}</small>
+
+
+
+      {{#if marked}}
+        <span class='story-read' {{action 'unmarkViewed' id}}>
+          {{fa-icon "fa-check-circle-o"}}
+          <small class='story-read-text'>mark as unread</small>
+        </span>
+      {{else}}
+        {{#if viewed}}
+          <span class='story-read' {{action 'unmarkViewed' id}}>
+            {{fa-icon "fa-check-circle-o"}}
+            <small class='story-read-text'>mark as unread</small>
+          </span>
+        {{/if}}
+      {{/if}}
+
 
       {{#if editable}}
         {{#if viewed}}
