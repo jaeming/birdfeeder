@@ -50,6 +50,10 @@
       <a target="_blank" {{bind-attr href="url"}} class='external-link'> {{fa-icon "fa-external-link"}} <span>visit article link</span></a>
     </h2>
     {{{story.body}}}
+    {{#if story.long_article}}
+      {{#link-to 'stories.show' this class='hashtag-subtitle'}}Read Full Story{{/link-to}}
+    {{/if}}
+    <br>
     <small>published {{date-and-time story.published_at}}</small>
 
   {{#if story.editable}}
@@ -85,6 +89,10 @@
         <a target="_blank" {{bind-attr href="url"}} class='external-link'> {{fa-icon "fa-external-link"}} <span>visit article link</span></a>
       </h2>
       {{{body}}}
+      {{#if long_article}}
+        {{#link-to 'stories.show' this class='hashtag-subtitle'}}Read Full Story{{/link-to}}
+      {{/if}}
+      <br>
       <small>published {{date-and-time published_at}}</small>
 
       {{#waypoint on-down="markViewed" id=id}}

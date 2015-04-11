@@ -10,7 +10,7 @@ Router.map(function() {
     this.route("show", { path: ":title" });
   });
   this.resource("stories", function() {
-    this.route("show", { path: ":story_id" });
+    this.route("show", { path: ":id" });
     this.route("favorites");
     this.route("subscribed");
   });

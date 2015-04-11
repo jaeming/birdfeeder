@@ -22,6 +22,10 @@
           {{#link-to 'hashtags.show' hashtag.title}}<small class='hashtag-subtitle'>[{{hashtag.title}}]</small>{{/link-to}}
         </h2>
         {{{body}}}
+        {{#if long_article}}
+          {{#link-to 'stories.show' this class='hashtag-subtitle'}}Read Full Story{{/link-to}}
+        {{/if}}
+        <br>
         <small>published {{date-and-time published_at}}</small>
 
         {{#if editable}}
