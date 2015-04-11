@@ -37,7 +37,7 @@
         {{#if editable}}
           {{#if viewed}}
           {{else}}
-            {{#waypoint on-down="markViewed" id=id hashtag_id=hashtag.id}}
+            {{#waypoint on-down="markViewed" offset='-25' triggerOnce=true id=id hashtag_id=hashtag.id}}
             {{/waypoint}}
           {{/if}}
         {{/if}}

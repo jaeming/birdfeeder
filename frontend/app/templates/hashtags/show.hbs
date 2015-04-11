@@ -59,16 +59,14 @@
     {{/if}}
     <br>
     <small>published {{date-and-time story.published_at}}</small>
-
+  </div>
     {{#if story.editable}}
-      {{#if story.viewed}}
+     {{#if story.viewed}}
       {{else}}
-        {{#waypoint on-down="markViewed" id=story.id hashtag_id=hashtag.id}}
+        {{#waypoint on-down="markViewed" offset='-25' triggerOnce=true id=story.id hashtag_id=hashtag.id}}
         {{/waypoint}}
       {{/if}}
     {{/if}}
-
-  </div>
   <br>
 {{/each}}
 
@@ -112,7 +110,7 @@
       {{#if editable}}
         {{#if viewed}}
         {{else}}
-          {{#waypoint on-down="markViewed" id=id hashtag_id=hashtag.id}}
+          {{#waypoint on-down="markViewed" offset='-25' triggerOnce=true id=id hashtag_id=hashtag.id}}
           {{/waypoint}}
         {{/if}}
       {{/if}}

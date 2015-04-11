@@ -2,7 +2,7 @@
   {{#if editable}}
     {{#if viewed}}
     {{else}}
-      {{#waypoint on-down="markViewed" id=id hashtagId=hashtag.id}}
+      {{#waypoint on-down="markViewed" offset='50%' triggerOnce=true id=id hashtagId=hashtag.id}}
       {{/waypoint}}
     {{/if}}
   {{/if}}
