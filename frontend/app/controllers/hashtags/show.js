@@ -70,9 +70,7 @@ export default Ember.ObjectController.extend({
       request.then(function(response) {
         console.log(response);
         story.set('marked', false);
-        if(story.get('viewed', true)){
-          story.set('viewed', false);
-        }
+        story.set('viewed', false);
         var storyCount = _this.get('stories_count');
         _this.set('stories_count', ++storyCount);
       });
