@@ -2,7 +2,7 @@ class SubscriptionsController < ApplicationController
 
   def create
     @hashtag = Hashtag.find(params[:hashtag_id])
-    @subscription = current_user.subscriptions.create! hashtag: @hashtag
+    @subscription = current_user.subscriptions.find_or_create_by! hashtag: @hashtag
     render json: @hashtag
   end
 

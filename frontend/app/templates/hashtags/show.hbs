@@ -14,17 +14,15 @@
 
   <h2 class='category-header'>{{title}}</h2>
   {{#if controllers.session.currentUser.authenticated}}
-
-  <a href="#" class='refresh-button' {{action 'updateStories' id}}>{{fa-icon "refresh"}}
-    <span {{bind-attr class=":updated-text updatedVisible"}}> &nbsp; Updated! </span>
-  </a>
-
-  {{#if subscribed}}
-    <a href="#" class="unsubscribe" {{action 'unsubscribe' id}}>Unsubscribe</a>
-  {{else}}
-    <a href="#" class="subscribe" {{action 'subscribe' id}}>Subscribe</a>
+    <a href="#" class='refresh-button' {{action 'updateStories' id}}>{{fa-icon "refresh"}}
+      <span {{bind-attr class=":updated-text updatedVisible"}}> &nbsp; Updated! </span>
+    </a>
+    {{#if subscribed}}
+      <a href="#" class="unsubscribe" {{action 'unsubscribe' id}}>Unsubscribe</a>
+    {{else}}
+      <a href="#" class="subscribe" {{action 'subscribe' id}}>Subscribe</a>
+    {{/if}}
   {{/if}}
-{{/if}}
 
 </div>
 
@@ -44,6 +42,12 @@
         <small class='story-read-text'>mark as unread</small>
       </span>
     {{/if}}
+    {{#if story.viewed}}
+      <span class='story-read' {{action 'unmarkViewed' story.id}}>
+        {{fa-icon "fa-check-circle-o"}}
+        <small class='story-read-text'>mark as unread</small>
+        </span>
+    {{/if}}
 
     <h2>
       {{story.title}}
@@ -56,10 +60,13 @@
     <br>
     <small>published {{date-and-time story.published_at}}</small>
 
-  {{#if story.editable}}
-    {{#waypoint on-down="markViewed" id=story.id}}
-    {{/waypoint}}
-  {{/if}}
+    {{#if story.editable}}
+      {{#if story.viewed}}
+      {{else}}
+        {{#waypoint on-down="markViewed" id=story.id hashtag_id=hashtag.id}}
+        {{/waypoint}}
+      {{/if}}
+    {{/if}}
 
   </div>
   <br>
@@ -77,7 +84,14 @@
         {{/if}}
       {{/if}}
 
+
       {{#if marked}}
+        <span class='story-read' {{action 'unmarkViewed' id}}>
+          {{fa-icon "fa-check-circle-o"}}
+          <small class='story-read-text'>mark as unread</small>
+        </span>
+      {{/if}}
+      {{#if viewed}}
         <span class='story-read' {{action 'unmarkViewed' id}}>
           {{fa-icon "fa-check-circle-o"}}
           <small class='story-read-text'>mark as unread</small>
@@ -95,8 +109,13 @@
       <br>
       <small>published {{date-and-time published_at}}</small>
 
-      {{#waypoint on-down="markViewed" id=id}}
-      {{/waypoint}}
+      {{#if editable}}
+        {{#if viewed}}
+        {{else}}
+          {{#waypoint on-down="markViewed" id=id hashtag_id=hashtag.id}}
+          {{/waypoint}}
+        {{/if}}
+      {{/if}}
 
     </div>
     <br>

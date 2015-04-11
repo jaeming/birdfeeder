@@ -107,8 +107,8 @@ export default Ember.Controller.extend({
 
       request.then(function() {
         story.set('marked', true);
-        var storyCountDeduct = hashtag.get('stories_count') - 1;
-        hashtag.set('stories_count', storyCountDeduct);
+        var storyCount = hashtag.get('stories_count');
+        hashtag.set('stories_count', --storyCount);
       });
     },
     unmarkViewed: function(id, hashtag) {
@@ -128,8 +128,11 @@ export default Ember.Controller.extend({
 
       request.then(function() {
         story.set('marked', false);
-        var storyCountAdd = hashtag.get('stories_count') + 1;
-        hashtag.set('stories_count', storyCountAdd);
+        if(story.get('viewed', true)){
+          story.set('viewed', false);
+        }
+        var storyCount = hashtag.get('stories_count');
+        hashtag.set('stories_count', ++storyCount);
       });
     },
     signOut: function() {

@@ -2,19 +2,19 @@ import Ember from 'ember';
 
 export default Ember.ObjectController.extend({
   needs: ['session', 'application', 'stories/favorites'],
-
   actions: {
     markViewed: function(obj) {
+      console.log(obj.hashtag_id);
       var _this = this;
       var story = this.store.find('story', obj.id);
-      var hashtag_id = this.get('id');
+      var hashtag = this.get('hashtag');
       var token = this.get('controllers.session.currentUser.token');
       var request = new Ember.RSVP.Promise(function(resolve) {
         Ember.$.ajax({
           url: '/api/views/',
           type: 'POST',
           dataType: 'json',
-          data: {'authenticity_token': token, 'story_id': obj.id, 'hashtag_id': hashtag_id},
+          data: {'authenticity_token': token, 'story_id': obj.id, 'hashtag_id': obj.hashtag_id},
           success: function(response) {
             resolve(response);
           }
@@ -24,14 +24,14 @@ export default Ember.ObjectController.extend({
       request.then(function(response) {
         console.log(response);
         story.set('marked', true);
-        var storyCountDeduct = _this.get('stories_count') - 1;
-        _this.set('stories_count', storyCountDeduct);
-        // story.set('viewed', response.viewed);
+        var storyCount = hashtag.get('stories_count');
+        hashtag.set('stories_count', --storyCount);
       });
     },
-    unmarkViewed: function(id) {
+    unmarkViewed: function(id, hashtag) {
       var _this = this;
       var story = this.store.find('story', id);
+      var hashtag = this.get('hashtag');
       var token = this.get('controllers.session.currentUser.token');
       var request = new Ember.RSVP.Promise(function(resolve) {
         Ember.$.ajax({
@@ -46,11 +46,10 @@ export default Ember.ObjectController.extend({
       });
 
       request.then(function(response) {
-        console.log(response);
-        // story.set('viewed', response.viewed);
         story.set('marked', false);
-        var storyCountAdd = _this.get('stories_count') + 1;
-        _this.set('stories_count', storyCountAdd);
+        story.set('viewed', false);
+        var storyCount = hashtag.get('stories_count');
+        hashtag.set('stories_count', ++storyCount);
       });
     }
   }

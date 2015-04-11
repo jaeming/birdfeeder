@@ -6,7 +6,7 @@ export default Ember.ObjectController.extend({
   currentPathChanged: function () {
     window.scrollTo(0, 0);
   }.observes('currentPath'),
-  sortProperties: ['viewed:asc', 'published_at:desc'],
+  sortProperties: ['viewed:asc', 'created_at:desc'],
   filteredStories: Ember.computed.sort('stories', 'sortProperties'),
   topStories: function() {
     return this.get('filteredStories').slice(0, 12);
@@ -47,9 +47,8 @@ export default Ember.ObjectController.extend({
       request.then(function(response) {
         console.log(response);
         story.set('marked', true);
-        var storyCountDeduct = _this.get('stories_count') - 1;
-        _this.set('stories_count', storyCountDeduct);
-        // story.set('viewed', response.viewed);
+        var storyCount = _this.get('stories_count');
+        _this.set('stories_count', --storyCount);
       });
     },
     unmarkViewed: function(id) {
@@ -70,10 +69,12 @@ export default Ember.ObjectController.extend({
 
       request.then(function(response) {
         console.log(response);
-        // story.set('viewed', response.viewed);
         story.set('marked', false);
-        var storyCountAdd = _this.get('stories_count') + 1;
-        _this.set('stories_count', storyCountAdd);
+        if(story.get('viewed', true)){
+          story.set('viewed', false);
+        }
+        var storyCount = _this.get('stories_count');
+        _this.set('stories_count', ++storyCount);
       });
     },
     updateStories: function(id) {

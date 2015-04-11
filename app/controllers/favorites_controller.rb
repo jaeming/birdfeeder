@@ -2,7 +2,7 @@ class FavoritesController < ApplicationController
 
   def create
     @story = Story.find(params[:story_id])
-    @favorite = current_user.favorites.create! story: @story
+    @favorite = current_user.favorites.find_or_create_by! story: @story
     render json: @story
   end
 
