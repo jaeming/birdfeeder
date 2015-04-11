@@ -33,7 +33,6 @@
     "ember-cli-font-awesome": "0.0.9",
     "ember-cli-ic-ajax": "0.1.1",
     "ember-cli-inject-live-reload": "^1.3.0",
-    "ember-cli-list-view": "0.0.9",
     "ember-cli-pagination": "^0.6.6",
     "ember-cli-qunit": "0.1.2",
     "ember-cli-rails-addon": "0.0.11",

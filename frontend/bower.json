@@ -16,10 +16,6 @@
     "moment": "~2.9.0",
     "momentjs": "~2.9.0",
     "ember-cli-moment-shim": "~0.0.3",
-    "sifter": "~0.4.1",
-    "ember-cli-list-view": ">=0.0.3",
-    "zynga-scroller": "https://raw.github.com/zynga/scroller/master/src/Scroller.js",
-    "zynga-scroller-animate": "https://raw.github.com/zynga/scroller/master/src/Animate.js",
-    "spin.js": "~2.0.2"
+    "sifter": "~0.4.1"
   }
 }
