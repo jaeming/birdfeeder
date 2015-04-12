@@ -12,7 +12,7 @@ Router.map(function() {
   this.resource("stories", function() {
     this.route("show", { path: ":id" });
     this.route("favorites");
-    this.route("subscribed");
+    this.route("all");
   });
   this.resource("users", function() {
     this.route("edit");

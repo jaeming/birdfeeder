@@ -16,7 +16,14 @@ export default Ember.Controller.extend({
   slidePanel: false,
   hideSideBar: false,
   sideCollapsed: false,
+  currentPage: 1,
+  hasMore: true,
 	actions: {
+    fetchMore: function(callback) {
+      this.incrementProperty('currentPage');
+      var promise = this.store.find('story', {page: this.get('currentPage')});
+      this.set('model', promise)
+    },
     loadNext: function() {
       this.get('pagedContent').loadNextPage();
     },

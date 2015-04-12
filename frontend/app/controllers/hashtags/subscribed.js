@@ -1,6 +1,5 @@
 import Ember from 'ember';
 
 export default Ember.ArrayController.extend({
-  sortAscending: false,
+  needs: ['session', 'application'],
 });
-
