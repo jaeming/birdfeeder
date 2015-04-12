@@ -36,7 +36,7 @@ export default Ember.ArrayController.extend({
         story.set('marked', true);
         var storyCount = hashtag.get('stories_count');
         if(storyCount > 0) {
-          hashtag.set('stories_count', --storyCount);
+          hashtag.decrementProperty('stories_count');
         }
       });
     },
@@ -58,8 +58,7 @@ export default Ember.ArrayController.extend({
       request.then(function() {
         story.set('marked', false);
         story.set('viewed', false);
-        var storyCount = hashtag.get('stories_count');
-        hashtag.set('stories_count', ++storyCount);
+        hashtag.incrementProperty('stories_count');
       });
     },
   }

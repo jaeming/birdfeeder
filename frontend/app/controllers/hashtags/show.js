@@ -49,7 +49,7 @@ export default Ember.ObjectController.extend({
         story.set('marked', true);
         var storyCount = _this.get('stories_count');
         if(storyCount > 0) {
-          _this.set('stories_count', --storyCount);
+          _this.decrementProperty('stories_count');
         }
       });
     },
@@ -73,8 +73,7 @@ export default Ember.ObjectController.extend({
         console.log(response);
         story.set('marked', false);
         story.set('viewed', false);
-        var storyCount = _this.get('stories_count');
-        _this.set('stories_count', ++storyCount);
+        _this.incrementProperty('stories_count');
       });
     },
     updateStories: function(id) {
