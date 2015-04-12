@@ -5,9 +5,8 @@ export default Ember.Controller.extend({
   needs: ['session', 'stories/favorites'],
   errors: null,
   loadBar: false,
-  sortProperties: ['viewed:asc', 'published_at:desc'],
-  sortedStories: Ember.computed.sort('stories', 'sortProperties'),
-  pagedContent: pagedArray('sortedStories', {infinite: "unpaged"}),
+  // sortProperties: ['viewed:asc', 'published_at:desc'],
+  // sortedStories: Ember.computed.sort('stories', 'sortProperties'),
   actionsVisible: false,
 	accountVisible: false,
 	smallLogo: false,
@@ -16,17 +15,7 @@ export default Ember.Controller.extend({
   slidePanel: false,
   hideSideBar: false,
   sideCollapsed: false,
-  currentPage: 1,
-  hasMore: true,
 	actions: {
-    fetchMore: function(callback) {
-      this.incrementProperty('currentPage');
-      var promise = this.store.find('story', {page: this.get('currentPage')});
-      this.set('model', promise)
-    },
-    loadNext: function() {
-      this.get('pagedContent').loadNextPage();
-    },
 		optionsShow: function() {
 			var _this = this;
 			this.set('actionsVisible', true);
@@ -94,52 +83,6 @@ export default Ember.Controller.extend({
         _this.set('sideHovered', false);
         _this.set('mainPaneSmall', true);
         }
-      });
-    },
-    markViewed: function(obj) {
-      var story = this.store.find('story', obj.id);
-      var hashtag = this.store.find('hashtag', obj.hashtag_id);
-      var token = this.get('controllers.session.currentUser.token');
-      var request = new Ember.RSVP.Promise(function(resolve) {
-        Ember.$.ajax({
-          url: '/api/views/',
-          type: 'POST',
-          dataType: 'json',
-          data: {'authenticity_token': token, 'story_id': obj.id, 'hashtag_id': hashtag.id},
-          success: function(response) {
-            resolve(response);
-          }
-        });
-      });
-
-      request.then(function() {
-        story.set('marked', true);
-        var storyCount = hashtag.get('stories_count');
-        if(storyCount > 0) {
-          hashtag.set('stories_count', --storyCount);
-        }
-      });
-    },
-    unmarkViewed: function(id, hashtag) {
-      var story = this.store.find('story', id);
-      var token = this.get('controllers.session.currentUser.token');
-      var request = new Ember.RSVP.Promise(function(resolve) {
-        Ember.$.ajax({
-          url: '/api/views/'+id,
-          type: 'DELETE',
-          dataType: 'json',
-          data: {'authenticity_token': token, 'story_id': id},
-          success: function(response) {
-            resolve(response);
-          }
-        });
-      });
-
-      request.then(function() {
-        story.set('marked', false);
-        story.set('viewed', false);
-        var storyCount = hashtag.get('stories_count');
-        hashtag.set('stories_count', ++storyCount);
       });
     },
     signOut: function() {

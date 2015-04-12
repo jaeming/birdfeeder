@@ -1,6 +1,7 @@
 import Ember from 'ember';
+import resetScrollMixin from "../../mixins/reset-scroll";
 
-export default Ember.Route.extend({
+export default Ember.Route.extend(resetScrollMixin, {
   model: function() {
     var storyIndex = this.controllerFor('stories.all').get('currentPage');
     return this.store.find('story', {page: storyIndex});
