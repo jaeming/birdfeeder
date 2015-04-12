@@ -1,17 +1,11 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-  beforeModel: function() {
-    // this.controllerFor('application').set('isSpinning', true);
-  },
   model: function() {
     return Ember.RSVP.hash({
       hashtags: this.store.find('hashtag', { subscribed: true }),
       stories: this.store.find('story', { subscribed: true })
     });
-  },
-  afterModel: function() {
-    // this.controllerFor('application').set('isSpinning', false);
   },
   setupController: function(controller, modelHash) {
     controller.set('stories', modelHash.stories);
