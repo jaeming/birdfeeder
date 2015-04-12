@@ -1,12 +1,12 @@
 class StorySerializer < ActiveModel::Serializer
   embed :ids, include: true
 
-  attributes :id, :title, :body, :published_at, :favorited, :created_at, :favorites_count, :editable, :viewed, :url, :hashtag_id, :user_ids, :long_article
+  attributes :id, :title, :body, :published_at, :favorited, :created_at, :favorites_count, :editable, :viewed, :url, :hashtag_id, :user_ids
 
   delegate :current_user, to: :scope
 
   def body
-    object.content.truncate(3500, separator: '<')
+    object.content
   end
 
   def favorited
@@ -19,10 +19,6 @@ class StorySerializer < ActiveModel::Serializer
 
   def editable
     true if current_user
-  end
-
-  def long_article
-    object.content.size > 3500
   end
 
 end

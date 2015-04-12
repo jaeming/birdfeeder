@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150407155929) do
+ActiveRecord::Schema.define(version: 20150412134718) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(version: 20150407155929) do
     t.integer  "feed_id"
     t.integer  "favorites_count"
     t.string   "url"
+    t.text     "viewed_by_users"
   end
 
   create_table "subscriptions", force: :cascade do |t|

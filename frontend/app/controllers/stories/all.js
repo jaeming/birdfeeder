@@ -3,7 +3,7 @@ import Ember from 'ember';
 export default Ember.ArrayController.extend({
   needs: ['session', 'stories/favorites'],
 
-  sortAscending: false,
+  // sortAscending: false,
   sortProperties: ['viewed:asc', 'published_at:desc'],
   sortedStories: Ember.computed.sort('model', 'sortProperties'),
   currentPage: 1,

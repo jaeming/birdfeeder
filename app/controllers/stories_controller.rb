@@ -3,6 +3,7 @@ class StoriesController < ApplicationController
   def index
     page = params[:page].try(:to_i) || 1
     story_index = page - 1
+    # stories_not_viewed = Story.all.reject { |s| s.viewed_by_users.include?(current_user) }
     @stories = Story.includes(:users).limit(15).offset(story_index * 15)
     puts @stories.to_sql
     render json: @stories
@@ -10,7 +11,7 @@ class StoriesController < ApplicationController
 
   def show
     @story = Story.find(params[:id])
-    render json: @story, serializer: StoryShowSerializer, root: :story
+    render json: @story
   end
 
   def favorite

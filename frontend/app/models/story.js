@@ -12,6 +12,5 @@ export default DS.Model.extend({
   users: DS.hasMany('user', { async: true }),
   favorited: DS.attr('boolean'),
   editable: DS.attr('boolean'),
-  viewed: DS.attr('boolean'),
-  long_article: DS.attr('boolean')
+  viewed: DS.attr('boolean')
 });

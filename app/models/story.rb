@@ -1,4 +1,5 @@
 class Story < ActiveRecord::Base
+  serialize :viewed_by_users, Array
   belongs_to :hashtag, counter_cache: true
   belongs_to :feed
   has_many :favorites
