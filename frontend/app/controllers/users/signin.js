@@ -28,7 +28,7 @@ export default Ember.Controller.extend({
           _this.transitionToRoute('/');
         },
         error: function(data) {
-          this.set('loadingVisible', false);
+          _this.set('loadingVisible', false);
           var message = data.responseJSON.error;
           console.log(message);
           _this.set('controllers.application.errors', message);
