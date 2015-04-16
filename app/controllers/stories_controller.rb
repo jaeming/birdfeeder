@@ -2,11 +2,8 @@ class StoriesController < ApplicationController
 
   def index
     page = params[:page].try(:to_i) || 1
-    story_index = page - 1
-    # stories_not_viewed = Story.all.reject { |s| s.viewed_by_users.include?(current_user) }
-    @stories = Story.includes(:users).limit(15).offset(story_index * 15)
-    puts @stories.to_sql
-    render json: @stories
+    @stories = Story.as_viewed_by(current_user || guest_user)
+    render json: Story.paginate(@stories, page)
   end
 
   def show
@@ -28,6 +25,14 @@ class StoriesController < ApplicationController
   end
 
   private
+    def offset_story(page)
+      if page == 0
+        15
+      else
+        page * 14
+      end
+    end
+
     def story_params
       params.require(:story).permit(:feed_url, :category)
     end
