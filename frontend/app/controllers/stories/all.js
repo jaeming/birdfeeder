@@ -13,7 +13,7 @@ export default Ember.ArrayController.extend({
     fetchMore: function(callback) {
       this.incrementProperty('currentPage');
       var promise = this.store.find('story', {page: this.get('currentPage')});
-      this.set('model', promise)
+      this.set('model', promise);
       console.log(this.get('currentPage'));
     },
     markViewed: function(obj) {
