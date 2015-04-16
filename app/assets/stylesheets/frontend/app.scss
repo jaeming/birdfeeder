@@ -629,11 +629,13 @@ z-index: 1000;
 }
 
 .loading-stories {
-  margin-top: -7rem;
+  margin-top: -9rem;
   text-align: center;
   position: relative;
   z-index: 5;
+  opacity: 0;
   span {
+    opacity: 0;
     font-size: 0rem;
     transition: all 300ms ease-in;
   }
@@ -746,7 +748,9 @@ z-index: 1000;
 
 .loading-visible {
   margin-top: 0;
+  opacity: 1;
   span {
+    opacity: 1;
     color: #f6f6f6;
     background: #457d8e;
     font-size: 1.6rem;
