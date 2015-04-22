@@ -24,14 +24,12 @@ class StoriesController < ApplicationController
     render json: @stories
   end
 
+  def all
+    @stories = Story.all
+    render json: @stories
+  end
+
   private
-    def offset_story(page)
-      if page == 0
-        15
-      else
-        page * 14
-      end
-    end
 
     def story_params
       params.require(:story).permit(:feed_url, :category)

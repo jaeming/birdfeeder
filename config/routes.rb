@@ -23,6 +23,9 @@ scope '/api' do
   get 'stories' => 'stories#favorite',
     :constraints => lambda { |request| request.params[:favorite] == "true"}
 
+  get 'stories' => 'stories#all',
+    :constraints => lambda { |request| request.params[:all] == "true"}
+
   resources :hashtags
   resources :stories
   resources :feeds
