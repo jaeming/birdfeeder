@@ -18,7 +18,7 @@ export default Ember.Route.extend({
     });
   },
   afterModel: function(){
-    this.store.find('story', { all: true });
+    // this.store.find('story', { all: true });
   },
   actions: {
     loading: function() {
