@@ -882,7 +882,7 @@ z-index: 1000;
 }
 
 .hide-side-bar {
-  margin-left: -16rem;
+  margin-left: -100%;
   transition: all 260ms ease-in;
 }
 
@@ -891,7 +891,7 @@ z-index: 1000;
   transition: all 260ms ease-in;
 }
 
-.full-main-pane {
+.full-view {
   margin-left: 0rem;
   transition: all 260ms ease-in;
 }
@@ -902,7 +902,7 @@ z-index: 1000;
 }
 
 .app-bar-hide {
-  margin-left: 0;
+  margin-left: -20rem;
   width: 160%;
   transition: all 260ms ease-in;
 }
@@ -1074,12 +1074,12 @@ z-index: 1000;
 	}
 
 	.side-bar {
-		left: -100%;
+		margin-left: -100%;
     transition: all 260ms ease-in;
 	}
 
-	.side-visible {
-		left: 0;
+	.mobile-side-visible {
+		margin-left: 0;
 	}
 
 	.main-pane {
@@ -1094,7 +1094,7 @@ z-index: 1000;
 	}
 
 	.app-bar {
-		left: -20rem;
+		margin-left: -20rem;
 		width: 160%;
 		transition: all 260ms ease-in;
 	}
@@ -1103,8 +1103,7 @@ z-index: 1000;
 		left: 0;
 	}
 
-	.slide-panel {
-		margin-right: -52rem;
+	.mobile-opaque-pane{
 		overflow: hidden;
     opacity: .5;
 	}
@@ -1134,20 +1133,22 @@ z-index: 1000;
 		vertical-align: middle;
 		font-size: 2.8rem;
 		transition: all 260ms ease;
+    margin-left: -2.5rem;
 	}
 
-	.small-logo {
-		font-size: 0rem;
-	}
+  .small-logo {
+    font-size: 2.8rem;
+    line-height: 1.4;
+  }
 
-	.side-bar {
-		left: -100%;
+  .side-bar {
+    margin-left: -100%;
     transition: all 260ms ease-in;
-	}
+  }
 
-	.side-visible {
-		left: 0;
-	}
+  .mobile-side-visible {
+    margin-left: 0;
+  }
 
 	.main-pane {
 		margin-left: 0rem;
@@ -1160,7 +1161,7 @@ z-index: 1000;
 	}
 
 	.app-bar {
-		left: -20rem;
+		left: 0rem;
 		width: 220%;
 		transition: all 260ms ease-in;
 	}
@@ -1181,6 +1182,7 @@ z-index: 1000;
 	.logo {
 		vertical-align: middle;
 		font-size: 2rem;
+    margin-left: 0rem;
 		line-height: 1.9;
 		transition: all 260ms ease;
 	}

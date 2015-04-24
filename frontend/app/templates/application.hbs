@@ -54,7 +54,7 @@
 
 	</div>
 	<div class='logo-bar'>
-		<div {{bind-attr class=":menu-icon menuIconShow"}} {{action "showSidePanel"}}>
+		<div {{bind-attr class=":menu-icon menuIconShow mobileMenuIconShow"}} {{action "showSidePanel"}}>
 			{{fa-icon "fa-bars" size="2"}}
 		</div>
 		<h1 class='logo' {{bind-attr class=":logo smallLogo"}}>Bluebird Feeder</h1>
@@ -64,20 +64,12 @@
 
 <div class='topbar-spacer'>
 	<main>
-		<div {{action "closeSidePanel"}}>
-		  <div {{bind-attr class=":side-bar sideVisible hideSideBar"}} {{action "hoverSidebar" on="mouseEnter"}}>
+		<div {{action "closeMobileSidePanel"}}>
+		  <div {{bind-attr class=":side-bar hideSideBar mobileSideVisible"}}>
 
-				{{#if sideCollapsed}}
-					{{#if sideHovered}}
-					<a href="#" class='close-side-icon' {{action 'pinSideBar'}}>
-						<span>pin side-bar</span> <img src="/images/pin.png" alt="close sidebar" class='close-arrow'>
-					</a>
-					{{/if}}
-				{{else}}
-					<a href="#" class='close-side-icon' {{action 'showFullView'}}>
+					<a href="#" class='close-side-icon' {{action 'closeSidebar'}}>
 						<span>collapse side-bar</span> <img src="/images/close.png" alt="close sidebar" class='close-arrow'>
 					</a>
-				{{/if}}
 
 				<br><br>
 
@@ -97,7 +89,7 @@
 		</div>
 
 
-	  <section {{bind-attr class=":main-pane slidePanel fullMainPane mainPaneSmall"}}>
+	  <section {{bind-attr class=":main-pane fullView mobileOpaquePane"}}>
 	    <div class="row">
 
 	      {{outlet 'body'}}
