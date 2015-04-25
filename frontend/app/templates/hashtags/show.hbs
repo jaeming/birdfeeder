@@ -142,3 +142,8 @@
     <a href="#" {{action 'loadAll'}} class='load-button'>More Stories</a>
   </div>
 {{/if}}
+{{#if loadingButton}}
+  <div class="overflow">
+    <a href="#" class='load-button load-button-active'>Loading...</a>
+  </div>
+{{/if}}

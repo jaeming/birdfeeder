@@ -20,12 +20,14 @@ export default Ember.ObjectController.extend({
   actions: {
     loadAll: function() {
       var _this = this;
-      this.set('controllers.application.loadBar', true);
-      Ember.run.later( function() {
-        _this.set('loadBar', false);
-      }, 1200);
-      this.set('showAllStories', true);
       this.set('showMoreButton', false);
+      this.set('loadingButton', true);
+      Ember.run.later( function() {
+        _this.set('showAllStories', true);
+      }, 100);
+      Ember.run.later( function() {
+        _this.set('loadingButton', false);
+      }, 1200);
     },
     markViewed: function(obj) {
       var _this = this;
