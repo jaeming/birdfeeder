@@ -11,10 +11,17 @@ export default Ember.ArrayController.extend({
 
   actions: {
     fetchMore: function(callback) {
+      var _this = this;
+      this.set('hasMore', false);
+      this.set('loadingButton', true);
       this.incrementProperty('currentPage');
       var promise = this.store.find('story', {page: this.get('currentPage')});
-      this.set('model', promise);
-      console.log(this.get('currentPage'));
+      Ember.run.later( function() {
+        _this.set('model', promise);
+        _this.set('loadingButton', false);
+        _this.set('hasMore', true);
+        window.scrollTo(0, 0);
+      }, 100);
     },
     markViewed: function(obj) {
       var story = this.store.find('story', obj.id);
