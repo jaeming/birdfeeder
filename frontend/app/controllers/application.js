@@ -4,6 +4,10 @@ export default Ember.Controller.extend({
   needs: ['session', 'stories/favorites'],
   errors: null,
 	actions: {
+    loadMoreStories: function() {
+      console.log('background loading stories');
+      this.store.find('story', {all: true});
+    },
 		optionsShow: function() {
 			var _this = this;
 			this.set('actionsVisible', true);

@@ -91,7 +91,8 @@
 
 	  <section {{bind-attr class=":main-pane fullView mobileOpaquePane"}}>
 	    <div class="row">
-
+				{{#waypoint on-down="loadMoreStories" triggerOnce=true}}
+				{{/waypoint}}
 	      {{outlet 'body'}}
 
 	    </div>
