@@ -1,3 +1,5 @@
+{{#waypoint on-down="loadMoreStories" triggerOnce=true}}
+{{/waypoint}}
 {{#if errors}}
 	<div id='flash-wrapper'>
 		<div class='flash-message'>
@@ -91,8 +93,7 @@
 
 	  <section {{bind-attr class=":main-pane fullView mobileOpaquePane"}}>
 	    <div class="row">
-				{{#waypoint on-down="loadMoreStories" triggerOnce=true}}
-				{{/waypoint}}
+
 	      {{outlet 'body'}}
 
 	    </div>
