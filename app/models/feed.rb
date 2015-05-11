@@ -27,12 +27,18 @@ class Feed < ActiveRecord::Base
       unless @story.url
         @story.feed = self
         @story.url = entry.url
-        @story.content = (entry.content || entry.summary).sanitize
+        @story.content = (entry.content || entry.summary)
         @story.published = entry.published
         @story.hashtag = self.hashtag
+        @story.content.sanitize!
         @story.save!
       end
     end
+  end
+
+  def self.update_all_feeds
+    feeds = Feed.all
+    feeds.each { |f| f.parse_feed }
   end
 
 end

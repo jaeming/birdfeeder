@@ -29,6 +29,11 @@ class Story < ActiveRecord::Base
     stories[start_index..end_index]
   end
 
-
+  def self.remove_old_stories
+    @stories = Story.where("created_at > :old", {:old => 40.days.ago})
+    @stories.each do |s|
+      s.destroy! unless s.favorites.any?
+    end
+  end
 
 end
