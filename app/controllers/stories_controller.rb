@@ -2,7 +2,11 @@ class StoriesController < ApplicationController
 
   def index
     page = params[:page].try(:to_i) || 1
-    @stories = Story.as_viewed_by(current_user || guest_user)
+    if current_user
+      @stories = Story.as_viewed_by(current_user)
+    else
+      @stories = Story.order(published: :desc)
+    end
     render json: Story.paginate(@stories, page)
   end
 

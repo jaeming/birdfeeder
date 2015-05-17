@@ -6,8 +6,6 @@ class Story < ActiveRecord::Base
   has_many :views
   has_many :users, through: :favorites
 
-  default_scope -> {order('id, published DESC')}
-
   def published_at
     self.published || self.created_at
   end
