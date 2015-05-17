@@ -25,13 +25,18 @@ class Feed < ActiveRecord::Base
     entries.each do |entry|
       @story = Story.find_or_create_by!(title: entry.title)
       unless @story.url
-        @story.feed = self
-        @story.url = entry.url
-        @story.content = (entry.content || entry.summary)
-        @story.published = entry.published
-        @story.hashtag = self.hashtag
-        @story.content.sanitize!
-        @story.save!
+        begin
+          @story.feed = self
+          @story.url = entry.url
+          @story.content = (entry.content || entry.summary)
+          @story.published = entry.published
+          @story.hashtag = self.hashtag
+          @story.content.sanitize!
+          @story.save!
+        rescue
+          @story.destroy!
+          puts 'either bad or missing RSS fields'
+        end
       end
     end
   end
