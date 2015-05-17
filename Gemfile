@@ -28,6 +28,7 @@ gem 'feedisco'
 gem 'gravtastic'
 gem 'jquery-rails'
 gem 'friendly_id', '~> 5.1.0'
+gem 'whenever', :require => false
 
 
 group :test do
