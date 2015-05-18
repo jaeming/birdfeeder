@@ -89,6 +89,7 @@ export default Ember.ObjectController.extend({
         data: {'authenticity_token': token, 'hashtag_id': id},
         success: function(data) {
           _this.store.pushPayload('story', data);
+          _this.get('target.router').refresh();
           _this.set('updatedVisible', true);
           Ember.run.later( function() {
             _this.set('loadingVisible', false);
