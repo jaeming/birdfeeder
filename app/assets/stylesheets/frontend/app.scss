@@ -156,7 +156,7 @@ span.prefix {
 
 .user-option-text {
 	color: #fff;
-	font-size: 0rem;
+	font-size: .8rem;
 	transition: all 260ms ease;
 
 	}
@@ -168,9 +168,6 @@ span.prefix {
 }
 
 .user-link:hover {
-	&>.user-option-text {
-		font-size: .8rem;
-	}
 	&>.user-option-icons {
 		-webkit-filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.85));
 		filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.85));
@@ -922,6 +919,16 @@ z-index: 1000;
   transition: all 260ms ease-in;
 }
 
+.mobile-icons {
+  display: none;
+  margin-top: -.8rem;
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+  text-align: center;
+  width: 100%;
+  background: #293E44;
+}
+
 ////LOADING BAR
 
 .loader-container {
@@ -1045,6 +1052,10 @@ z-index: 1000;
 
 @media (max-width: 1000px) {
 
+  .mobile-icons {
+    display: block;
+  }
+
 	//NAV-SLIDER
 
   .close-side-icon {
@@ -1115,6 +1126,10 @@ z-index: 1000;
 
 @media (max-width: 650px) {
 
+  .mobile-icons {
+    display: block;
+  }
+
   .close-side-icon {
     display: none;
   }
@@ -1182,6 +1197,10 @@ z-index: 1000;
 }
 
 @media (max-width: 415px) {
+
+  .mobile-icons {
+    display: block;
+  }
 
 	.logo {
 		vertical-align: middle;

@@ -69,11 +69,35 @@
 		<div {{action "closeMobileSidePanel"}}>
 		  <div {{bind-attr class=":side-bar hideSideBar mobileSideVisible"}}>
 
-					<a href="#" class='close-side-icon' {{action 'closeSidebar'}}>
-						<span>collapse side-bar</span> <img src="/images/close.png" alt="close sidebar" class='close-arrow'>
-					</a>
+				<a href="#" class='close-side-icon' {{action 'closeSidebar'}}>
+					<span>collapse side-bar</span> <img src="/images/close.png" alt="close sidebar" class='close-arrow'>
+				</a>
 
-				<br><br>
+				<div class="mobile-icons">
+					{{#if controllers.session.currentUser.authenticated}}
+						{{#link-to 'users.edit' class='user-link'}}
+							<img src="/images/edit.png" alt="edit profile" class='user-option-icons'>
+							<small class='user-option-text'>&nbsp; edit account</small>
+						{{/link-to}} &nbsp; &nbsp; &nbsp;
+						<a href="#" class='user-link' {{action 'signOut'}}>
+							<img src="/images/sign-out.png" alt="sign out" class='user-option-icons'>
+							<small class='user-option-text'>&nbsp; sign out</small>
+						</a>
+
+					{{else}}
+
+						{{#link-to 'users.signin' class='user-link'}}
+							<img src="/images/sign-in.png" alt="edit profile" class='user-option-icons'>
+							<small class='user-option-text'>&nbsp; sign in</small>
+						{{/link-to}} &nbsp; &nbsp; &nbsp;
+						{{#link-to 'users.signup' class='user-link'}}
+							<img src="/images/sign-up.png" alt="sign out" class='user-option-icons'>
+							<small class='user-option-text'>&nbsp; sign up</small>
+						{{/link-to}}
+					{{/if}}
+				</div>
+				<br>
+				<br>
 
 				{{#if controllers.session.currentUser.authenticated}}
 					{{#link-to 'feeds.customize' class='outlined button tiny round'}}
