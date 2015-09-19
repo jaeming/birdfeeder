@@ -15,10 +15,10 @@ class Feed < ActiveRecord::Base
   def parse_feed
     begin
       feed = Feedjira::Feed.fetch_and_parse(self.rss)
+      create_stories_with(feed.entries) unless feed.blank?
     rescue
       puts "couldn't parse feed"
     end
-    create_stories_with(feed.entries) unless feed.blank?
   end
 
   def create_stories_with(entries)

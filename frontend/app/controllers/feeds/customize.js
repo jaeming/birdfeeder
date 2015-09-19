@@ -23,7 +23,13 @@ export default Ember.ArrayController.extend({
         url: '/api/feeds/',
         type: 'POST',
         dataType: "json",
-        data: {"authenticity_token": token, "feed":{"url": url, "hashtag": category}},
+        data: {
+          "authenticity_token": token,
+          "feed": {
+            "url": url,
+            "hashtag": category
+          }
+        },
         success: function(data) {
           _this.set('url', '');
           _this.set('category', '');
@@ -40,7 +46,9 @@ export default Ember.ArrayController.extend({
     },
     searchCategories: function() {
       var searchTerm = this.get('search');
-      var results = this.store.find('hashtag', { title: searchTerm });
+      var results = this.store.find('hashtag', {
+        title: searchTerm
+      });
       this.set('results', results);
       this.set('searched', true);
     },
@@ -60,14 +68,17 @@ export default Ember.ArrayController.extend({
         url: '/api/subscriptions',
         type: 'POST',
         dataType: 'json',
-        data: {'authenticity_token': token, 'hashtag_id': id},
+        data: {
+          'authenticity_token': token,
+          'hashtag_id': id
+        },
         success: function() {
           _this.get('target.router').refresh();
         },
         error: function() {
           _this.set('subscribed', false);
           _this.set('controllers.application.errors', 'Subscription failed, try again later.');
-          Ember.run.later( function() {
+          Ember.run.later(function() {
             _this.set('controllers.application.errors', false);
           }, 3000);
         }
@@ -78,17 +89,20 @@ export default Ember.ArrayController.extend({
       var _this = this;
       var token = this.get('controllers.session.currentUser.token');
       Ember.$.ajax({
-        url: '/api/subscriptions/'+id,
+        url: '/api/subscriptions/' + id,
         type: 'DELETE',
         dataType: 'json',
-        data: {'authenticity_token': token, 'hashtag_id': id},
+        data: {
+          'authenticity_token': token,
+          'hashtag_id': id
+        },
         success: function() {
           _this.get('target.router').refresh();
         },
         error: function() {
           _this.set('subscribed', true);
           _this.set('controllers.application.errors', 'Unsubscribe failed, try again later.');
-          Ember.run.later( function() {
+          Ember.run.later(function() {
             _this.set('controllers.application.errors', false);
           }, 3000);
         }
